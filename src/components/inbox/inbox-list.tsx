@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,44 +21,41 @@ const TIER_ORDER: InboxItem["tier"][] = [
   "ambient",
 ];
 
-export function InboxList() {
-  const [state, setState] = useState<LoadState>({ status: "loading" });
-  const [forceEmpty, setForceEmpty] = useState(false);
+function sortItems(items: InboxItem[]) {
+  return [...items].sort(
+    (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier),
+  );
+}
 
-  const load = useCallback(async (empty = false) => {
+export function InboxList({ initialItems }: { initialItems: InboxItem[] }) {
+  const [state, setState] = useState<LoadState>({
+    status: "ready",
+    items: sortItems(initialItems),
+  });
+
+  async function load(query = "") {
     setState({ status: "loading" });
     try {
-      const query = empty ? "?empty=1" : "";
       const res = await fetch(`/api/inbox${query}`, { cache: "no-store" });
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as {
           error?: string;
         } | null;
-        throw new Error(
-          data?.error ?? "Could not reach the Inbox channel.",
-        );
+        throw new Error(data?.error ?? "Could not reach the Inbox channel.");
       }
       const data = (await res.json()) as { items: InboxItem[] };
       if (!data.items.length) {
         setState({ status: "empty" });
         return;
       }
-      const sorted = [...data.items].sort(
-        (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier),
-      );
-      setState({ status: "ready", items: sorted });
+      setState({ status: "ready", items: sortItems(data.items) });
     } catch (err) {
       setState({
         status: "error",
-        message:
-          err instanceof Error ? err.message : "Inbox request failed.",
+        message: err instanceof Error ? err.message : "Inbox request failed.",
       });
     }
-  }, []);
-
-  useEffect(() => {
-    void load(forceEmpty);
-  }, [load, forceEmpty]);
+  }
 
   if (state.status === "loading") {
     return (
@@ -88,7 +85,7 @@ export function InboxList() {
           type="button"
           variant="outline"
           className="mx-auto"
-          onClick={() => void load(forceEmpty)}
+          onClick={() => void load()}
         >
           Retry
         </Button>
@@ -106,17 +103,14 @@ export function InboxList() {
           いま決めるべき Blocking も、週評もありません。Staff
           が通常業務を進めているあいだ、翌日へ進めて構いません。
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              setForceEmpty(false);
-            }}
-          >
-            Restore sample feed
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="mx-auto"
+          onClick={() => void load()}
+        >
+          Restore sample feed
+        </Button>
       </div>
     );
   }
@@ -124,12 +118,8 @@ export function InboxList() {
   return (
     <div className="space-y-1">
       <ul className="divide-y divide-[var(--stage-line)]">
-        {state.items.map((item, index) => (
-          <li
-            key={item.id}
-            className="animate-in fade-in slide-in-from-bottom-1 fill-mode-both"
-            style={{ animationDelay: `${index * 45}ms` }}
-          >
+        {state.items.map((item) => (
+          <li key={item.id}>
             <Link
               href={`/inbox/${item.id}`}
               className="group flex items-start gap-3 py-4 transition-colors hover:bg-[var(--stage-mist)]/60"
@@ -158,37 +148,14 @@ export function InboxList() {
         <button
           type="button"
           className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-          onClick={() => setForceEmpty(true)}
+          onClick={() => void load("?empty=1")}
         >
           Preview empty Inbox
         </button>
         <button
           type="button"
           className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-          onClick={async () => {
-            setState({ status: "loading" });
-            try {
-              const res = await fetch("/api/inbox?fail=1", {
-                cache: "no-store",
-              });
-              const data = (await res.json().catch(() => null)) as {
-                error?: string;
-              } | null;
-              setState({
-                status: "error",
-                message:
-                  data?.error ?? "Could not reach the Inbox channel.",
-              });
-            } catch (err) {
-              setState({
-                status: "error",
-                message:
-                  err instanceof Error
-                    ? err.message
-                    : "Inbox request failed.",
-              });
-            }
-          }}
+          onClick={() => void load("?fail=1")}
         >
           Preview error state
         </button>

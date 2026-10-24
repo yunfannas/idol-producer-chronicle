@@ -1,5 +1,6 @@
 import { AppHeader } from "@/components/shell/app-header";
 import { InboxList } from "@/components/inbox/inbox-list";
+import { MOCK_INBOX } from "@/lib/mock/inbox";
 
 export default function InboxPage() {
   return (
@@ -10,7 +11,7 @@ export default function InboxPage() {
         showAdvance
       />
       <main className="px-4 pt-2">
-        <InboxList />
+        <InboxList initialItems={MOCK_INBOX} />
       </main>
     </>
   );

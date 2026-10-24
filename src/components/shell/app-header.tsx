@@ -1,6 +1,7 @@
 import { DayAdvance } from "@/components/shell/day-advance";
+import { readGameDate } from "@/lib/game-date-cookie";
 
-export function AppHeader({
+export async function AppHeader({
   title,
   subtitle,
   showAdvance = false,
@@ -9,6 +10,10 @@ export function AppHeader({
   subtitle?: string;
   showAdvance?: boolean;
 }) {
+  const { dateLabel } = showAdvance
+    ? await readGameDate()
+    : { dateLabel: "" };
+
   return (
     <header className="sticky top-0 z-30 border-b border-[var(--stage-line)] bg-[var(--stage-paper)]/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-lg flex-col gap-3 px-4 pb-3 pt-4">
@@ -25,7 +30,7 @@ export function AppHeader({
             ) : null}
           </div>
         </div>
-        {showAdvance ? <DayAdvance /> : null}
+        {showAdvance ? <DayAdvance dateLabel={dateLabel} /> : null}
       </div>
     </header>
   );

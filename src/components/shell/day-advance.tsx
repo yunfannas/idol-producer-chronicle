@@ -1,12 +1,13 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { useGame } from "@/components/game/game-provider";
+import { advanceOneDayAction } from "@/app/actions/advance-day";
 import { ChevronRight } from "lucide-react";
 
-export function DayAdvance({ compact = false }: { compact?: boolean }) {
-  const { dateLabel, advanceOneDay } = useGame();
-
+export function DayAdvance({
+  dateLabel,
+  compact = false,
+}: {
+  dateLabel: string;
+  compact?: boolean;
+}) {
   return (
     <div
       className={
@@ -20,16 +21,16 @@ export function DayAdvance({ compact = false }: { compact?: boolean }) {
         <span className="mx-1.5 text-border">·</span>
         <span>JST</span>
       </p>
-      <Button
-        type="button"
-        size={compact ? "sm" : "default"}
-        onClick={advanceOneDay}
-        className="gap-1 bg-[var(--stage-ink)] text-[var(--stage-paper)] hover:bg-[var(--stage-ink)]/90"
-        aria-label="Advance 1 Day"
-      >
-        翌日へ
-        <ChevronRight className="size-3.5 opacity-80" />
-      </Button>
+      <form action={advanceOneDayAction}>
+        <button
+          type="submit"
+          aria-label="Advance 1 Day"
+          className="inline-flex h-8 items-center gap-1 rounded-lg bg-[var(--stage-ink)] px-2.5 text-sm font-medium text-[var(--stage-paper)] transition-opacity hover:opacity-90"
+        >
+          翌日へ
+          <ChevronRight className="size-3.5 opacity-80" aria-hidden />
+        </button>
+      </form>
     </div>
   );
 }

@@ -17,11 +17,11 @@ npm run dev
 
 Dev server: [http://127.0.0.1:3847](http://127.0.0.1:3847) (port **3847**).
 
-Open `/inbox` (root redirects there). Sample Inbox loads from `/api/inbox` (mock JSON with loading / empty / error paths).
+Open `/inbox` (root redirects there). Inbox ships with SSR sample items; `/api/inbox` backs empty/error previews. Day advance (`翌日へ`) is a server action writing a cookie — works without client hydration.
 
 ```bash
 npm run build
-npm start
+npm start   # also port 3847; prefer this if `next dev` HMR websockets are blocked
 ```
 
 ## Stack
