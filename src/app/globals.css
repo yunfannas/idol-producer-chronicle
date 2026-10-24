@@ -1,0 +1,130 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans), "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-display), "Syne", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+  Stage-paper light theme: ink + teal (LED board), warm mist atmosphere.
+  Avoids purple-default / cream-terracotta / broadsheet defaults.
+*/
+:root {
+  --stage-paper: #f3f0ea;
+  --stage-mist: #e4ebe8;
+  --stage-ink: #1a2430;
+  --stage-teal: #0f6e6a;
+  --stage-amber: #c47a2c;
+  --stage-line: color-mix(in oklab, var(--stage-ink) 12%, transparent);
+
+  --tier-blocking: #b53d2c;
+  --tier-actionable: #0f6e6a;
+  --tier-report: #2f4f7a;
+  --tier-ambient: #8a8174;
+
+  --background: var(--stage-paper);
+  --foreground: var(--stage-ink);
+  --card: #faf8f4;
+  --card-foreground: var(--stage-ink);
+  --popover: #faf8f4;
+  --popover-foreground: var(--stage-ink);
+  --primary: var(--stage-ink);
+  --primary-foreground: var(--stage-paper);
+  --secondary: var(--stage-mist);
+  --secondary-foreground: var(--stage-ink);
+  --muted: color-mix(in oklab, var(--stage-mist) 80%, white);
+  --muted-foreground: color-mix(in oklab, var(--stage-ink) 55%, transparent);
+  --accent: var(--stage-mist);
+  --accent-foreground: var(--stage-ink);
+  --destructive: oklch(0.55 0.18 25);
+  --border: var(--stage-line);
+  --input: var(--stage-line);
+  --ring: color-mix(in oklab, var(--stage-teal) 55%, transparent);
+  --chart-1: var(--stage-teal);
+  --chart-2: var(--stage-amber);
+  --chart-3: var(--tier-report);
+  --chart-4: var(--tier-blocking);
+  --chart-5: var(--tier-ambient);
+  --radius: 0.625rem;
+  --sidebar: #faf8f4;
+  --sidebar-foreground: var(--stage-ink);
+  --sidebar-primary: var(--stage-teal);
+  --sidebar-primary-foreground: var(--stage-paper);
+  --sidebar-accent: var(--stage-mist);
+  --sidebar-accent-foreground: var(--stage-ink);
+  --sidebar-border: var(--stage-line);
+  --sidebar-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(
+        120% 80% at 100% -10%,
+        color-mix(in oklab, var(--stage-teal) 14%, transparent),
+        transparent 55%
+      ),
+      radial-gradient(
+        90% 60% at -10% 100%,
+        color-mix(in oklab, var(--stage-amber) 12%, transparent),
+        transparent 50%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, white 40%, var(--stage-paper)),
+        var(--stage-paper)
+      );
+    background-attachment: fixed;
+    min-height: 100%;
+  }
+  html {
+    @apply font-sans;
+  }
+}
