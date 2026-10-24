@@ -39,3 +39,14 @@ docs/data/…
 - `Public` is awareness, **not** `新規`; never expose imagined individual conversion reasons.
 - Narrative opportunity is guaranteed; Live results, audience, revenue and grade are simulated.
 - Prologue 2013 Jan – 2014 Aug, chapter evaluation four qualitative grades, historical reference B.
+
+## Import audit (2026-10-24)
+
+**Committed and verified in `main`:**
+- Canonical v0.9, glossary v0.2, feedback spec and asset inventory.
+- January first-generation CSV and October new-candidate CSV.
+- Seven archived design notes under `docs/design/archive/`.
+
+**Not yet uploaded:** 10 PNG image files (key visual, portrait triptych, UI concepts and explorations), 2 XLSX calibration/simulation files, plus the archive-only local manifest / import README and research playtest note. The complete 28-file import archive is retained for binary import. Do not link PNG paths on GitHub until they exist.
+
+**Binary import requirement:** Upload ZIP contents under their paths (e.g. through GitHub web uploader or local `git add` / `git push`). The connector used for this import cannot take a local ZIP/binary file path. Reconcile/skip already committed Markdown and CSV files rather than overwriting newer revisions.
