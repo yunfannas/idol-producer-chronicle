@@ -15,6 +15,7 @@ export type Member = {
   id: string;
   nameJa: string;
   nameReading: string;
+  portraitSrc: string;
   role: string;
   birthdate: string;
   note: string;

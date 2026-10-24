@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { AppHeader } from "@/components/shell/app-header";
 import { MOCK_MEMBERS } from "@/lib/mock/members";
 
@@ -18,11 +19,15 @@ export default function MembersPage() {
             >
               <div
                 aria-hidden
-                className="flex size-14 shrink-0 items-end justify-center overflow-hidden rounded-xl bg-[var(--stage-mist)]"
+                className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-[var(--stage-mist)]"
               >
-                <span className="pb-2 font-[family-name:var(--font-display)] text-lg text-[var(--stage-teal)]">
-                  {member.nameJa.slice(0, 1)}
-                </span>
+                <Image
+                  alt=""
+                  src={member.portraitSrc}
+                  fill
+                  sizes="56px"
+                  className="object-cover"
+                />
               </div>
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
