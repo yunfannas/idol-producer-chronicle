@@ -24,8 +24,8 @@
 | `pPToOFromLive` | .025 | .025 | 本团 P 本场观看后的 O 转化 |
 | `pExternalDirectOFromLive` | .004 | .004 | 临时外部观众直接成为 O |
 | `pOFromChekiTrial` | .10 | .10 | 发生实际试买后，独立的增量转化机会 |
-| `pExistingOToNewAffinity` | .035 | .035 | 观看成员有效曝光的既有 O 新增 A_i |
-| `pExtraAffinityForNewO` | .05 | .05 | 新 O 对每位非首推成员额外建立 affinity 的基准 |
+| `baseExistingOToAffinityPerShow` | .10 | .10 | **整场** O 产生额外成员 affinity 的总强度，按成员有效曝光份额分配 |
+| `baseExtraAffinityForNewO` | .05 | .05 | 新 O 在首推外增加其他 affinity 的**整场**总强度，按成员曝光份额分配 |
 | `pWeeklyPChurn` | .008 | .008 | 周度自然衰减 |
 | `pWeeklyOChurn` | .003 | .003 | 已分配 O 的自然流失 |
 | `pWeeklyAffinityChurn` | .0015 | .0015 | O 留存前提下的成员 affinity 额外流失 |
@@ -133,11 +133,11 @@ pTrialO = .10  // 仅对本场真实完成 Cheki 的非 O 试买者
 pOCombined = 1 - (1-pLiveO)*(1-pTrialO_ifCompleted)
 ```
 
-- 既有 P 观众：以 `pPToO` 计算 P→O；若该人完成首次试买，则使用合并概率 `pOCombined`，**不再单独加一笔 O**。成功时 P−1、O+1。
+- 既有 P 观众：以 `pPToO` 计算 P→O；若该人完成首次试买，则使用合并概率 `pOCombined`，**不再单独加一笔 O**。成功时 P−1、O+1。多场活动同周重复曝光时，采用按来源池的合并 hazard `p_week=1−Π_events(1−p_event)` 与可用 P/O 存量上限，而非假装跨场能精确追踪同一人；无持久 Cohort。
 - 外部 X 观众：先以 `pXToO`（含试买增量）尝试直接 O；未转 O 者以 `pXToP` 形成持久 P；两种结果互斥。不能先加 P 再又保留 P 同时加 O。
 - 新增媒体/SNS `mediaUniqueReach`：`newP_media=Binomial(mediaUniqueReach,clamp(.03*mediaQuality,0,.15))`，但该 reach 必须已排除同一活动 X 观众的重复曝光；否则需按唯一 reach 合并。无独立曝光数据就不凭空加 P。
-- 对每个新 O，以当场各成员正 `MemberImpression` 归一化权重选**一名**初始 affinity；对其他实际有曝光成员，以 `p=.05*Q_i` 生成可选额外 affinity。新 O 因此至少有一名推（无可选成员的特殊活动则转入临时 U，需记录异常）。
-- 对原有 O 的非 affinity 成员 i：`newA_i_existing ~ Binomial(eligibleExposedOWithoutAffinity_i, clamp(.035*Q_i,0,.12))`；只有实际完成该成员试买的既有 O 可额外叠加一次 `pTrialToAffinity=.15`，按 `1-(1-pLive)(1-pTrial)` 合并。不得把一位观众同一周的多次接触重复计为多位新增 A_i；多场活动按已发生的独立机会累积概率，但按成员去重。
+- 定义 `exposureShare_i=max(0,MemberEffectiveExposure_i)/Σ_j max(0,MemberEffectiveExposure_j)`（分母为0时不发生基于舞台的 affinity 转化）；它是本场**已确定的实际曝光**，不是新造 Center/Standing bonus。对每个新 O，以正曝光份额为权重选**一名**初始 affinity；对其他实际有曝光成员，以 `p=clamp(.05*exposureShare_i*Q_i,0,1)` 生成可选额外 affinity。新 O 因此至少有一名推（无可选成员的特殊活动则转入临时 U，需记录异常）。
+- 对原有 O 的非 affinity 成员 i：`newA_i_existing ~ Binomial(eligibleExposedOWithoutAffinity_i, clamp(.10*exposureShare_i*Q_i,0,.12))`；只有实际完成该成员试买的既有 O 可额外叠加一次 `pTrialToAffinity=.15`，按 `1-(1-pLive)(1-pTrial)` 合并。**整场 .10 由成员实际曝光份额分配**，避免成员越多就凭空增加获客概率。多场活动同一周的累计新增 A_i 以本周起始时尚未 affinity 的 O 池为上限，不能因临时 ID 不一致重复增加超过存量。
 - 成员亲和增长/流失只作用于 `A_i`；Cheki 收入额、购买张数**不直接**转化成 O 或 A_i。
 
 每周先对 `P` 以 .008 自然衰减；对 `O-U` 以 .003 自然衰减，并按相同比例减少现有 `A_i`；再对存活的 `A_i` 以 .0015 额外自然衰减（队列/互动导致的额外损失通过 `queueLostFraction` 和 `engagement` 影响 W，并可按 `pAffinityBadExperience=.005*queueLostFraction` 加入该成员 A_i 的周流失率）。最后应用本周已去重的 P/O/A 新增，并确保 `A_i≤O-U`；不得因为 `ΣA_i>O` 而缩减多推。所有期望数值允许浮点，只有活动实体采用整数抽样。
@@ -184,7 +184,7 @@ GroupRetained_i = Gross_i − MemberShare_i − VariableCosts_i
 2. `W_i=3` → 购买预算抽样均值约3 KJPY；同一人对两名成员可分别购买，不设团队钱包上限。
 3. 同一观众买 A 后才可排 B，绝不同时服务；¥2,000商品为一件、按40秒而非两件20秒；每次换粉额外5秒。
 4. 队列受60min限制，卖不出的需求不记账；无 Cheki 权限/成员缺席/免费活动收费销售为0。
-5. 真实试买与 Live 观看同一人至多产生一个 O；新 O 至少有一名初始 A_i，不能因同一周多次 Live 被重复算作多个独立新 O。
+5. 同场真实试买与 Live 观看至多产生一个 O；新 O 至少有一名初始 A_i；同周多场用合并 hazard/来源池上限近似去重，不声称无 Cohort 可以精确识别跨场同一人。
 6. `ΣA_i>O` 合法；A_i 边界、U 边界合法；同 seed 的随机购买、转化、排队、毕业估计完全重放一致。
 7. 有经验偶像加入：`incomingNewOtaku=30,existingOtakuNewAffinity=20,reassignedUnassigned=10` → `ΔO=30,ΔA_i=60,ΔU=-10`，不得对本团 O 重复计数。
 8. 5/9/15人序章各运行至少12周、20 seeds，记录周 P/O/A/W、Live Attendance、Cheki gross/net、服务容量损失、周现金流、成员毕业/补员边界；**不得**硬编码人数收入倍率或目标 Cheki 保底。
