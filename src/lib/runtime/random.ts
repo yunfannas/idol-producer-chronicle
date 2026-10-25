@@ -22,3 +22,27 @@ export function sampleBinomial(trials: number, probability: number, random: () =
   }
   return result;
 }
+
+/**
+ * Sequential draw without replacement. Fan aggregates stay persistent; this
+ * is only the deterministic, event-local reconstruction of affinity visitors.
+ */
+export function sampleHypergeometric(input: {
+  population: number;
+  successes: number;
+  draws: number;
+  random: () => number;
+}): number {
+  let population = Math.max(0, Math.round(input.population));
+  let successes = Math.min(population, Math.max(0, Math.round(input.successes)));
+  let result = 0;
+  const draws = Math.min(population, Math.max(0, Math.round(input.draws)));
+  for (let index = 0; index < draws; index += 1) {
+    if (input.random() < successes / population) {
+      result += 1;
+      successes -= 1;
+    }
+    population -= 1;
+  }
+  return result;
+}

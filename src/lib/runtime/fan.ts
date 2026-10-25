@@ -8,7 +8,22 @@ export const fanChekiBalanceV1 = {
   pWeeklyPChurn: 0.008,
   pWeeklyOChurn: 0.003,
   pWeeklyAffinityChurn: 0.0015,
+  pPublicToOtaku: 0.025,
+  pExternalToOtaku: 0.004,
+  pExternalToPublic: 0.08,
+  // Calibrated after the 5/9/15-member 12-week seeded regression. This is
+  // allocated by real member exposure, so roster size never multiplies it.
+  pExistingOtakuToAffinity: 0.05,
   defaultNewAffinityW: 1.8,
+  pStayChekiOtaku: 0.8,
+  chekiMinutes: 60,
+  cheki1000Seconds: 20,
+  cheki2000Seconds: 40,
+  cheki1000VariableCostJPY: 0,
+  cheki2000VariableCostJPY: 0,
+  fanChangeOverheadSeconds: 5,
+  queueExtraAbandonScaleMinutes: 15,
+  maxConsecutive: 2,
 } as const;
 
 export function createFanState(memberIds: string[], seed?: Partial<Pick<FanState, "publicCount" | "otakuCount">>): FanState {

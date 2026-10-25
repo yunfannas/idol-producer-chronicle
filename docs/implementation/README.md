@@ -16,6 +16,8 @@
 
 **Fan × Cheki 可运行数值基线（TUNABLE）**：[Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md](Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md) 已给出到场、单场多推重建、Gamma 购买预算、双档选购、共享排队、Fan 转化/流失、毕业与剧本新人 seed 的**完整第一版算法**。实现时必须读取；具体概率为初始校准值，不是历史事实。原 Fan 文档缺口由此文件填充，后续通过 seeded 5/9/15 人回归调参。
 
+**首次回归记录**：[Fan_Cheki_Regression_2026-10-24.md](Fan_Cheki_Regression_2026-10-24.md) 记录中性 fixture、12周×20 seeds 的初始基线、唯一调整的集中参数和校准后结果；它不是正式 Scenario 数据。
+
 **Chronicle 展示与数据裁剪规则（LOCKED）**：不提供 Idol World Tier 表、Overall 评分、行业 Top50、跨团排名、其他团或本团的行业地位评价 UI/API。其他团仅以有必要的活动参演者、剧本人物和竞争日程出现。内部可保留少量由 Scenario 提供的活动难度、资源/曝光权重，但不得因此要求建立完整行业 Tier 或全团评分库。第五份 Tier 文档是历史校准附录，**不属于必读实施规范**。
 
 **实现级优先级**：本 `README` 的冲突禁令 → 同目录专项规范 → Chronicle Game Design 剧本/合同 → 旧 `docs/design/Chronicle_*Kernel_v0.x` 历史提取。历史提取仅作追溯，不能推翻本目录。任何字段或公式若本目录标为 `TUNABLE/INTEGRATION_PENDING`，不得通过阅读旧文档“猜一个锁定值”。
