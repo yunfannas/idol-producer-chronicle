@@ -182,10 +182,11 @@ export type GrowthFixtureOptions = {
   liveQualityFactor?: number; // performance / satisfaction; neutral 1
   interactionQualityBonus?: number; // normalized positive FanEngage; neutral 0
   externalWatchingAudience?: number; // actual watchers, not owned O/P
+  attendanceImportance?: number; // 0 means no existing O/P exposure
 };
 
 function settleWeek(input: { fan: FanState; memberIds: string[]; seed: string; rosterSize: number; week: number; fixture?: GrowthFixtureOptions }) {
-  const attendance = sampleFanAttendance({ fan: input.fan, kind: "taiban", seed: `${input.seed}:attendance`, externalWatchingAudience: input.fixture?.externalWatchingAudience ?? regressionFixtureV1.externalWatchingAudience });
+  const attendance = sampleFanAttendance({ fan: input.fan, kind: "taiban", seed: `${input.seed}:attendance`, attendanceImportance: input.fixture?.attendanceImportance, externalWatchingAudience: input.fixture?.externalWatchingAudience ?? regressionFixtureV1.externalWatchingAudience });
   let eligibleExposedOWithoutAffinity: Record<string, number> = {};
   const sales = settleChekiQueue({
     fan: input.fan, memberIds: input.memberIds, attendeeOtaku: attendance.otaku,
