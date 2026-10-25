@@ -178,7 +178,29 @@ GroupRetained_i = Gross_i − MemberShare_i − VariableCosts_i
 
 仅完成服务的商品可入账。Finance 用 `eventId/memberId/productId` 唯一幂等键记 **gross+share+cost** 或 **net retained** 之一，不能重复。免费商场、禁收费合同、未出征成员收入恒0；门票归 Live、CD 归 Music。既有普通拼盘票务合同公式保持不变。
 
-## 9. 必须通过的回归
+## 9. 首轮公式自检（不是 Chronicle 端到端模拟）
+
+以普通 Taiban、`O=300,A_i=80,W_i=3`、无额外倍率为例：
+
+```text
+E[O attending] = 300*.12 = 36 people
+E[i-affinity attending] = 80*.12 = 9.6 people
+E[i-affinity staying Cheki] = 9.6*.80 = 7.68 people
+E[intended budget before product rounding] = 7.68*3 = 23.04 KJPY
+```
+
+这是**排队和商品选择前的期望购买意愿**，不是收入；预算不足一件商品、商品档位舍入、放弃排队、时间容量均可能降低成交。单独用 20,000 次 Gamma+商品选择随机样本作数值烟雾测试（固定种子）：
+
+| W (KJPY) | Mean intended budget | Mean product-request value (KJPY) | P(request≥1 item) |
+|---:|---:|---:|---:|
+| 1.5 | 1.51 | 1.02 | .62 |
+| 2.0 | 2.00 | 1.50 | .73 |
+| 3.0 | 3.01 | 2.50 | .85 |
+| 5.0 | 5.01 | 4.51 | .94 |
+
+这些结果说明**W 是平均消费意愿，不是保证完成的销售额**；商品最小 ¥1,000 会产生约 ¥500 的离散化差额，排队又会继续减少实际收入。上表是公式级抽样检查，**尚未运行完整游戏的周/月模拟**。
+
+## 10. 必须通过的回归
 
 1. `O=300,A_i=80,pO=.12` → 单场该成员 Affinity 到场期望9.6，**不是80**；Cheki 留场后期望7.68。
 2. `W_i=3` → 购买预算抽样均值约3 KJPY；同一人对两名成员可分别购买，不设团队钱包上限。
