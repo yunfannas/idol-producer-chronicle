@@ -30,6 +30,13 @@
 
 **重要限制**：`liveQualityFactor` 和 `interactionQualityBonus` 是 **regression-only 注入值**，用于验证单调响应；**尚未接入**真实 Performance Impression 或真实 FanEngage 输出。不能把通过此测试描述成完成 Live/Palette/Training/Staff 的端到端集成。正式游戏仍需把真实事件结果映射到这些接口或等价生产接口。
 
+## 代码审查发现的两个待修正口径（不在本次偷偷改中性基线）
+
+1. `regression.ts/settleWeek` 的 `newAffinity` 目前对 `round(O−A_i)` 抽样，而非**本场实际曝光的到场 O**。这会让没有到场的人每周因 Live 自动产生新成员偏好，且此前 `.10→.05` 校准部分抵消了该口径问题。下一次校准前应先改为 `eligibleExposedOWithoutAffinity_i`，再重新跑 5/9/15 中性回归，不能沿用旧 A 结果。
+2. `settleChekiQueue` 的 `pStayChekiOtaku` 目前对每位成员的 affinity **分别**抽样，而非每位实际观众只抽样一次留场状态。单个多推观众可能在成员 A 的队列中出现、却在成员 B 的队列中被判定已离场。下一次需把 stay 抽样提升到观众级，再统一构建多成员需求。
+
+这两项是**源代码审查发现的实现缺口**，不是本轮压力测试已验证通过的结论。若先修正，会改变旧中性结果，必须重新建立基线。建议在 B/C/D 输出正式校准数值之前解决。
+
 ## 运行与验收命令
 
 ```bash
