@@ -27,7 +27,7 @@ interface TeamFanState {
 
 - `P` 是统计意义的轻度认知/消费池，**不是永久身份固定的用户集合**；`O` 是团队活跃偶像消费层。跨团 `O` 允许重叠，世界中 `Σ O_group` 可远大于独立 Otaku 人数。
 - `A_i` 是当前 O 中对成员 i 有真实购买意愿的人数；一人可对多成员有 affinity，故 `Σ_i A_i` **可以大于** `O`。每个 `A_i<=O` 是合理的单成员人数边界；成员毕业时必须解除该成员 affinity。
-- `W_i` 单位是**千日元等价消费强度**，没有成员级消费上限，也不因为多推自动除以人数。产品价格 ¥1,000=1单位、¥2,000=2单位、¥1,200 CD=1.2单位。
+- `W_i` 单位是**千日元等价消费强度**，具体定义为**Affinity 粉丝在一次正常价格、正常购买机会且实际到场时，对该成员的平均购买意愿**。没有成员级消费上限，也不因为多推自动除以人数。产品价格 ¥1,000=1单位、¥2,000=2单位、¥1,200 CD=1.2单位。`W_i` 不是每场无条件发生的收入。
 - **废弃**：持久 Core/C_i/C_team、member retention_weight、独立 BoxRate、团队 Otaku 消费上限、单推消费守恒。
 - `BoxRate_derived = Σ A_i/O`（O>0）；O=0时定义为 null/不可用（**DESIGN_CONTRACT** 安全约定）。
 
@@ -41,7 +41,8 @@ ExpectedMemberPaidDemandKJPY_i
   ≈ A_i × W_i × EventFactor + PublicTrialKJPY_i [LOCKED 形状/TUNABLE 系数]
 ```
 
-- `EventFactor` 是本次机会的持续时间、开放 slot、重要性、可达性等条件；**不是**根据团队 Tier 再乘一个 Otaku 购买文化倍率。
+- `EventFactor = AttendanceProbability × OpportunityFactor`（Chronicle 实施定义）：前者由本场真实到场/抽样决定，后者表示正常价格下的购买机会和活动重要性；**不能**在后续需求计算再乘一次到场率，也不能把实际服务容量或排队成交率预先乘入后再二次限制。它不是根据团队 Tier 再乘一个 Otaku 购买文化倍率。
+- 单场先统一确定 Live/特典会观众；成员需求使用同一批到场观众的 affinity 与 W_i。只有合同明确允许时才额外生成 `ChekiOnlyVisitors`；不能 Live 与 Cheki 独立生成互相矛盾的本团观众。
 - `PublicTrial` 是轻度尝鲜购买，不代表 Public 自动形成持久 member affinity。
 - 需求强度 **≠** 实际入账。消费必须依次经过：是否到场/开放→本场产品菜单→购买选择→连续购买限制→排队/时长/成员服务容量→真实成交→成员交流反馈→现金入账。
 - `A_i×W_i` 已反映多人支持和重度消费；不再额外叠加“Core张数”、BoxRate 或全团人数 multiplier。
