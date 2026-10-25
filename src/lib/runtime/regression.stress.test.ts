@@ -10,6 +10,63 @@ function state(otaku: number, profiles: Record<string, { affinityCount: number; 
   return { publicCount: 300, otakuCount: otaku, temporarilyUnassignedOtaku: 0, members: profiles };
 }
 
+
+describe("Fan/Cheki event sampling fixes", () => {
+  it("does not create member affinity from Otaku who did not attend the Live", () => {
+    const route = runTwelveWeekRoute(5, 11, {
+      attendanceImportance: 0,
+      externalWatchingAudience: 0,
+    });
+    // With no P/O/X exposure there can be no acquisition; only weekly decay.
+    expect(route.weeks.every((week) => week.attendance === 0)).toBe(true);
+    expect(route.weeks[11].affinityTotal).toBeLessThan(24);
+    expect(route.weeks[11].otakuCount).toBeLessThan(40);
+  });
+
+  it("samples Cheki stay once per fan, even when every fan has affinity for every member", () => {
+    const fan = state(20, {
+      a: { affinityCount: 20, purchaseWeightKJPY: 2 },
+      b: { affinityCount: 20, purchaseWeightKJPY: 2 },
+      c: { affinityCount: 20, purchaseWeightKJPY: 2 },
+    });
+    const stays = new Map<string, boolean>();
+    const counts = new Map<string, number>();
+    let stayedOtaku = -1;
+    settleChekiQueue({
+      fan, memberIds: ["a", "b", "c"], attendeeOtaku: 20,
+      seed: "stay:shared:1",
+      onAudience: (audience) => {
+        stayedOtaku = audience.stayedOtaku;
+        expect(Object.values(audience.eligibleExposedOWithoutAffinity)).toEqual([0, 0, 0]);
+      },
+      onAffinitySample: ({ fanId, stayedForCheki }) => {
+        if (stays.has(fanId)) expect(stays.get(fanId)).toBe(stayedForCheki);
+        stays.set(fanId, stayedForCheki);
+        counts.set(fanId, (counts.get(fanId) ?? 0) + 1);
+      },
+    });
+    expect(stays.size).toBe(20);
+    expect([...counts.values()].every((count) => count === 3)).toBe(true);
+    expect(stayedOtaku).toBe([...stays.values()].filter(Boolean).length);
+  });
+
+  it("counts only assigned and actually exposed non-affinity O as acquisition candidates", () => {
+    const fan: FanState = {
+      publicCount: 0, otakuCount: 20, temporarilyUnassignedOtaku: 5,
+      members: { a: { affinityCount: 15, purchaseWeightKJPY: 2 } },
+    };
+    let candidates = -1;
+    settleChekiQueue({
+      fan, memberIds: ["a"], attendeeOtaku: 20, seed: "eligible:unassigned:1",
+      onAudience: ({ eligibleExposedOWithoutAffinity }) => {
+        candidates = eligibleExposedOWithoutAffinity.a;
+      },
+    });
+    // Five unassigned fans have no affinity but must not be auto-reassigned.
+    expect(candidates).toBe(0);
+  });
+});
+
 describe("B/C/D stress fixtures — not historical or production Scenario seeds", () => {
   it("B: a popular member saturates the 60-minute queue; unmet demand is not revenue", () => {
     const fan = state(300, { star: { affinityCount: 240, purchaseWeightKJPY: 15 } });
