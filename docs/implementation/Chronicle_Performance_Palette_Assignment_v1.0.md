@@ -4,6 +4,8 @@
 
 **运算次序**：实际 Lineup → Key Duty 第一/第二/第三候补解析 → 当曲有效能力/Condition → Part 技术 Fit → 全体实际参演者八色 BasePE → Key Contrast + Familiarity → EnvPalette **单次**作用于歌曲审美表达 → PaletteMultiplier → PartExposure（段落固有）→ ArrangementExecution → Team/Member Impression → Satisfaction 与 Fan momentum。所有关键段落实际担当必须存档。
 
+**无行业评级依赖**：本文件历史名称 `LiveTierRate` → Chronicle `EventScaleLearningRate`（按场次规模/实际时长/角色的 Scenario 参数）；`TierFactor(TeamTier)` → `ExpectedShowBaseline(ScenarioChapter,LiveContract)`。歌曲曲库的本地 `popularity_local` 仅用于**同团曲目先验**，不推导行业排名。无完整 Tier 评分系统、无站位或跨团地位 UI。
+
 **公式状态**：八色、Opp3、Bonus cap、PE→Multiplier 是 `LOCKED`；Env 与 PE 的数值桥接、BaseQuality Fit、PartExposure、ArrangementExecution、AudienceShare、ExpectedImpression 具体参数是 `INTEGRATION_PENDING/TUNABLE`，不得编造为既有已冻结公式。
 
 ## 1. 八色语义和类型（`LOCKED`）
@@ -147,7 +149,7 @@ CapacityFactor =
   1−0.15×r^6                    if r≤1
   0.85×exp(−3.8×(r−1))          if r>1
 
-DeltaPalette[c] = Duration×LiveTierRate×VenueFactor×RoleFactor
+DeltaPalette[c] = Duration×EventScaleLearningRate×VenueFactor×RoleFactor
                   ×LearningFactor(Age,Tenure,Wit)×StatusFactor
                   ×Direction[c]×CapacityFactor
 Direction = (1−MemberColorWeight)×TeamPaletteDirection
@@ -225,14 +227,14 @@ MemberImpression[m,L] =
 
 ```text
 ExpectedImpression = VenueBase(VenueSize)
-  × TierFactor(TeamTier) × SlotFactor(SlotType) × SetlistFactor(N_songs)
+  × ExpectedShowBaseline(ScenarioChapter,LiveContract) × SlotFactor(SlotType) × SetlistFactor(N_songs)
 
 SetlistFactor(N) ∝ N^alpha, 0<alpha<1
 SatisfactionRatio = TeamImpression / ExpectedImpression
 ```
 
-- Expected **开演前冻结**；TeamTier、SlotType、歌曲数、VenueSize 是仅有的四个结构性输入。票价、Brand、MC、VTR、换装、Season 不再另行乘进 Expected。
-- VenueBase/TierFactor/SlotFactor/alpha 和满意度 UI 映射 **TUNABLE**；Expected 必须正数并对零歌/取消场次做显式分支。
+- Expected **开演前冻结**；Chronicle 用本章/合同预期基准替代 TeamTier，其他结构性输入为 SlotType、歌曲数、VenueSize。票价、Brand、MC、VTR、换装、Season 不再另行乘进 Expected。
+- VenueBase/ExpectedShowBaseline/SlotFactor/alpha 和满意度 UI 映射 **TUNABLE**；Expected 必须正数并对零歌/取消场次做显式分支。
 - World/Live审美环境只在 `PaletteExpression` 阶段应用一次；MC/VTR/换装可调整审美饱和度、Condition，不直接加 Impression。
 
 
