@@ -2,6 +2,8 @@
 
 **Chronicle 独立实施规范 · 2026-10-24**。以下所有公式及测试在本仓库内完整给出；无需查阅外部研究文档。旧十色、TargetPalette/lambda、普通 part TeamPalette 与 key part MemberPalette 硬切换、Center/Front/StandingExposure、旧 dramatic bonus **全部禁止**。
 
+> **Technical kernel authority (2026-10-24)**：唱跳的每个 Attribute 使用独立算法，详见 [Chronicle_Technical_Performance_Kernel_v1.0.md](Chronicle_Technical_Performance_Kernel_v1.0.md)。本文旧 `Fit(EffectiveAbility, Difficulty, Burden)` 仅是接口占位符，**禁止**按加权 Ability−Difficulty 实现；Breath/Rhythm 是连续基线，Pitch/Agility 是失败概率检定，Tone/Power 仅正向 bonus，Stage Presence 最终乘数，Stamina 只控制疲劳。新技术规范优先。
+
 **运算次序**：实际 Lineup → Key Duty 第一/第二/第三候补解析 → 当曲有效能力/Condition → Part 技术 Fit → 全体实际参演者八色 BasePE → Key Contrast + Familiarity → EnvPalette **单次**作用于歌曲审美表达 → PaletteMultiplier → PartExposure（段落固有）→ ArrangementExecution → Team/Member Impression → Satisfaction 与 Fan momentum。所有关键段落实际担当必须存档。
 
 **无行业评级依赖**：本文件历史名称 `LiveTierRate` → Chronicle `EventScaleLearningRate`（按场次规模/实际时长/角色的 Scenario 参数）；`TierFactor(TeamTier)` → `ExpectedShowBaseline(ScenarioChapter,LiveContract)`。歌曲曲库的本地 `popularity_local` 仅用于**同团曲目先验**，不推导行业排名。无完整 Tier 评分系统、无站位或跨团地位 UI。
