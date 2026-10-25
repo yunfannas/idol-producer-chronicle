@@ -41,10 +41,19 @@ export function finalPaletteExecution(input: {
   participantPalettes: DevelopedPalette[];
   keyParts: { maxBonus: number; dutyPalette: DevelopedPalette; familiarity: number }[];
 }): number {
+  return paletteExecutionBreakdown(input).finalPE;
+}
+
+export function paletteExecutionBreakdown(input: {
+  song: SongPalette;
+  participantPalettes: DevelopedPalette[];
+  keyParts: { maxBonus: number; dutyPalette: DevelopedPalette; familiarity: number }[];
+}): { basePE: number; keyBonus: number; finalPE: number } {
   const base = basePaletteExecution(input.song, input.participantPalettes);
-  const keyBonus = input.keyParts.reduce((sum, part) =>
+  const uncappedKeyBonus = input.keyParts.reduce((sum, part) =>
     sum + part.maxBonus * contrastFit(input.song, part.dutyPalette) * clamp(part.familiarity / 100, 0, 1), 0);
-  return Math.min(100, base + Math.min(12, keyBonus));
+  const keyBonus = Math.min(12, uncappedKeyBonus);
+  return { basePE: base, keyBonus, finalPE: Math.min(100, base + keyBonus) };
 }
 
 export function paletteMultiplier(finalPE: number): number {

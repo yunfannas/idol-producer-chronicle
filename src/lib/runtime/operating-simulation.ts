@@ -1,7 +1,7 @@
 import { chekiLedgerEntries, settleChekiSales } from "./cheki";
 import { fanChekiBalanceV1, sampleFanAttendance } from "./fan";
 import { calculateTaibanTicketRevenue, createFinanceState, postLedgerEntry } from "./finance";
-import { emptyPalette, finalPaletteExecution, paletteMultiplier } from "./palette";
+import { emptyPalette, paletteExecutionBreakdown, paletteMultiplier } from "./palette";
 import { applyActivityLoad, liveSongGeneralLoad } from "./performance";
 import { createSeededRandom, sampleBinomial } from "./random";
 import { settleChekiQueue } from "./regression";
@@ -213,10 +213,15 @@ function managerApFor(decision: StaffWeekDecision): number {
   return trainingSlots + liveCount * operatingSimulationV3.managerApPerLive;
 }
 
-export function resolveOperatingPerformance(members: OperatingMember[], eventId: string, multipliers: Record<string, number> = {}): { quality: number; members: OperatingMember[]; memberPerformance: Record<string, MemberPerformance> } {
+export function resolveOperatingPerformance(
+  members: OperatingMember[],
+  eventId: string,
+  multipliers: Record<string, number> = {},
+  keyParts: { maxBonus: number; dutyPalette: DevelopedPalette; familiarity: number }[] = [],
+): { quality: number; members: OperatingMember[]; memberPerformance: Record<string, MemberPerformance>; paletteExecution: { basePE: number; keyBonus: number; finalPE: number } } {
   const random = createSeededRandom(`performance:${eventId}`);
-  const pe = finalPaletteExecution({ song, participantPalettes: members.map((member) => member.palette), keyParts: [] });
-  const palette = paletteMultiplier(pe);
+  const paletteExecution = paletteExecutionBreakdown({ song, participantPalettes: members.map((member) => member.palette), keyParts });
+  const palette = paletteMultiplier(paletteExecution.finalPE);
   const next = members.map((member) => {
     let condition = member.fitnessCondition;
     let total = 0;
@@ -246,6 +251,7 @@ export function resolveOperatingPerformance(members: OperatingMember[], eventId:
   return {
     quality,
     memberPerformance,
+    paletteExecution,
     members: next.map((member) => {
       const { _quality: internalQuality, ...persistedMember } = member;
       void internalQuality;

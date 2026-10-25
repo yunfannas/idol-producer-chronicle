@@ -56,7 +56,26 @@ describe("Staff autoplay prologue E2E", () => {
       Array.from({ length: 20 }, (_, index) => runStaffAutoplayPrologue({ route, seed: index + 1 })),
     );
     expect(routes).toHaveLength(60);
-    expect(routes.every((result) => result.scenarioVersion === "staff-autoplay-scenario-v4-founder-fan-seed")).toBe(true);
+    expect(routes.every((result) => result.scenarioVersion === "staff-autoplay-scenario-v5-s3c-familiarity-key-duty:S3-C")).toBe(true);
     expect(routes.every((result) => result.stageStatus !== "BLOCKED_BUG")).toBe(true);
+  });
+
+  it("keeps S3-A/B isolated and records the S3-C graduation re-arrangement with resolved duties", () => {
+    const s3a = runStaffAutoplayPrologue({ route: "B", seed: 1, s3Variant: "S3-A" });
+    const s3b = runStaffAutoplayPrologue({ route: "B", seed: 1, s3Variant: "S3-B" });
+    const s3c = runStaffAutoplayPrologue({ route: "B", seed: 1, s3Variant: "S3-C" });
+    const postGraduation = s3c.events.filter((event) => event.date > "2014-05-11");
+    const postGraduationDuties = postGraduation.flatMap((event) => event.resolvedDuties ?? []);
+
+    expect(s3a.familiaritySettlements).toEqual([]);
+    expect(s3a.events.every((event) => event.resolvedDuties === undefined)).toBe(true);
+    expect(s3b.familiaritySettlements.length).toBeGreaterThan(0);
+    expect(s3b.events.every((event) => event.resolvedDuties === undefined)).toBe(true);
+    expect(postGraduation.every((event) => event.arrangementVersion === "v2-after-rina-graduation")).toBe(true);
+    expect(postGraduation.every((event) => (event.resolvedDuties?.length ?? 0) === 3)).toBe(true);
+    expect(postGraduationDuties.every((duty) => duty.selectedMemberId !== "IPC1-001")).toBe(true);
+    expect(s3c.state.performanceProgression.arrangements["prologue-staff-default-song:v1"]).toBeDefined();
+    expect(s3c.state.performanceProgression.arrangements["prologue-staff-default-song:v2-after-rina-graduation"]).toBeDefined();
+    expect(s3c.memberDevelopment["IPC1-001"]).toMatchObject({ active: false, trainingHours: 420 });
   });
 });

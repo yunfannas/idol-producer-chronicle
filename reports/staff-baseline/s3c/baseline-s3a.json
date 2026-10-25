@@ -1,0 +1,87 @@
+{
+  "gitSha": "9fa5682891da917ee75909bcb4756b5857282d44",
+  "scenarioVersion": "staff-autoplay-scenario-v5-s3c-familiarity-key-duty",
+  "variant": "S3-A",
+  "B20": {
+    "seedCount": 20,
+    "completedTif": 20,
+    "debtDistress": 0,
+    "performanceMean": 0.7251653505258975,
+    "finalOtakuMean": 29.505682302683056,
+    "finalCashMeanJPY": 407460,
+    "minimumCashJPY": 227950,
+    "keyBonusMean": 0,
+    "keyBonusMaximum": 0,
+    "grades": {
+      "fans": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      },
+      "performance": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 20,
+        "E": 0
+      },
+      "business": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      },
+      "overall": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      }
+    }
+  },
+  "B100": {
+    "seedCount": 100,
+    "completedTif": 100,
+    "debtDistress": 0,
+    "performanceMean": 0.725116554975438,
+    "finalOtakuMean": 29.97784553441665,
+    "finalCashMeanJPY": 404603.5,
+    "minimumCashJPY": 191150,
+    "keyBonusMean": 0,
+    "keyBonusMaximum": 0,
+    "grades": {
+      "fans": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 100
+      },
+      "performance": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 100,
+        "E": 0
+      },
+      "business": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 100
+      },
+      "overall": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 100
+      }
+    }
+  }
+}

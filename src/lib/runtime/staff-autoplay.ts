@@ -8,6 +8,7 @@
  * open are kept here, labelled TUNABLE, rather than being hidden in a test.
  */
 import { settleChekiSales } from "./cheki";
+import { arrangementFor, createArrangementVersion, recordArrangementExposure, settleArrangementFamiliarityWeek, type FamiliaritySettlement } from "./arrangement-familiarity";
 import { applyWeeklyFanDecay, createFanState } from "./fan";
 import { calculateTaibanTicketRevenue, createMonthlyOperatingReport, postLedgerEntry } from "./finance";
 import {
@@ -27,13 +28,15 @@ import {
 } from "./prologue";
 import { createSeededRandom, sampleBinomial } from "./random";
 import { settleChekiQueue } from "./regression";
-import type { Color8, FanState, PrologueState, RuntimeEvent, RuntimeMember } from "./types";
+import { resolveKeyDuties } from "./key-duty";
+import type { Color8, FanState, KeyPartType, PriorityAssignment, PrologueState, ResolvedKeyDuty, RuntimeEvent, RuntimeMember } from "./types";
 
 export type StaffAutoplayRoute = "A" | "B" | "C";
+export type StaffAutoplayS3Variant = "S3-A" | "S3-B" | "S3-C";
 export type StageStatus = "COMPLETED_TIF" | "BANKRUPT_OR_DEBT_DISTRESS" | "BLOCKED_BUG";
 
 export const staffAutoplayScenarioV1 = {
-  version: "staff-autoplay-scenario-v4-founder-fan-seed",
+  version: "staff-autoplay-scenario-v5-s3c-familiarity-key-duty",
   tuningVersion: "fanChekiBalanceV1",
   // Source: v0.10 locks the dates and contract kinds but intentionally leaves
   // specific capacity, receipts and rent to Scenario data. These are named
@@ -51,6 +54,20 @@ export const staffAutoplayScenarioV1 = {
   // Performance-only calibration surface. It is applied only to actual
   // rehearsal/live Palette exposure, not to Fan, ticket, or Cheki inputs.
   performanceGrowth: { memberPalettePerHour: 0.6, livePaletteHours: 1.5, rehearsalHoursPerSong: 3, dailyConditionRecovery: 2 },
+  // S3-C scenario adapter. The detailed historical prologue setlist and the
+  // graduation inheritance curve are not frozen by v0.10; both are named
+  // TUNABLE input, not claimed historical facts or balance bonuses.
+  arrangement: {
+    songId: "prologue-staff-default-song",
+    initialVersion: "v1",
+    graduationVersion: "v2-after-rina-graduation",
+    graduationInheritanceFactor: 0.5,
+    keyAssignments: [
+      { keyPartId: "sabi-1", partType: "sabi_1_key_line", firstMemberId: "IPC1-001", secondMemberId: "IPC1-002", thirdMemberId: "IPC1-003" },
+      { keyPartId: "bridge", partType: "bridge", firstMemberId: "IPC1-002", secondMemberId: "IPC1-001", thirdMemberId: "IPC1-004" },
+      { keyPartId: "last-sabi", partType: "last_sabi", firstMemberId: "IPC1-001", secondMemberId: "IPC1-003", thirdMemberId: "IPC1-002" },
+    ] satisfies PriorityAssignment[],
+  },
 } as const;
 
 const DEFAULT_SONG_DIRECTION: Record<Color8, number> = {
@@ -83,6 +100,11 @@ export type StaffAutoplayEventAudit = {
   otakuCount: number;
   affinityTotal: number;
   cashAfterJPY: number;
+  songId?: string;
+  arrangementVersion?: string;
+  familiarityAtLive?: number;
+  paletteExecution?: { basePE: number; keyBonus: number; finalPE: number };
+  resolvedDuties?: ResolvedKeyDuty[];
   fanFlow: {
     opening: StaffAutoplayFanSnapshot;
     otakuAttendance: number;
@@ -130,15 +152,17 @@ export type StaffAutoplayResult = {
   seed: number;
   runId: string;
   scenarioVersion: string;
+  s3Variant: StaffAutoplayS3Variant;
   tuningVersion: string;
   stageStatus: StageStatus;
   state: PrologueState;
   events: StaffAutoplayEventAudit[];
   fanMonths: StaffAutoplayFanMonth[];
+  familiaritySettlements: ({ weekEnd: string } & FamiliaritySettlement)[];
   months: StaffAutoplayMonth[];
   minCash: number;
   grades: { fans: string; performance: string; business: string; overall: string };
-  memberDevelopment: Record<string, { trainingHours: number; paletteMean: number; palette: Record<Color8, number> }>;
+  memberDevelopment: Record<string, { active: boolean; condition: number; trainingHours: number; paletteMean: number; palette: Record<Color8, number> }>;
 };
 
 type MonthSnapshot = { publicCount: number; otakuCount: number; activeRoster: number };
@@ -272,6 +296,31 @@ function applyPaletteExposure(member: OperatingMember, hours: number): Operating
   return { ...member, palette };
 }
 
+function keyPartMaximum(partType: KeyPartType): number {
+  switch (partType) {
+    case "opening_sabi": return 2;
+    case "sabi_1_key_line": return 3;
+    case "sabi_2_key_line": return 3;
+    case "bridge": return 5;
+    case "ochi_sabi": return 8;
+    case "last_sabi": return 6;
+  }
+}
+
+function teamCoreAttributeAverage(members: OperatingMember[]): number {
+  const values = members.flatMap((member) => [
+    member.attributes.pitch, member.attributes.tone, member.attributes.breath, member.attributes.rhythm,
+    member.attributes.agility, member.attributes.power, member.attributes.stagePresence, member.attributes.stamina,
+  ]);
+  return values.reduce((sum, value) => sum + value, 0) / Math.max(1, values.length);
+}
+
+function staffDutyRanking(members: OperatingMember[]): string[] {
+  // TUNABLE staff fallback ordering: explicit priority candidates always win;
+  // this order is used only after every explicit candidate is ineligible.
+  return [...members].sort((left, right) => right.attributes.stagePresence - left.attributes.stagePresence || left.id.localeCompare(right.id)).map((member) => member.id);
+}
+
 function grade(value: number, c: number) { return value >= c * 1.5 ? "A" : value >= c * 1.15 ? "B" : value >= c ? "C" : value >= c * 0.65 ? "D" : "E"; }
 
 function finalizeMonths(state: PrologueState, eventAudits: StaffAutoplayEventAudit[], minCashByMonth: Map<string, number>, snapshots: Map<string, MonthSnapshot>): StaffAutoplayMonth[] {
@@ -296,12 +345,14 @@ function finalizeMonths(state: PrologueState, eventAudits: StaffAutoplayEventAud
 }
 
 /** Runs the Calendar from the mandatory interview through the real TIF event. */
-export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; seed: number }): StaffAutoplayResult {
+export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; seed: number; s3Variant?: StaffAutoplayS3Variant }): StaffAutoplayResult {
+  const s3Variant = input.s3Variant ?? "S3-C";
   let state = createPrologueState({ saveId: `staff-autoplay:${input.route}:${input.seed}` });
   state = signRoster(completeMandatoryInterview(state), rosterForRoute(input.route));
   state = completeStrategyAndOriginals(state);
   let operating = state.members.map(operatingMember);
   const audits: StaffAutoplayEventAudit[] = [];
+  const familiaritySettlements: ({ weekEnd: string } & FamiliaritySettlement)[] = [];
   const fanMonths = new Map<string, StaffAutoplayFanMonth>();
   const minCashByMonth = new Map<string, number>();
   const monthSnapshots = new Map<string, MonthSnapshot>();
@@ -324,7 +375,9 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     // load but omitted every intervening day of recovery, forcing otherwise
     // healthy members to the technical floor.  This is a state-flow repair;
     // it does not alter Fan or commercial inputs.
-    operating = operating.map((member) => ({ ...member, fitnessCondition: Math.min(100, member.fitnessCondition + staffAutoplayScenarioV1.performanceGrowth.dailyConditionRecovery) }));
+    operating = operating.map((member) => member.active
+      ? { ...member, fitnessCondition: Math.min(100, member.fitnessCondition + staffAutoplayScenarioV1.performanceGrowth.dailyConditionRecovery) }
+      : member);
     if (input.route === "C" && !augmented && date === "2013-10-01") {
       // Scenario-only October audition: a fresh pool, not rejected January IDs.
       state = { ...state, members: [...state.members, ...C_NEWCOMERS], fan: {
@@ -337,7 +390,24 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
     if (weekday === 1) {
       state = post(state, { id: `training-room:${date}`, date, kind: "operating_cost", amount: staffAutoplayScenarioV1.normalTrainingRoomJPY, category: "training_room", note: "Staff default Medium shared training" });
-      operating = operating.map((member) => applyPaletteExposure({ ...member, fitnessCondition: Math.max(55, Math.min(100, member.fitnessCondition - 8 + 11)), trainingExp: member.trainingExp + staffAutoplayScenarioV1.normalTrainingHours }, staffAutoplayScenarioV1.performanceGrowth.rehearsalHoursPerSong));
+      operating = operating.map((member) => member.active
+        ? applyPaletteExposure({ ...member, fitnessCondition: Math.max(55, Math.min(100, member.fitnessCondition - 8 + 11)), trainingExp: member.trainingExp + staffAutoplayScenarioV1.normalTrainingHours }, staffAutoplayScenarioV1.performanceGrowth.rehearsalHoursPerSong)
+        : member);
+      if (s3Variant !== "S3-A") {
+        const arrangementVersion = state.performanceProgression.arrangements[`${staffAutoplayScenarioV1.arrangement.songId}:${staffAutoplayScenarioV1.arrangement.graduationVersion}`]
+          ? staffAutoplayScenarioV1.arrangement.graduationVersion
+          : staffAutoplayScenarioV1.arrangement.initialVersion;
+        state = {
+          ...state,
+          performanceProgression: recordArrangementExposure({
+            state: state.performanceProgression,
+            songId: staffAutoplayScenarioV1.arrangement.songId,
+            arrangementVersion,
+            sourceId: `rehearsal:${date}:${staffAutoplayScenarioV1.arrangement.songId}:${arrangementVersion}`,
+            rehearsalHours: staffAutoplayScenarioV1.performanceGrowth.rehearsalHoursPerSong,
+          }),
+        };
+      }
     }
     if (date.endsWith("-01")) {
       const payroll = state.members.filter((member) => member.active).length * staffAutoplayScenarioV1.monthlySalaryJPY;
@@ -348,7 +418,39 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       const participants = eligibleLineup(operating.filter((member) => member.active));
       const contract = contractFor(event, String(input.seed));
       const rehearsed = participants.map((member) => applyPaletteExposure(member, staffAutoplayScenarioV1.performanceGrowth.livePaletteHours));
-      const resolved = resolveOperatingPerformance(rehearsed, `${state.saveId}:${event.id}`);
+      const arrangementVersion = state.performanceProgression.arrangements[`${staffAutoplayScenarioV1.arrangement.songId}:${staffAutoplayScenarioV1.arrangement.graduationVersion}`]
+        ? staffAutoplayScenarioV1.arrangement.graduationVersion
+        : staffAutoplayScenarioV1.arrangement.initialVersion;
+      const arrangement = arrangementFor(state.performanceProgression, staffAutoplayScenarioV1.arrangement.songId, arrangementVersion);
+      const resolvedDuties = s3Variant === "S3-C"
+        ? resolveKeyDuties({
+          liveId: event.id,
+          songId: staffAutoplayScenarioV1.arrangement.songId,
+          arrangementVersion,
+          familiarityAtResolution: arrangement.familiarity,
+          assignments: staffAutoplayScenarioV1.arrangement.keyAssignments,
+          lineupMemberIds: rehearsed.map((member) => member.id),
+          staffRankedMemberIds: staffDutyRanking(rehearsed),
+        })
+        : [];
+      const paletteKeyParts = resolvedDuties.flatMap((duty) => {
+        if (!duty.selectedMemberId) return [];
+        const member = rehearsed.find((candidate) => candidate.id === duty.selectedMemberId);
+        return member ? [{ maxBonus: keyPartMaximum(duty.partType), dutyPalette: member.palette, familiarity: duty.familiarityAtResolution }] : [];
+      });
+      const resolved = resolveOperatingPerformance(rehearsed, `${state.saveId}:${event.id}`, {}, paletteKeyParts);
+      if (s3Variant !== "S3-A") {
+        state = {
+          ...state,
+          performanceProgression: recordArrangementExposure({
+            state: state.performanceProgression,
+            songId: staffAutoplayScenarioV1.arrangement.songId,
+            arrangementVersion,
+            sourceId: `live:${event.id}:${staffAutoplayScenarioV1.arrangement.songId}:${arrangementVersion}`,
+            stageHours: staffAutoplayScenarioV1.performanceGrowth.livePaletteHours,
+          }),
+        };
+      }
       operating = operating.map((member) => resolved.members.find((updated) => updated.id === member.id) ?? member);
       const fanOpening = snapshotFan(state.fan);
       const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, actualExternal: contract.attendees, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}` });
@@ -373,13 +475,34 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       fanMonth.eventFlow.publicToOtaku += fanOutcome.flow.publicToOtaku;
       fanMonth.eventFlow.externalToOtaku += fanOutcome.flow.externalToOtaku;
       fanMonth.eventFlow.externalToPublic += fanOutcome.flow.externalToPublic;
-      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, fanFlow: { opening: fanOpening, ...fanOutcome.flow } });
+      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, fanFlow: { opening: fanOpening, ...fanOutcome.flow } });
       if (event.id === "graduation-2014-05-11") {
         state = graduateRina(state);
+        if (s3Variant === "S3-C") {
+          state = {
+            ...state,
+            performanceProgression: createArrangementVersion({
+              state: state.performanceProgression,
+              songId: staffAutoplayScenarioV1.arrangement.songId,
+              fromArrangementVersion: staffAutoplayScenarioV1.arrangement.initialVersion,
+              arrangementVersion: staffAutoplayScenarioV1.arrangement.graduationVersion,
+              inheritanceFactor: staffAutoplayScenarioV1.arrangement.graduationInheritanceFactor,
+            }),
+          };
+        }
         operating = operating.map((member) => member.id === "IPC1-001" ? { ...member, active: false } : member);
       }
     }
     if (weekEnds(date)) {
+      if (s3Variant !== "S3-A") {
+        const settled = settleArrangementFamiliarityWeek({
+          state: state.performanceProgression,
+          teamCoreAttributeAverage: teamCoreAttributeAverage(operating.filter((member) => member.active)),
+          weekId: date,
+        });
+        state = { ...state, performanceProgression: settled.state };
+        familiaritySettlements.push(...settled.settlements.map((settlement) => ({ weekEnd: date, ...settlement })));
+      }
       const beforeDecay = state.fan;
       const afterDecay = applyWeeklyFanDecay(beforeDecay);
       const fanMonth = fanMonths.get(month)!;
@@ -399,6 +522,22 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     state = { ...state, date };
     date = nextDate(date);
   }
+  // TIF falls on Saturday. Close the partial final week so its actual stage
+  // time is not silently discarded merely because the chapter ends before
+  // the normal Sunday settlement.
+  if (s3Variant !== "S3-A") {
+    const hasUnsettledExposure = Object.values(state.performanceProgression.arrangements)
+      .some((arrangement) => arrangement.rehearsalHoursThisWeek > 0 || arrangement.stageHoursThisWeek > 0);
+    if (hasUnsettledExposure) {
+      const settled = settleArrangementFamiliarityWeek({
+        state: state.performanceProgression,
+        teamCoreAttributeAverage: teamCoreAttributeAverage(operating.filter((member) => member.active)),
+        weekId: "2014-08-02:chapter-close",
+      });
+      state = { ...state, performanceProgression: settled.state };
+      familiaritySettlements.push(...settled.settlements.map((settlement) => ({ weekEnd: "2014-08-02", ...settlement })));
+    }
+  }
   const performanceMean = audits.reduce((sum, event) => sum + event.performanceInternal, 0) / Math.max(1, audits.length);
   const grades = {
     fans: grade(state.fan.otakuCount, staffAutoplayScenarioV1.grades.fanC),
@@ -413,9 +552,11 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     ? (minCash < 0 ? "BANKRUPT_OR_DEBT_DISTRESS" : "COMPLETED_TIF") : "BLOCKED_BUG";
   const months = finalizeMonths(state, audits, minCashByMonth, monthSnapshots);
   const memberDevelopment = Object.fromEntries(operating.map((member) => [member.id, {
+    active: member.active,
+    condition: member.fitnessCondition,
     trainingHours: member.trainingExp,
     paletteMean: Object.values(member.palette).reduce((sum, value) => sum + value, 0) / 8,
     palette: member.palette,
   }]));
-  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: staffAutoplayScenarioV1.version, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, fanMonths: [...fanMonths.values()], months, minCash, grades, memberDevelopment };
+  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: `${staffAutoplayScenarioV1.version}:${s3Variant}`, s3Variant, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, fanMonths: [...fanMonths.values()], familiaritySettlements, months, minCash, grades, memberDevelopment };
 }

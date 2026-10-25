@@ -7,6 +7,52 @@ export type Difficulty = "easy" | "normal" | "hard";
 export type Color8 = "red" | "pink" | "orange" | "aqua" | "yellow" | "green" | "blue" | "purple";
 export type SongPalette = Record<Color8, number>;
 export type DevelopedPalette = Record<Color8, number>;
+export type KeyPartType =
+  | "opening_sabi"
+  | "sabi_1_key_line"
+  | "sabi_2_key_line"
+  | "bridge"
+  | "ochi_sabi"
+  | "last_sabi";
+
+/** A song arrangement/version owns one shared rehearsal familiarity state. */
+export type ArrangementFamiliarity = {
+  songId: string;
+  arrangementVersion: string;
+  familiarity: number;
+  performedPreviousWeek: boolean;
+  rehearsalHoursThisWeek: number;
+  stageHoursThisWeek: number;
+};
+
+export type PerformanceProgressionState = {
+  arrangements: Record<string, ArrangementFamiliarity>;
+  recordedExposureIds: string[];
+  settledWeekIds: string[];
+};
+
+export type PriorityAssignment = {
+  keyPartId: string;
+  partType: KeyPartType;
+  firstMemberId?: string;
+  secondMemberId?: string;
+  thirdMemberId?: string;
+  autoCandidates?: string[];
+};
+
+/** Immutable evidence on a completed Live; this is not a standing position. */
+export type ResolvedKeyDuty = {
+  liveId: string;
+  songId: string;
+  arrangementVersion: string;
+  keyPartId: string;
+  partType: KeyPartType;
+  selectedMemberId: string | null;
+  selectedFrom: "first" | "second" | "third" | "staff" | "unfilled";
+  reasonCode: string;
+  candidatesConsidered: string[];
+  familiarityAtResolution: number;
+};
 export type EventStatus =
   | "DORMANT"
   | "ELIGIBLE"
@@ -160,6 +206,7 @@ export type PrologueState = {
   interviewedCandidateIds: string[];
   members: RuntimeMember[];
   fan: FanState;
+  performanceProgression: PerformanceProgressionState;
   gates: Record<PrologueGate, boolean>;
   events: RuntimeEvent[];
   finance: FinanceState;

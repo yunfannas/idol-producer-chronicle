@@ -1,0 +1,10 @@
+member_id,active_at_close,training_hours,actual_live_count,actual_live_palette_hours,condition_at_close,palette_mean
+IPC1-001,false,420,27,40.5,87,20.0375
+IPC1-002,true,492,42,63,85,23.8
+IPC1-003,true,492,42,63,76.384615,23.8
+IPC1-004,true,492,42,63,71,23.175
+IPC1-005,true,492,42,63,85,23.175
+IPC1-006,true,492,42,63,76.384615,23.175
+IPC1-007,true,492,42,63,76.384615,23.175
+IPC1-008,true,492,42,63,81,23.175
+IPC1-009,true,492,42,63,71,23.175

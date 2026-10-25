@@ -3,6 +3,7 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createPrologueState } from "./prologue";
 import { createFanState } from "./fan";
+import { createPerformanceProgression } from "./arrangement-familiarity";
 import type { Difficulty, PrologueState } from "./types";
 
 const SAVE_ID = "local-prologue";
@@ -25,8 +26,12 @@ export async function loadOrCreateSave(input: {
   try {
     const saved = JSON.parse(await readFile(savePath(saveId), "utf8")) as PrologueState;
     // v1 save migration: prior local saves predate the P/O/A/W state.
-    if (!saved.fan) {
-      const migrated = { ...saved, fan: createFanState(saved.members.map((member) => member.id)) };
+    if (!saved.fan || !saved.performanceProgression) {
+      const migrated = {
+        ...saved,
+        fan: saved.fan ?? createFanState(saved.members.map((member) => member.id)),
+        performanceProgression: saved.performanceProgression ?? createPerformanceProgression({ songId: "prologue-staff-default-song", arrangementVersion: "v1", initialFamiliarity: 0 }),
+      };
       await savePrologueState(migrated);
       return migrated;
     }
