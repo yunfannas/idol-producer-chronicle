@@ -1,6 +1,8 @@
 # Chronicle｜idol-data-lab → Game Simulation Model Extraction v0.1
 
-**状态**：Implementation handoff / 第一批可执行公式与模型迁移清单；2026-10-24。**不是已实现的 Runtime**，未锁定的转化/留存概率不得伪装成历史校准公式。  
+> **已迁移（2026-10-24）**：实现 Agent 应从 [Chronicle Runtime Implementation Pack v1.0](../implementation/README.md) 进入；本文件为提取过程与来源追溯，旧 `SOURCE_PENDING` / 十色 / Standing 等文字不再具有实现权威。全部已提取公式、规则和待校准缺口已整理进 Chronicle 本地实现目录，无须打开 `idol-data-lab`。
+
+**状态**：历史提取记录 / 第一批可执行公式与模型迁移清单；2026-10-24。**不是已实现的 Runtime**，未锁定的转化/留存概率不得伪装成历史校准公式。  
 **作用域**：将研究数据和设计规则转化为 Chronicle 自有的游戏状态、函数接口、结算顺序和测试，不在游戏里导入研究脚本或复制 L1/L2 推断流程。  
 **与 Chronicle v0.10 的关系**：v0.10 负责剧情、时间、产品交互和序章合同；本文件负责共用 Simulation Kernel 的**当前权威模型迁移边界**。遇到旧 v0.10 对 persistent Core 的描述，以本文件引用的 Fan Market v0.2 为准；待正式合并时清除旧字段。
 
