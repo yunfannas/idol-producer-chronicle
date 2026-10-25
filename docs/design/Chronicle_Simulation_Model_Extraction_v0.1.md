@@ -6,6 +6,9 @@
 
 ## 已完成的专项公式提取（2026-10-24）
 
+- **[Key-Part Assignment & Rotation v0.1](Chronicle_Key_Part_Assignment_and_Rotation_v0.1.md)**：Chronicle 专用简化；不模拟站位加成；关键段落 first/second/third 候补，缺省 Staff 自动，兼容 9 人全员与 15 人轮换；14 项验收。优先于 Lab 的 StandingExposure 细节。
+
+
 > **更新**：`idol-data-lab/main@5499e7c5355b` 已补齐八色 Palette Execution；下方旧 `SOURCE_PENDING` 仅为前次提取的历史状态。以 [Eight-Color Palette · Performance Kernel v0.2](Chronicle_Eight_Color_Palette_Performance_Kernel_v0.2.md) 的八色规则为准。仍待完成的是 EnvPalette 与 PE 的单次结合、Part Fit 等参数回归，不是八色坐标或 Opp3 公式。
 
 - **[Eight-Color Palette · Performance Kernel v0.2](Chronicle_Eight_Color_Palette_Performance_Kernel_v0.2.md)**：八色语义轴/对向、BasePE、KeyPart Opp3、Familiarity、FinalPE→Impression倍率、八色容量/成长、L3截止过滤与14项测试；源 SHA `5499e7c5355b`。另记录 Performance Analyzer MVP 合并及数据证据边界。
