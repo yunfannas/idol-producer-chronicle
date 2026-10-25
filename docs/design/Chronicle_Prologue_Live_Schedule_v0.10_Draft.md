@@ -1,5 +1,8 @@
 # Chronicle 序章 Live／活动排期 v0.10 Draft
 
+> ⚠️ **历史草案，已并入 [Chronicle_Game_Design_v0.10.md](Chronicle_Game_Design_v0.10.md)。** 后续实现、测试和冲突裁决一律以正式 v0.10 为准；本文件保留为活动排期/规则决策的形成记录，不作为第二套生效规范。
+
+
 > 2026-10-24；**游戏安排（已采纳的设计草案）**，与 `docs/research/AKSB_2013-2014_LIVE_HISTORY_REFERENCE_v0.1.md` 的历史证据表分离。尚未替换正式 `Chronicle_Game_Design_v0.9.md`。日期／场馆／共演者历史参考不等于游戏中必须照搬真人和真实名称。
 
 ## A. 类型与经济规则（本次确认）
