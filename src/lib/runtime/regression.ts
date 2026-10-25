@@ -74,7 +74,11 @@ function shuffled<T>(items: T[], random: () => number): T[] {
 }
 
 /** Shared-time FIFO approximation required by the v1 queue contract. */
-function settleChekiQueue(input: { fan: FanState; memberIds: string[]; attendeeOtaku: number; seed: string }) {
+export type ChekiServiceRecord = { fanId: string; memberId: string; startSeconds: number; endSeconds: number; grossJPY: number };
+export function settleChekiQueue(input: {
+  fan: FanState; memberIds: string[]; attendeeOtaku: number; seed: string;
+  onService?: (record: ChekiServiceRecord) => void;
+}) {
   const random = createSeededRandom(input.seed);
   const visitors: TemporaryFan[] = Array.from({ length: input.attendeeOtaku }, (_, index) => ({
     id: `o-${index}`, availableAt: random() * 720, orders: new Map(),
@@ -137,6 +141,7 @@ function settleChekiQueue(input: { fan: FanState; memberIds: string[]; attendeeO
     sales[memberId].buyerCount += 1;
     sales[memberId].waitMinutes.push(wait);
     nextAvailable[memberId] = start + serviceSeconds;
+    input.onService?.({ fanId: visitor.id, memberId, startSeconds: start, endSeconds: nextAvailable[memberId], grossJPY: spend });
     visitor.availableAt = nextAvailable[memberId];
     for (const id of units) {
       requested[id] -= 1;
@@ -147,13 +152,20 @@ function settleChekiQueue(input: { fan: FanState; memberIds: string[]; attendeeO
   return sales;
 }
 
-function settleWeek(input: { fan: FanState; memberIds: string[]; seed: string; rosterSize: number; week: number }) {
-  const attendance = sampleFanAttendance({ fan: input.fan, kind: "taiban", seed: `${input.seed}:attendance`, externalWatchingAudience: regressionFixtureV1.externalWatchingAudience });
+export type GrowthFixtureOptions = {
+  liveQualityFactor?: number; // performance / satisfaction; neutral 1
+  interactionQualityBonus?: number; // normalized positive FanEngage; neutral 0
+  externalWatchingAudience?: number; // actual watchers, not owned O/P
+};
+
+function settleWeek(input: { fan: FanState; memberIds: string[]; seed: string; rosterSize: number; week: number; fixture?: GrowthFixtureOptions }) {
+  const attendance = sampleFanAttendance({ fan: input.fan, kind: "taiban", seed: `${input.seed}:attendance`, externalWatchingAudience: input.fixture?.externalWatchingAudience ?? regressionFixtureV1.externalWatchingAudience });
   const sales = settleChekiQueue({ fan: input.fan, memberIds: input.memberIds, attendeeOtaku: attendance.otaku, seed: `${input.seed}:queue` });
   const random = createSeededRandom(`${input.seed}:fans`);
-  const publicToOtaku = sampleBinomial(attendance.public, fanChekiBalanceV1.pPublicToOtaku, random);
-  const externalToOtaku = sampleBinomial(attendance.external, fanChekiBalanceV1.pExternalToOtaku, random);
-  const externalToPublic = sampleBinomial(attendance.external - externalToOtaku, fanChekiBalanceV1.pExternalToPublic, random);
+  const quality = Math.max(0, input.fixture?.liveQualityFactor ?? 1);
+  const publicToOtaku = sampleBinomial(attendance.public, Math.min(1, fanChekiBalanceV1.pPublicToOtaku * quality), random);
+  const externalToOtaku = sampleBinomial(attendance.external, Math.min(1, fanChekiBalanceV1.pExternalToOtaku * quality), random);
+  const externalToPublic = sampleBinomial(attendance.external - externalToOtaku, Math.min(1, fanChekiBalanceV1.pExternalToPublic * quality), random);
   const survivingP = input.fan.publicCount * (1 - fanChekiBalanceV1.pWeeklyPChurn) - publicToOtaku + externalToPublic;
   const survivingO = input.fan.otakuCount * (1 - fanChekiBalanceV1.pWeeklyOChurn) + publicToOtaku + externalToOtaku;
   const members = Object.fromEntries(input.memberIds.map((memberId) => {
@@ -162,13 +174,13 @@ function settleWeek(input: { fan: FanState; memberIds: string[]; seed: string; r
     const exposureShare = 1 / input.memberIds.length;
     const newAffinity = (publicToOtaku + externalToOtaku) * exposureShare + sampleBinomial(
       Math.max(0, Math.round(input.fan.otakuCount - current.affinityCount)),
-      fanChekiBalanceV1.pExistingOtakuToAffinity * exposureShare,
+      Math.min(1, fanChekiBalanceV1.pExistingOtakuToAffinity * exposureShare * quality),
       random,
     );
     const served = memberSales.buyerCount / Math.max(1, memberSales.affinityVisitors);
     const lost = memberSales.queueLostBuyers / Math.max(1, memberSales.affinityVisitors);
     const averageWait = memberSales.waitMinutes.reduce((sum, wait) => sum + wait, 0) / Math.max(1, memberSales.waitMinutes.length);
-    const engagement = Math.max(0, 1 - 0.2 * Math.min(1, averageWait / 60));
+    const engagement = Math.max(0, 1 + (input.fixture?.interactionQualityBonus ?? 0) - 0.2 * Math.min(1, averageWait / 60));
     const logW = Math.min(0.05, Math.max(-0.05, 0.015 * served * (engagement - 1) - 0.01 * lost));
     return [memberId, {
       affinityCount: Math.min(survivingO, current.affinityCount * (1 - fanChekiBalanceV1.pWeeklyOChurn) * (1 - fanChekiBalanceV1.pWeeklyAffinityChurn) + newAffinity),
@@ -184,12 +196,12 @@ function settleWeek(input: { fan: FanState; memberIds: string[]; seed: string; r
   return { fan, attendance, sales, grossJPY, retainedJPY, cashFlowJPY };
 }
 
-export function runTwelveWeekRoute(rosterSize: 5 | 9 | 15, seed: number): RouteRegression {
+export function runTwelveWeekRoute(rosterSize: 5 | 9 | 15, seed: number, fixture?: GrowthFixtureOptions): RouteRegression {
   const memberIds = memberIdsFor(rosterSize);
   let fan = initialFan(memberIds);
   const weeks: WeeklyRouteReport[] = [];
   for (let week = 1; week <= 12; week += 1) {
-    const settled = settleWeek({ fan, memberIds, seed: `${seed}:${week}`, rosterSize, week });
+    const settled = settleWeek({ fan, memberIds, seed: `${seed}:${week}`, rosterSize, week, fixture });
     fan = settled.fan;
     const memberProfiles = Object.values(fan.members);
     weeks.push({
