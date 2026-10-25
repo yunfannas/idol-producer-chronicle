@@ -2,6 +2,8 @@
 
 **状态**：从 `idol-data-lab` 2026-10-25 `main@5499e7c5355bc6b360051575e7061f7f516ee9dd` 提取的**已定义公式合同**；尚未在 Chronicle Runtime 实现/跑测试。  
 **替代**：`Chronicle_Member_Training_Condition_Performance_Kernel_v0.1.md` 的 §6 `SOURCE_PENDING` 与旧十色示例。其余 Attribute/Condition/Impression 规则仍可参考原文件。  
+> **Chronicle 专项覆盖（2026-10-24）**：本文件中关于 Standing/Formation 站位曝光的表述不再适用于 Chronicle；使用 [Key-Part Assignment & Rotation v0.1](Chronicle_Key_Part_Assignment_and_Rotation_v0.1.md)。仅保留实际出演成员、关键段落 duty、第一/第二/第三候补、Staff 自动补位；MemberImpression 不乘 StandingExposure。03H 的 BasePE/Opp3/FinalPE 数学公式不变。
+
 **源文件**：`skills/l2b-song-palette/references/theme-palette-basis.md`、`docs/Idol_GPT_03H_Palette_Performance_v0.1.md`、`docs/Idol_GPT_03C_Member_Palette_Growth_v0.1.md`、`docs/Idol_GPT_03E_Live_Impression_System_v0.1.md`、`docs/Idol_Fan_Market_Model_v0.2.md`。最后一份负责废除旧 Core 观众持久层。
 
 ## 1. 八色语义和类型（`LOCKED`）
