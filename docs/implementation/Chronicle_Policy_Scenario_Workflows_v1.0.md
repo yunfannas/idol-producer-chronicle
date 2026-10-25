@@ -47,7 +47,9 @@
 - 3–10 人团常规全员出演；11–18 人团遵循本章固定轮换 Policy；Key-Part duty 第一/二/三候补独立于 Lineup，缺省 Staff 自动。
 - 页面是信息空间，会议是决策空间；Staff 提案是基于模拟状态的可选决策，不用固定周会/月会制造操作。
 
-## 4. 分类与 Staff 自动化参数（本地复制）
+## 4. 分类与 Staff 自动化参数（历史矩阵只供参考）
+
+> **Chronicle override（优先于下方历史矩阵）**：Staff `automationGrade` 由每章 Scenario 提供，或根据本章 Staff 能力/规模生成，不从完整 Group Tier 推导；不需要世界团体评级库。历史的 `Tier × Operational Staff HC` 矩阵不是 Chronicle 的必实现要求。即使 G3 也不能解锁 R2/R3/R4 的玩家编辑。
 
 ## 2. R1–R4
 
