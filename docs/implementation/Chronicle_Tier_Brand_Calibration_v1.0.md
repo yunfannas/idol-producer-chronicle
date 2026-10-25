@@ -1,6 +1,8 @@
-# Chronicle｜Tier / Brand Calibration v1.0 — Local Frozen Implementation Copy
+# Chronicle｜Historical Tier / Brand Calibration — Archived Reference
 
-**Chronicle local authoritative calibration copy (2026-10-24)**. 下文包含完整的连续 0–10000 分段、12m Live/Music/Brand、场馆/活动与历史回归锚；实现无需读取外部研究仓库。下方英文原规范内容保留其完整数值语义。**历史校准锚不是剧情结果保底**；插值缺口必须明确 TUNABLE，不得用 tier 中点假装观测分数。
+> **ARCHIVED / NON-RUNTIME (Chronicle 2026-10-24 decision)**：此文件保留作为开发者内部历史校准资料，**不是 Chronicle 实现要求或玩家界面设计**。Chronicle 不实现完整 E−…S / 0–10000 Tier 分段、Live/Music/Brand/Overall 评分流水线、跨团排行榜，也不评价本团或其他团在偶像界的地位。任何下文出现的“authoritative runtime calibration”仅指**原研究模型历史原文**，在 Chronicle 中已被本覆盖声明废止。需要事件规模/演出预期/Staff 能力时使用章节 Scenario 隐藏参数；只展示实际动员、粉丝、收入、作品和章节成果。请勿为这些输入恢复完整 Tier 系统。
+
+**Historical local reference copy (2026-10-24)**. 下文包含完整的连续 0–10000 分段、12m Live/Music/Brand、场馆/活动与历史回归锚；实现无需读取外部研究仓库。下方英文原规范内容保留其完整数值语义。**历史校准锚不是剧情结果保底**；插值缺口必须明确 TUNABLE，不得用 tier 中点假装观测分数。
 
 **Chronicle 覆盖**：Scenario opening 数据遵守该剧本时间截止；玩家经营后只用实际结算记录滚动更新。Fan 持久状态是 P/O/A_i/W_i（无 Core）。章节固定 R2/R3 与全局固定 R4 不因 Tier 上升自动解锁。R4/R2/R3 不允许玩家自由修改。此文件只规定评分，不赋予任何 Policy 编辑权限。
 
