@@ -70,3 +70,10 @@ Required reconciliation before implementation:
 When resolved, update v0.9 and the relevant data source first, add the decision
 and migration notes to the tracker, then remove or mark this register entry as
 integrated.
+
+
+### PDR-2026-10-25-02 — prologue event, tokutenkai/merch, SNS and external commentary
+
+User-agreed revision and phased plan: [Chronicle Prologue Events / Merch / SNS / Reviews](design/Chronicle_Prologue_Events_Merch_SNS_Reviews_Revision_2026-10-25.md).
+
+**Pending integration, not Runtime authority** until reconciled with v0.10 and Implementation Pack v1.0. In particular the ¥1,500 signed Cheki proposal conflicts with the existing ¥2,000 price tier; honor the existing school/company closed-contract and free-mall-Live rules, and preserve P/O/A_i/W_i (no persistent Core). Review comments must be generated offline from settled metrics without changing the outcome. Update v0.10, Fan/Cheki modules, fixtures, report contract and tracker coherently before implementing.
