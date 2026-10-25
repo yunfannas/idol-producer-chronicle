@@ -26,7 +26,7 @@
 
 **Staff 决策与周度玩法夹具**：[Chronicle_Operating_Simulation_v3.md](Chronicle_Operating_Simulation_v3.md) 在冻结 v2 数值基线的前提下，验证 Staff 的阵容/训练/额外明确合同提案、AP 冲突和周度确认接口；不迁移正式 GameState、Calendar 或存档。
 
-**Live 评论生成 Kernel**：[Chronicle_Live_Review_Generator_v0.1.md](Chronicle_Live_Review_Generator_v0.1.md) 从已结算的 Live 证据确定性生成 Otaku/Public/Media 日语评论；不参与 Fan、Performance、Cheki 或 Finance 结算，待报告存档契约正式协调后再接入。
+**Live 评论生成 Kernel**：[Chronicle_Live_Review_Generator_v0.2.md](Chronicle_Live_Review_Generator_v0.2.md) 从已结算的 Live 证据确定性生成 Otaku/Public/Media 日语评论；不参与 Fan、Performance、Cheki 或 Finance 结算，待报告存档契约正式协调后再接入。v0.1 保留为已替代的初版设计记录。
 
 **Chronicle 展示与数据裁剪规则（LOCKED）**：不提供 Idol World Tier 表、Overall 评分、行业 Top50、跨团排名、其他团或本团的行业地位评价 UI/API。其他团仅以有必要的活动参演者、剧本人物和竞争日程出现。内部可保留少量由 Scenario 提供的活动难度、资源/曝光权重，但不得因此要求建立完整行业 Tier 或全团评分库。第五份 Tier 文档是历史校准附录，**不属于必读实施规范**。
 

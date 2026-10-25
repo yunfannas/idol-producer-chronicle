@@ -13,7 +13,10 @@ const base: SettledLiveReviewInput = {
     { id: "IPC1-002", nameJa: "宮原優花", impression: 1.0 },
     { id: "IPC1-003", nameJa: "小日向陽菜", impression: 0.7 },
   ],
-  audience: { otaku: 30, public: 8, external: 12 },
+  songs: [{ id: "song-001", titleJa: "はじまりの合図", impression: 1.22, expectedImpression: 1 }],
+  mc: { reception: "warm" },
+  stageManagement: { execution: "smooth" },
+  audience: { otaku: 30, public: 8, external: 12, expectedTotal: 35 },
   tokuten: { allowed: true, grossJPY: 24_000, queueLostJPY: 3_000 },
 };
 
@@ -29,7 +32,7 @@ describe("deterministic, evidence-grounded Live review generator", () => {
     for (const comment of first.comments) {
       expect(comment.evidenceIds.every((id) => ids.has(id))).toBe(true);
       expect(comment.textJa).not.toMatch(/1\.2|24000|3000/);
-      expect(comment.styleVersion).toBe("review-ja-v1");
+      expect(comment.styleVersion).toBe("review-ja-v2");
     }
   });
 
@@ -39,12 +42,25 @@ describe("deterministic, evidence-grounded Live review generator", () => {
     expect(result.evidence.length).toBeGreaterThan(0);
   });
 
-  it("makes queue pressure and historical improvement available as separate facts", () => {
+  it("only creates song, MC, production and audience evidence from supplied settled facts", () => {
+    const rich = extractEvidence(base, { previousTeamSatisfaction: 1.02 });
+    expect(rich.map((item) => item.dimension)).toEqual(expect.arrayContaining(["song-highlight", "mc-rapport", "production-flow", "audience-response", "improvement"]));
+    const sparse = extractEvidence({ ...base, songs: undefined, mc: undefined, stageManagement: undefined, audience: { otaku: 30, public: 0, external: 0 } });
+    expect(sparse.some((item) => ["song-highlight", "song-caveat", "mc-rapport", "mc-caveat", "production-flow", "production-caveat", "audience-response"].includes(item.dimension))).toBe(false);
+  });
+
+  it("keeps queue pressure and historical improvement as independent facts with source/topic cooldown", () => {
     const evidence = extractEvidence(base, { previousTeamSatisfaction: 1.02 });
     expect(evidence.some((item) => item.dimension === "tokuten-queue")).toBe(true);
     expect(evidence.some((item) => item.dimension === "improvement")).toBe(true);
     const opinions = selectOpinions(base, evidence, { recentEvidenceDimensions: ["team-performance"] }, "cooldown");
     expect(opinions.every((opinion) => evidence.find((item) => item.id === opinion.evidenceIds[0])?.dimension !== "team-performance")).toBe(true);
+  });
+
+  it("varies natural Japanese syntax by deterministic seed without changing evidence", () => {
+    const comments = new Set(Array.from({ length: 20 }, (_, index) => generateLiveComments(base, {}, `variation-${index}`).comments.map((comment) => comment.textJa).join("\n")));
+    expect(comments.size).toBeGreaterThan(3);
+    for (const text of comments) expect(text).not.toMatch(/1\.2|24000|3000|evidence/);
   });
 
   it("represents mixed and weak settled performances without a score-to-text shortcut", () => {
