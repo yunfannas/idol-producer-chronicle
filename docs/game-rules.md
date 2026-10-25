@@ -7,12 +7,12 @@ events, balances, or mandatory historical outcomes.
 
 | Concern | Authoritative source |
 | --- | --- |
-| Story scope, chronology, gates, and scenario consequences | [Game Design v0.9](design/Chronicle_Game_Design_v0.9.md), especially §§4–6 and 13–23 |
-| Fan, Live, Member Feedback, and Weekly Review presentation | [Feedback rhythm v0.1](design/Feedback_Rhythm_and_Milestones_v0.1.md) and v0.9 §§12, 17, 20–21 |
+| Story scope, chronology, gates, and scenario consequences | [Game Design v0.10](design/Chronicle_Game_Design_v0.10.md), especially §§0–9 |
+| Fan, Live, Member Feedback, and Weekly Review presentation | [Game Design v0.10](design/Chronicle_Game_Design_v0.10.md) §§5 and 8, plus [Feedback rhythm v0.1](design/Feedback_Rhythm_and_Milestones_v0.1.md) where it does not conflict |
 | Localization and player-visible naming | [Terminology v0.2](design/Terminology_ZH_JA_EN_v0.2.md) |
-| Initial roster calibration and October candidate pool | [data directory](data/) and v0.9 §14 |
-| Superseded reasoning or source context | [design archive](design/archive/) only, subject to v0.9 precedence |
-| Implementation sequencing | [Project tracker](PROJECT_TRACKER.md) and v0.9 §23.3 |
+| Initial roster calibration and October candidate pool | [data directory](data/) and v0.10 §2 |
+| Superseded reasoning or source context | [design archive](design/archive/) and v0.9 only, subject to v0.10 precedence |
+| Implementation sequencing | [Project tracker](PROJECT_TRACKER.md) and v0.10 §9 |
 
 Inherited engine formulas (17 attributes, traits, palette, Performance, fan
 and economy calculations) remain outside this navigation document. Use the
@@ -37,7 +37,7 @@ from prose or turn a calibration value into a new formula.
 **Status:** user-confirmed design revision awaiting reconciliation into the
 authoritative design. It is intentionally non-operative: do not use it to
 change Runtime, mock defaults, existing chronology, or character fate until a
-versioned update resolves its interactions with v0.9.
+versioned update resolves its interactions with v0.10.
 
 ### PDR-2026-10-24-01 — character growth and natural departures
 
@@ -53,9 +53,9 @@ The requested revision is recorded exactly as the current design input:
 
 Required reconciliation before implementation:
 
-1. v0.9's currently normative G01 requires the January group interview, and
-   G07 uses a `<9` active-member October intervention. A formal update must
-   state which parts change, which remain, and how existing saves migrate.
+1. v0.10 currently requires the January group interview and only applies the
+   October company branch to a 3–7-person group. A formal update must state
+   which parts change, which remain, and how existing saves migrate.
 2. “Unified route,” “deferred,” “replenishment,” and “upper-management
    recommendations” need approved event boundaries, player choices,
    information visibility, and failure/expiry handling. This register does not

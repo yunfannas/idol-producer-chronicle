@@ -5,17 +5,18 @@ second UI specification.
 
 ## Shared interaction contract
 
-Use [v0.9 §1](design/Chronicle_Game_Design_v0.9.md#1-ui-信息架构mobile-first),
-§19, and [the terminology glossary](design/Terminology_ZH_JA_EN_v0.2.md).
+Use [v0.10 §§1, 7, and 8](design/Chronicle_Game_Design_v0.10.md), then the
+non-conflicting visual/mobile detail in v0.9 and [the terminology
+glossary](design/Terminology_ZH_JA_EN_v0.2.md).
 Keep the four mobile destinations—Inbox, Calendar, Members, and Manage—on one
 adaptive information architecture rather than building separate desktop logic.
 
 | Surface | Primary responsibility | Authoritative reading |
 | --- | --- | --- |
-| Inbox | Decision queue and story/report entry point | v0.9 §§1.2–1.4, 10–11, 20 |
-| Calendar | Future commitments, conflicts, and time advance | v0.9 §§1.3, 13.2–13.3, 16 |
-| Members | Character list, card, detail, and conversation entry | v0.9 §§3, 14.1–14.2, 19 |
-| Manage | Meeting entry points for Making, Training, Live, Audition, Finance, Policy | v0.9 §§1.4, 15–18 |
+| Inbox | Decision queue and story/report entry point | v0.10 §§1 and 8 |
+| Calendar | Future commitments, conflicts, and time advance | v0.10 §§1, 4, 6, and 7 |
+| Members | Character list, card, detail, and conversation entry | v0.10 §§1–3 and 8 |
+| Manage | Meeting entry points for Making, Training, Live, Audition, Finance, Policy | v0.10 §§1–5 |
 
 ## Non-negotiable flow boundaries
 
@@ -36,13 +37,14 @@ adaptive information architecture rather than building separate desktop logic.
 ## Prologue flow checkpoints
 
 The ordered gates, their event/idempotency requirements, and their acceptance
-tests live in v0.9 §§13 and 23. Before implementing a checkpoint, read its
+tests live in v0.10 §§6, 7, and 9. Before implementing a checkpoint, read its
 source section instead of relying on this summary:
 
-1. G00–G03: founders, interview, selection/contract, and strategy meeting.
-2. G04–G06: covers/originals, early commercial Live, and debut.
-3. G07–G08: October roster gate and December regular-Live contract.
-4. G09–G11: Rina's departure/Leader handover, One-man, TIF, and the snapshot.
+1. G00–G05: founders, interview, selection/contract, strategy, fixed original
+   delivery, and the 2013-05-24 debut.
+2. G06–G08: the small-group October check, experimental regular Lives, and
+   formal weekly regular Lives from 2014-03-05.
+3. G09–G12: Rina's graduation/Leader handover, One-man, TIF, and the snapshot.
 
 Pending changes that may alter these checkpoints are recorded—but not made
 operative—in [game rules](game-rules.md#pending-integration-register).
