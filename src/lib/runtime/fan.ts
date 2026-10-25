@@ -75,6 +75,30 @@ export function applyWeeklyFanDecay(fan: FanState): FanState {
   return { publicCount, otakuCount, temporarilyUnassignedOtaku, members };
 }
 
+/**
+ * Applies the documented statistical fan transition when an active member
+ * graduates.  The aggregate model intentionally does not pretend to know
+ * individual fan identities; it only moves the estimated unassigned portion
+ * into the explicitly temporary U bucket.
+ */
+export function graduateMemberFanAffinity(fan: FanState, memberId: string): FanState {
+  const departing = fan.members[memberId];
+  if (!departing) return fan;
+  const assignedOtaku = Math.max(0, fan.otakuCount - fan.temporarilyUnassignedOtaku);
+  const retentionElsewhere = Object.entries(fan.members)
+    .filter(([id]) => id !== memberId)
+    .reduce((product, [, profile]) => product * (1 - Math.min(1, Math.max(0, profile.affinityCount / Math.max(1, assignedOtaku)))), 1);
+  const uniqueLost = departing.affinityCount * retentionElsewhere;
+  return {
+    ...fan,
+    temporarilyUnassignedOtaku: Math.min(fan.otakuCount, fan.temporarilyUnassignedOtaku + uniqueLost),
+    members: {
+      ...fan.members,
+      [memberId]: { ...departing, affinityCount: 0 },
+    },
+  };
+}
+
 /** Gamma(k=2, scale=W/2), in KJPY; W is intent, never booked revenue. */
 export function samplePurchaseBudgetKJPY(weightKJPY: number, random: () => number): number {
   if (weightKJPY <= 0) return 0;

@@ -1,0 +1,30 @@
+{
+  "run_id": "staff-autoplay:B:1",
+  "scenario_version": "staff-autoplay-scenario-v1",
+  "tuning_version": "fanChekiBalanceV1",
+  "stage_status": "COMPLETED_TIF",
+  "event_count": 42,
+  "resolved_tif": "tif-2014-08-02",
+  "final": {
+    "cash": 332500,
+    "operating_revenue": 2085500,
+    "operating_cost": 4138000,
+    "capitalized_assets": 615000,
+    "loans": 0,
+    "min_cash": 231500,
+    "public_count": 61.23965002530811,
+    "otaku_count": 2.7236145026983736,
+    "active_roster": 8,
+    "grades": { "fans": "E", "performance": "E", "business": "E", "overall": "E" }
+  },
+  "selected_event_ledger": [
+    { "live_id": "debut-2013-05-24", "ticket_revenue": 0, "venue_cost": 0, "cheki_gross": 0, "attendance": 80 },
+    { "live_id": "mall-2013-09-29", "ticket_revenue": 0, "venue_cost": 0, "cheki_gross": 0, "attendance": 72 },
+    { "live_id": "graduation-2014-05-11", "ticket_revenue": 144000, "venue_cost": 50000, "cheki_gross": 0, "attendance": 72 },
+    { "live_id": "regular-2014-06-25", "ticket_revenue": 55500, "venue_cost": 35000, "cheki_gross": 0, "attendance": 37 },
+    { "live_id": "taiban-2014-06-26", "ticket_revenue": 15250, "venue_cost": 8000, "cheki_gross": 0, "attendance": 61 },
+    { "live_id": "one-man-2014-07-27", "ticket_revenue": 324000, "venue_cost": 180000, "cheki_gross": 0, "attendance": 108 },
+    { "live_id": "tif-2014-08-02", "ticket_revenue": 0, "venue_cost": 0, "cheki_gross": 0, "attendance": 130 }
+  ],
+  "reproduction": "npm run test:staff-e2e; runStaffAutoplayPrologue({ route: 'B', seed: 1 })"
+}

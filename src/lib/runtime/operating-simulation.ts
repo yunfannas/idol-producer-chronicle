@@ -7,14 +7,14 @@ import { createSeededRandom, sampleBinomial } from "./random";
 import { settleChekiQueue } from "./regression";
 import type { DevelopedPalette, FanState, FinanceState, RuntimeEvent, RuntimeMember, SongPalette } from "./types";
 
-type CoreAttributes = {
+export type CoreAttributes = {
   agility: number; naturalFitness: number; stamina: number; pitch: number; tone: number;
   breath: number; rhythm: number; power: number; stagePresence: number;
 };
 
 export type OperatingMember = RuntimeMember & { attributes: CoreAttributes; palette: DevelopedPalette; trainingExp: number };
 type TicketContract = { totalReceipts: number; participatingGroupCount: number; groupNominatedAdmissions: number; allNominatedAdmissions: number | null };
-type OperatingContract = { id: string; kind: "debut" | "taiban" | "free-mall"; date: string; ticket?: TicketContract; venueCostJPY: number; externalWatchingAudience: number; chekiAllowed: boolean };
+export type OperatingContract = { id: string; kind: "debut" | "taiban" | "free-mall" | "experimental-regular" | "regular" | "graduation" | "one-man" | "festival"; date: string; ticket?: TicketContract; venueCostJPY: number; externalWatchingAudience: number; chekiAllowed: boolean };
 export type FanFixture = { publicCount: number; otakuCount: number; affinityTotal: number; purchaseWeightKJPY: number };
 export type OperatingSimulationOptions = { fanFixture?: FanFixture; performanceMultiplierByMember?: Record<string, number> };
 export type MemberPerformance = { impression: number; expectedImpression: number; quality: number; exposureProbability: number };
@@ -83,7 +83,7 @@ export type StaffWeekProposal = {
 // Core performance fields are copied from docs/data/First_Generation_Calibration_v0.6.csv.
 // The complete 17-field source remains canonical; this adapter consumes only the
 // fields required by the approved technical kernel.
-const CORE: Record<string, CoreAttributes> = {
+export const prologueCoreAttributes: Record<string, CoreAttributes> = {
   "IPC1-001": { agility: 13, naturalFitness: 14, stamina: 14, pitch: 15, tone: 16, breath: 15, rhythm: 16, power: 14, stagePresence: 17 },
   "IPC1-002": { agility: 14, naturalFitness: 15, stamina: 15, pitch: 17, tone: 17, breath: 16, rhythm: 16, power: 14, stagePresence: 16 },
   "IPC1-003": { agility: 13, naturalFitness: 14, stamina: 13, pitch: 16, tone: 15, breath: 15, rhythm: 16, power: 12, stagePresence: 15 },
@@ -99,6 +99,9 @@ const CORE: Record<string, CoreAttributes> = {
   "IPC1-013": { agility: 12, naturalFitness: 13, stamina: 12, pitch: 14, tone: 15, breath: 13, rhythm: 14, power: 10, stagePresence: 13 },
   "IPC1-014": { agility: 13, naturalFitness: 12, stamina: 13, pitch: 11, tone: 11, breath: 11, rhythm: 13, power: 12, stagePresence: 14 },
   "IPC1-015": { agility: 14, naturalFitness: 14, stamina: 13, pitch: 14, tone: 13, breath: 13, rhythm: 15, power: 14, stagePresence: 14 },
+  "IPC1-016": { agility: 12, naturalFitness: 12, stamina: 12, pitch: 10, tone: 11, breath: 11, rhythm: 12, power: 11, stagePresence: 15 },
+  "IPC1-017": { agility: 16, naturalFitness: 15, stamina: 17, pitch: 11, tone: 10, breath: 12, rhythm: 15, power: 16, stagePresence: 15 },
+  "IPC1-018": { agility: 12, naturalFitness: 13, stamina: 14, pitch: 12, tone: 13, breath: 12, rhythm: 12, power: 12, stagePresence: 12 },
 };
 
 const song: SongPalette = { red: 0.25, pink: 0.1, orange: 0.1, aqua: 0.1, yellow: 0.1, green: 0.1, blue: 0.1, purple: 0.15 };
@@ -114,7 +117,7 @@ const contracts: OperatingContract[] = Array.from({ length: 12 }, (_, index) => 
 });
 
 function initialMembers(rosterSize: 5 | 9 | 15): OperatingMember[] {
-  return Object.entries(CORE).slice(0, rosterSize).map(([id, attributes], index) => ({
+  return Object.entries(prologueCoreAttributes).slice(0, rosterSize).map(([id, attributes], index) => ({
     id, nameJa: id, active: true, contractEndsOn: "2015-01-07", chekiCommissionRate: 0.2,
     monthlySalary: operatingSimulationV1.monthlySalaryJPY, fitnessCondition: 100,
     attributes: { ...attributes }, palette: { ...emptyPalette(0), [index === 0 ? "pink" : index === 1 ? "red" : "yellow"]: 50 }, trainingExp: 0,
@@ -210,7 +213,7 @@ function managerApFor(decision: StaffWeekDecision): number {
   return trainingSlots + liveCount * operatingSimulationV3.managerApPerLive;
 }
 
-function performance(members: OperatingMember[], eventId: string, multipliers: Record<string, number> = {}): { quality: number; members: OperatingMember[]; memberPerformance: Record<string, MemberPerformance> } {
+export function resolveOperatingPerformance(members: OperatingMember[], eventId: string, multipliers: Record<string, number> = {}): { quality: number; members: OperatingMember[]; memberPerformance: Record<string, MemberPerformance> } {
   const random = createSeededRandom(`performance:${eventId}`);
   const pe = finalPaletteExecution({ song, participantPalettes: members.map((member) => member.palette), keyParts: [] });
   const palette = paletteMultiplier(pe);
@@ -309,7 +312,7 @@ export function runOperatingSimulation(rosterSize: 5 | 9 | 15, seed: string, opt
     finance = postLedgerEntry(finance, { id: `${contract.id}:training`, date: contract.date, kind: "operating_cost", amount: operatingSimulationV1.trainingRoomCostJPY, category: "training_room", note: "Staff scheduled shared medium training" });
     if (week % 4 === 0) finance = postLedgerEntry(finance, { id: `${contract.id}:payroll`, date: contract.date, kind: "operating_cost", amount: members.reduce((sum, member) => sum + (member.monthlySalary ?? 0), 0), category: "member_payroll", note: "Monthly member payroll" });
     const participants = lineup(members);
-    const live = performance(participants, contract.id, options.performanceMultiplierByMember);
+    const live = resolveOperatingPerformance(participants, contract.id, options.performanceMultiplierByMember);
     members = members.map((member) => live.members.find((next) => next.id === member.id) ?? member);
     const outcome = resolveFan({ fan, participantIds: participants.map((member) => member.id), contract, quality: live.quality, memberPerformance: live.memberPerformance, seed: `${seed}:${contract.id}` });
     fan = outcome.fan;
@@ -444,7 +447,7 @@ function settleV3Live(input: {
   seed: string;
 }) {
   const participants = input.state.members.filter((member) => input.participantIds.includes(member.id));
-  const live = performance(participants, input.contract.id);
+    const live = resolveOperatingPerformance(participants, input.contract.id);
   const members = input.state.members.map((member) => live.members.find((next) => next.id === member.id) ?? member);
   const outcome = resolveFan({ fan: input.state.fan, participantIds: input.participantIds, contract: input.contract, quality: live.quality, memberPerformance: live.memberPerformance, seed: `${input.seed}:${input.contract.id}` });
   const event: RuntimeEvent = { id: input.contract.id, date: input.contract.date, gate: "G05", kind: input.contract.kind, status: "RESOLVED", scenarioInstance: input.contract.id, chekiAllowed: input.contract.chekiAllowed, participantIds: input.participantIds };

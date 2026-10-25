@@ -1,0 +1,2 @@
+route,seeds,completed_tif,debt_distress,blocked_bug,final_o_mean,final_o_min,final_o_max,min_cash_mean,min_cash_min,min_cash_max,final_cash_mean,final_cash_min,final_cash_max,grades
+B,100,100,0,0,4.3891077248,0,12.0098408654,202418,129000,271250,322251.5,192800,434000,"Fans E=100; Performance E=100; Business E=100; Overall E=100"

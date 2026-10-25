@@ -1,5 +1,5 @@
 import { chekiLedgerEntries, settleChekiSales } from "./cheki";
-import { createFanState } from "./fan";
+import { createFanState, graduateMemberFanAffinity } from "./fan";
 import { createFinanceState, postLedgerEntry } from "./finance";
 import type {
   ChekiSaleInput,
@@ -254,6 +254,7 @@ export function graduateRina(state: PrologueState): PrologueState {
   return {
     ...state,
     members: state.members.map((member) => member.id === "IPC1-001" ? { ...member, active: false } : member),
+    fan: graduateMemberFanAffinity(state.fan, "IPC1-001"),
     weeklyReviewHosts: [...state.weeklyReviewHosts, { date: "2014-05-12", memberId: nextLeader.id }],
     gates: { ...state.gates, G09: true },
   };
