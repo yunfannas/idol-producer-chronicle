@@ -98,8 +98,10 @@ SNS/媒体/外务/直播的外部 reach → P
 - 普通拼盘/联合演出中他团观众是**本团临时 Public**；可能离开、形成持久 P、成为 O 并形成成员 affinity。不能直接把他团 O 计入本团存量；union referral 只是额外临时曝光，不直接加粉。
 - 各活动产生事件 momentum，周结算统一消费一次，避免 Live 当天和周末重复增长。Condition、收入与即时反馈仍按事件当日更新；旧 §29 中 `O→Core` 结算步骤必须改为 `O→A_i / W_i`。
 - **待定函数**：`P_acquisition(reach)`、`P_to_O(impression,repeatExposure)`、`A_gain(O,memberImpression,interaction)`、`A_churn(interaction,availability,turnover)`、`W_update(price,experience,repeats)`、`P/O_churn`、跨团注意力竞争。不得从旧 Core 模型借常数声称权威。
-- 若用统计 aggregate 而非个体级 fan edges 保存 `A_i`，毕业时“仍有其他推的 O 保留”**无法由 `Σ A_i` 精确推导**；须引入可重复的轻量 overlap 近似或显式 affinity cohort/edges，标记模型假设并做多推测试。
-- 新成员 seed 由章节规模/当前真实 P/O、出道曝光决定且较小；毕业后的新人可吸收部分 `O_unassigned`，依据角色/形象/能力/互动 fit，不能瞬间全继承。
+- **Chronicle 决议：不持久化 Cohort 或个体 Fan edges**。每场 Live/特典会按 `P/O/A_i/W_i`、实际到场和固定 seed 临时生成可多推的观众；同一观众的排队时间不可重复使用，但对多名成员的消费需求不强制守恒。活动结束只保存成交、互动反馈、周 momentum 与长期 aggregate；不保留个体。
+- 仅用 `A_i` 无法精确求多推重叠：毕业时采用**确定性、可重复的 overlap 统计估计**，保留仍推其他成员的 Otaku；失去全部 affinity 者进入短期 `O_unassigned`。不模拟粉丝跟随毕业偶像去其他团、偶像复出或跨团双向流动；不得声称估计是精确人数。
+- **Scenario-scripted 新成员初始化**：普通新人按章节提供小额初始粉丝 seed；有经验偶像由 Scenario 直接给出一次性的 `incomingNewOtaku`（此前非本团 O）与 `existingOtakuNewAffinity`（本团既有 O 的新增偏好），并初始化该成员 `A_i/W_i`。无需追溯前团历史、跨团 fan cohort 或完整行业 Tier。加入时 `ΔO=incomingNewOtaku`，`ΔA_i=incomingNewOtaku+existingOtakuNewAffinity+reassignedUnassigned`（对同一人去重），`ΔP` 只有 Scenario 明示才增加；`existingOtakuNewAffinity` 不增加 O。数值受 `A_i<=O`、`O_unassigned` 实际余额约束。来自原团的初始粉丝只是剧本的一次性输入，不触发原团流失结算。
+- 毕业后的新人可吸收部分 `O_unassigned`，依据角色/形象/能力/互动 fit，不能瞬间全继承；吸收是**同一团队内部重分配**，不增加 O。所有 audition/加入机会仅由 Scenario 发起，玩家不可主动开启。
 
 ## 5. Public / Otaku 市场与活动经济
 
@@ -173,18 +175,19 @@ interface ChekiKernel {
 | F03 | ¥2,000=2 KJPY，不计作两张¥1,000商品；佣金按实收20% |
 | F04 | 60分钟、5秒换粉 overhead、产品服务时长与排队共同限制逐成员销量 |
 | F05 | 成员不参加/无产品/免费商场时收费销量0 |
-| F06 | 同一人多推不强制消费守恒；毕业后保留其他 affinity，孤立者短期 unassigned |
+| F06 | 单场多推不强制消费守恒、排队时间不可复制；不持久化 Cohort；毕业时 overlap 估计保留其他 affinity，孤立者短期 unassigned |
 | F07 | Live新客受Impression/有效曝光影响；FanEngage主要影响 affinity 留存/W |
 | F08 | 跨团临时Public不直接增加持久O；union referral不自动增加owned O |
 | F09 | 周 momentum 只结算一次，存档重放不重复产生粉丝或收入 |
 | F10 | Finance仅一次计 gross/佣金/成本；CD和门票不由Fan二次入账 |
 | F11 | 5/9/15路线成员级销量汇总，**无硬编码人数倍数或销售保底** |
 | F12 | 2013年不使用S6市场规模作为历史真实上限；源缺参数明示TUNABLE |
+| F13 | 有经验偶像的剧本一次性 seed：新来 O 增加 O 和 A_i，本团既有 O 新增偏好只增加 A_i；不得重复计 O；无需跨团流动/复出历史 |
 
 ## 9. 需要 Agent 提交的参数校准提案（尚未冻结）
 
 1. P/O/A/W 获客、留存、流失概率与时间步长；
-2. A_i/W_i 初始种子、成员毕业 overlap/reassignment；
+2. A_i/W_i 初始种子、毕业 overlap 近似与剧本新人一次性粉丝导入（无持久 Cohort）；
 3. EventFactor、PublicTrial、商品档位偏好、重复购买分布；
 4. 实际队列、服务时间、不同产品耗材、工作人员影响；
 5. 现场观众结构、拼盘他团曝光、跨团重复转化；
