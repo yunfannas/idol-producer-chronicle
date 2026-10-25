@@ -2,9 +2,9 @@
 
 **Status: TEST FIXTURES COMMITTED / EXECUTION PENDING.** 这是继 [Fan_Cheki_Regression_2026-10-24.md](Fan_Cheki_Regression_2026-10-24.md) 之后的第二轮测试定义。仓库已有确定性测试源码，但本次 GitHub 文件编辑会话**未执行**本地 npm、Vitest、ESLint 或 build；**不提供虚构通过结果或数值均值**。待本地运行并附带输出后才可将结果标为 VERIFIED。
 
-## 保留中性基线
+## 中性参数保留；旧数值必须重新计算
 
-原 5/9/15 人、12 周×20 seeds、`pExistingOtakuToAffinity=.05` 的结果不变；没有修改 `fanChekiBalanceV1`、FanState 持久字段、Cheki 商品时长/成本或正式 Scenario。新测试专门给 regression harness 增加可选的 `GrowthFixtureOptions`（默认无影响）。
+仍保留 `pExistingOtakuToAffinity=.05`、`fanChekiBalanceV1` 其余参数、FanState 持久字段、Cheki 商品时长/成本和正式 Scenario；新测试专门给 regression harness 增加可选的 `GrowthFixtureOptions`（默认无影响）。**但 2026-10-24 首轮报告中的 A、Cheki 收入及现金流数值属于修正前历史结果，不能继续作为修正后的基线。** 必须重新运行 5/9/15 人、12周×20 seeds 才能生成新结果。
 
 ## B. 热门成员容量压力
 
@@ -30,12 +30,14 @@
 
 **重要限制**：`liveQualityFactor` 和 `interactionQualityBonus` 是 **regression-only 注入值**，用于验证单调响应；**尚未接入**真实 Performance Impression 或真实 FanEngage 输出。不能把通过此测试描述成完成 Live/Palette/Training/Staff 的端到端集成。正式游戏仍需把真实事件结果映射到这些接口或等价生产接口。
 
-## 代码审查发现的两个待修正口径（不在本次偷偷改中性基线）
+## 两个统计口径已修正（待执行验证）
 
-1. `regression.ts/settleWeek` 的 `newAffinity` 目前对 `round(O−A_i)` 抽样，而非**本场实际曝光的到场 O**。这会让没有到场的人每周因 Live 自动产生新成员偏好，且此前 `.10→.05` 校准部分抵消了该口径问题。下一次校准前应先改为 `eligibleExposedOWithoutAffinity_i`，再重新跑 5/9/15 中性回归，不能沿用旧 A 结果。
-2. `settleChekiQueue` 的 `pStayChekiOtaku` 目前对每位成员的 affinity **分别**抽样，而非每位实际观众只抽样一次留场状态。单个多推观众可能在成员 A 的队列中出现、却在成员 B 的队列中被判定已离场。下一次需把 stay 抽样提升到观众级，再统一构建多成员需求。
+1. **只对实际曝光者建立新 affinity**：`settleChekiQueue` 在与 Cheki 共用的本场 O 观众样本中，按成员 Hypergeometric 重建 affinity，返回 `eligibleExposedOWithoutAffinity[memberId]`；`settleWeek` 使用这个整数作为 `Binomial` 抽样池，不再使用全体 `round(O−A_i)`。毕业过渡期 `U` 的观众虽可到场，但不自动成为新 affinity 候选，防止绕过既定重分配机制。
+2. **单场留场状态按观众只抽一次**：每位到场 O 只抽一次 `stayedForCheki`，再对每名成员建立 affinity 和商品需求。多推观众对不同成员的购买使用同一个留场决定，不会同时被认定离场和留场。
 
-这两项是**源代码审查发现的实现缺口**，不是本轮压力测试已验证通过的结论。若先修正，会改变旧中性结果，必须重新建立基线。建议在 B/C/D 输出正式校准数值之前解决。
+新增针对性测试：`attendanceImportance=0` 且无外部观众时 `A` 不能因 Live 增长；全部成员 affinity 覆盖相同20名观众时，同一人的留场结果跨成员一致；`U` 不参与新增 affinity 候选。测试夹具不持久化观众 ID 或 Cohort。
+
+**状态**：已提交源代码及断言；本次会话未运行 npm，故不能宣称测试通过。修正改变随机数调用顺序和经济结果，旧 5/9/15 基线的数值须重新计算，`.05` 暂不重新调参。
 
 ## 运行与验收命令
 
