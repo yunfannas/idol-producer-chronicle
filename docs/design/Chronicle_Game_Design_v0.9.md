@@ -1,5 +1,8 @@
 # Idol Producer: Chronicle｜剧情模式与移动端 Game Design v0.9
 
+> ⚠️ **历史版本，已被 [Chronicle_Game_Design_v0.10.md](Chronicle_Game_Design_v0.10.md) 取代。** 本文件仅用于追溯设计与不冲突的参考细节；Agent 不得以此文件的 2013-03 出道、2013-12 定期、旧合同/特典会或旧测试矩阵覆盖 v0.10。
+
+
 **日期**：2026-10-24  
 **状态**：v0.6 统一序章规则与开发验收标准；保留此前版本的设计历史；属于规格草案，尚未完成 Runtime 验收。既有 L2 权威数据版本须在实施时再次确认。  
 **范围**：2013–2026 AKSB 历史启发的虚构连续剧情、序章可玩切片、移动端 Inbox、角色交互、演出报告、Staff/Weekly Review。  
