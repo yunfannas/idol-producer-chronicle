@@ -14,6 +14,8 @@
 | Appendix | [Tier / Brand Calibration — archive only](Chronicle_Tier_Brand_Calibration_v1.0.md) | **非 Chronicle Runtime 必需**；仅供开发者历史标定查阅，不实现完整 0–10000 Tier、跨团排行或行业地位评价 |
 | 6 | [Chronicle Game Design v0.10](../design/Chronicle_Game_Design_v0.10.md) | 序章人物、具体日期、剧情里程碑、合同和验收；**若旧 UI/Policy 描述冲突，以本目录 1–5 优先** |
 
+**Fan × Cheki 可运行数值基线（TUNABLE）**：[Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md](Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md) 已给出到场、单场多推重建、Gamma 购买预算、双档选购、共享排队、Fan 转化/流失、毕业与剧本新人 seed 的**完整第一版算法**。实现时必须读取；具体概率为初始校准值，不是历史事实。原 Fan 文档缺口由此文件填充，后续通过 seeded 5/9/15 人回归调参。
+
 **Chronicle 展示与数据裁剪规则（LOCKED）**：不提供 Idol World Tier 表、Overall 评分、行业 Top50、跨团排名、其他团或本团的行业地位评价 UI/API。其他团仅以有必要的活动参演者、剧本人物和竞争日程出现。内部可保留少量由 Scenario 提供的活动难度、资源/曝光权重，但不得因此要求建立完整行业 Tier 或全团评分库。第五份 Tier 文档是历史校准附录，**不属于必读实施规范**。
 
 **实现级优先级**：本 `README` 的冲突禁令 → 同目录专项规范 → Chronicle Game Design 剧本/合同 → 旧 `docs/design/Chronicle_*Kernel_v0.x` 历史提取。历史提取仅作追溯，不能推翻本目录。任何字段或公式若本目录标为 `TUNABLE/INTEGRATION_PENDING`，不得通过阅读旧文档“猜一个锁定值”。
@@ -98,6 +100,6 @@ chapter opening snapshot / cutoff → scripted policy & roster
 
 ## 6. Agent 交付与验收
 
-1. **只读取本目录 1–5 + 本地 Game Design v0.10**，禁止把研究仓库作为实现依赖。
+1. **只读取本目录 1–5 + Fan × Cheki Executable Formulas + 本地 Game Design v0.10**，禁止把研究仓库作为实现依赖。
 2. 在 PR 中提供：本地公式→代码函数/字段的映射、`LOCKED/TUNABLE/NOT_IMPLEMENTED` 清单、seeded regression fixtures、逐模块单测、端到端 3/5/9/15 人序章回归。
 3. 不得把设计文档提交视为 Runtime 完成；每个缺口需显式 issue/测试标记。当前仅完成文档迁移，**未声称运行测试**。
