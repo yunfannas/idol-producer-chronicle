@@ -15,6 +15,9 @@ type CoreAttributes = {
 type OperatingMember = RuntimeMember & { attributes: CoreAttributes; palette: DevelopedPalette; trainingExp: number };
 type TicketContract = { totalReceipts: number; participatingGroupCount: number; groupNominatedAdmissions: number; allNominatedAdmissions: number | null };
 type OperatingContract = { id: string; kind: "debut" | "taiban" | "free-mall"; date: string; ticket?: TicketContract; venueCostJPY: number; externalWatchingAudience: number; chekiAllowed: boolean };
+type FanFixture = { publicCount: number; otakuCount: number; affinityTotal: number; purchaseWeightKJPY: number };
+export type OperatingSimulationOptions = { fanFixture?: FanFixture; performanceMultiplierByMember?: Record<string, number> };
+export type MemberPerformance = { impression: number; expectedImpression: number; quality: number; exposureProbability: number };
 
 export const operatingSimulationV1 = {
   version: "operatingSimulationV1",
@@ -71,9 +74,8 @@ function initialMembers(rosterSize: 5 | 9 | 15): OperatingMember[] {
   }));
 }
 
-function initialFan(members: OperatingMember[]): FanState {
-  const otakuCount = 40;
-  return { publicCount: 300, otakuCount, temporarilyUnassignedOtaku: 0, members: Object.fromEntries(members.map((member) => [member.id, { affinityCount: 24 / members.length, purchaseWeightKJPY: 2 }])) };
+function initialFan(members: OperatingMember[], fixture: FanFixture): FanState {
+  return { publicCount: fixture.publicCount, otakuCount: fixture.otakuCount, temporarilyUnassignedOtaku: 0, members: Object.fromEntries(members.map((member) => [member.id, { affinityCount: fixture.affinityTotal / members.length, purchaseWeightKJPY: fixture.purchaseWeightKJPY }])) };
 }
 
 function train(members: OperatingMember[]): OperatingMember[] {
@@ -87,7 +89,7 @@ function lineup(members: OperatingMember[]): OperatingMember[] {
   return members.length <= 10 ? members : [...members].sort((a, b) => b.fitnessCondition - a.fitnessCondition || a.id.localeCompare(b.id)).slice(0, 10);
 }
 
-function performance(members: OperatingMember[], eventId: string): { quality: number; members: OperatingMember[] } {
+function performance(members: OperatingMember[], eventId: string, multipliers: Record<string, number> = {}): { quality: number; members: OperatingMember[]; memberPerformance: Record<string, MemberPerformance> } {
   const random = createSeededRandom(`performance:${eventId}`);
   const pe = finalPaletteExecution({ song, participantPalettes: members.map((member) => member.palette), keyParts: [] });
   const palette = paletteMultiplier(pe);
@@ -107,11 +109,19 @@ function performance(members: OperatingMember[], eventId: string): { quality: nu
       const raw = 2 + liveSongGeneralLoad(operatingSimulationV1.songVocalDifficulty, operatingSimulationV1.songDanceDifficulty);
       condition = Math.max(0, condition - raw * (14 / member.attributes.stamina));
     }
-    return { ...member, fitnessCondition: Math.min(100, condition + operatingSimulationV1.postLiveRecovery), _quality: total / operatingSimulationV1.songsPerLive };
+    return { ...member, fitnessCondition: Math.min(100, condition + operatingSimulationV1.postLiveRecovery), _quality: (total / operatingSimulationV1.songsPerLive) * Math.max(0, multipliers[member.id] ?? 1) };
   });
-  const quality = Math.min(1.5, Math.max(0.5, (next.reduce((sum, member) => sum + member._quality, 0) / next.length) * palette / operatingSimulationV1.expectedImpression));
+  const memberPerformance = Object.fromEntries(next.map((member) => {
+    const impression = member._quality * palette;
+    // This is the same Fan v1 normalization as team Q, applied to the
+    // actual member Impression rather than a separate arbitrary scale.
+    const quality = Math.min(1.5, Math.max(0.5, impression / operatingSimulationV1.expectedImpression));
+    return [member.id, { impression, expectedImpression: operatingSimulationV1.expectedImpression, quality, exposureProbability: Math.min(1, Math.max(0, impression / operatingSimulationV1.expectedImpression)) }];
+  })) as Record<string, MemberPerformance>;
+  const quality = Math.min(1.5, Math.max(0.5, Object.values(memberPerformance).reduce((sum, member) => sum + member.quality, 0) / members.length));
   return {
     quality,
+    memberPerformance,
     members: next.map((member) => {
       const { _quality: internalQuality, ...persistedMember } = member;
       void internalQuality;
@@ -120,49 +130,67 @@ function performance(members: OperatingMember[], eventId: string): { quality: nu
   };
 }
 
-function resolveFan(input: { fan: FanState; participantIds: string[]; contract: OperatingContract; quality: number; seed: string }) {
+function allocateNewAffinity(total: number, participantIds: string[], memberPerformance: Record<string, MemberPerformance>, random: () => number) {
+  const allocated = Object.fromEntries(participantIds.map((id) => [id, 0])) as Record<string, number>;
+  const weights = participantIds.map((id) => Math.max(0, memberPerformance[id]?.impression ?? 0));
+  const denominator = weights.reduce((sum, weight) => sum + weight, 0);
+  for (let count = 0; count < total && denominator > 0; count += 1) {
+    let remaining = random() * denominator;
+    for (let index = 0; index < participantIds.length; index += 1) {
+      remaining -= weights[index];
+      if (remaining <= 0 || index === participantIds.length - 1) { allocated[participantIds[index]] += 1; break; }
+    }
+  }
+  return allocated;
+}
+
+function resolveFan(input: { fan: FanState; participantIds: string[]; contract: OperatingContract; quality: number; memberPerformance: Record<string, MemberPerformance>; seed: string }) {
   const attendance = sampleFanAttendance({ fan: input.fan, kind: input.contract.kind === "debut" ? "taiban" : input.contract.kind, seed: `${input.seed}:attendance`, externalWatchingAudience: input.contract.externalWatchingAudience });
   let eligible: Record<string, number> = {};
-  const sales = input.contract.chekiAllowed ? settleChekiQueue({ fan: input.fan, memberIds: input.participantIds, attendeeOtaku: attendance.otaku, seed: `${input.seed}:queue`, onAudience: (audience) => { eligible = audience.eligibleExposedOWithoutAffinity; } }) : Object.fromEntries(input.participantIds.map((id) => [id, { requestedJPY: 0, requestedUnits: 0, grossJPY: 0, completedUnits: 0, completedUnitsByTier: { "1000": 0, "2000": 0 }, variableCostJPY: 0, buyerCount: 0, affinityVisitors: 0, queueLostJPY: 0, queueLostBuyers: 0, waitMinutes: [] }])) as ReturnType<typeof settleChekiQueue>;
+  const sales = settleChekiQueue({ fan: input.fan, memberIds: input.participantIds, attendeeOtaku: attendance.otaku, seed: `${input.seed}:queue`, allowSales: input.contract.chekiAllowed, exposureProbabilityByMember: Object.fromEntries(input.participantIds.map((id) => [id, input.memberPerformance[id].exposureProbability])), onAudience: (audience) => { eligible = audience.eligibleExposedOWithoutAffinity; } });
   const random = createSeededRandom(`${input.seed}:momentum`);
   const publicToOtaku = sampleBinomial(attendance.public, Math.min(0.2, fanChekiBalanceV1.pPublicToOtaku * input.quality), random);
   const externalToOtaku = sampleBinomial(attendance.external, Math.min(0.1, fanChekiBalanceV1.pExternalToOtaku * input.quality), random);
   const externalToPublic = sampleBinomial(attendance.external - externalToOtaku, Math.min(0.3, fanChekiBalanceV1.pExternalToPublic * input.quality), random);
   const publicCount = Math.max(0, input.fan.publicCount * (1 - fanChekiBalanceV1.pWeeklyPChurn) - publicToOtaku + externalToPublic);
   const otakuCount = Math.max(0, input.fan.otakuCount * (1 - fanChekiBalanceV1.pWeeklyOChurn) + publicToOtaku + externalToOtaku);
+  const newOtakuAffinity = allocateNewAffinity(publicToOtaku + externalToOtaku, input.participantIds, input.memberPerformance, random);
+  const newAffinityByMember: Record<string, number> = {};
   const members = Object.fromEntries(Object.entries(input.fan.members).map(([id, profile]) => {
-    if (!input.participantIds.includes(id)) return [id, { ...profile, affinityCount: profile.affinityCount * (1 - fanChekiBalanceV1.pWeeklyOChurn), purchaseWeightKJPY: profile.purchaseWeightKJPY }];
+    if (!input.participantIds.includes(id)) { newAffinityByMember[id] = 0; return [id, { ...profile, affinityCount: profile.affinityCount * (1 - fanChekiBalanceV1.pWeeklyOChurn), purchaseWeightKJPY: profile.purchaseWeightKJPY }]; }
     const sale = sales[id];
-    const exposureShare = 1 / input.participantIds.length;
-    const newAffinity = (publicToOtaku + externalToOtaku) * exposureShare + sampleBinomial(eligible[id] ?? 0, Math.min(0.12, fanChekiBalanceV1.pExistingOtakuToAffinity * exposureShare * input.quality), random);
+    const memberQuality = input.memberPerformance[id].quality;
+    const newAffinity = (newOtakuAffinity[id] ?? 0) + sampleBinomial(eligible[id] ?? 0, Math.min(1, fanChekiBalanceV1.pExistingOtakuToAffinity * memberQuality), random);
+    newAffinityByMember[id] = newAffinity;
     const served = sale.buyerCount / Math.max(1, sale.affinityVisitors);
     const lost = sale.queueLostBuyers / Math.max(1, sale.affinityVisitors);
     const logW = Math.max(-0.05, Math.min(0.05, 0.015 * served * ((1 + (input.quality - 1) * operatingSimulationV1.interactionEngagementScale) - 1) - 0.01 * lost));
     return [id, { affinityCount: Math.min(otakuCount, profile.affinityCount * (1 - fanChekiBalanceV1.pWeeklyOChurn) * (1 - fanChekiBalanceV1.pWeeklyAffinityChurn) + newAffinity), purchaseWeightKJPY: profile.purchaseWeightKJPY * Math.exp(logW) }];
   }));
-  return { fan: { publicCount, otakuCount, temporarilyUnassignedOtaku: 0, members }, attendance, sales };
+  return { fan: { publicCount, otakuCount, temporarilyUnassignedOtaku: 0, members }, attendance, sales, eligibleExposedOWithoutAffinity: eligible, newAffinityByMember };
 }
 
-export type OperatingWeekReport = { week: number; eventId: string; quality: number; attendance: number; ticketRevenueJPY: number; chekiGrossJPY: number; cash: number; publicCount: number; otakuCount: number; affinityTotal: number; meanCondition: number };
+export type OperatingWeekReport = { week: number; eventId: string; quality: number; attendance: number; ticketRevenueJPY: number; chekiGrossJPY: number; operatingRevenueJPY: number; operatingCostJPY: number; cash: number; publicCount: number; otakuCount: number; affinityTotal: number; meanCondition: number; members: Record<string, { affinityCount: number; purchaseWeightKJPY: number; impression: number; expectedImpression: number; quality: number; eligibleExposedOtaku: number; newAffinity: number; chekiRequestedJPY: number; chekiGrossJPY: number; chekiQueueLostJPY: number }> };
 
 /**
  * A deterministic 12-week integration fixture. Its explicit contracts are
  * test data, not unrecorded ticket-income defaults for production events.
  */
-export function runOperatingSimulation(rosterSize: 5 | 9 | 15, seed: string) {
+export function runOperatingSimulation(rosterSize: 5 | 9 | 15, seed: string, options: OperatingSimulationOptions = {}) {
   let members = initialMembers(rosterSize);
-  let fan = initialFan(members);
+  let fan = initialFan(members, options.fanFixture ?? { publicCount: 300, otakuCount: 40, affinityTotal: 24, purchaseWeightKJPY: 2 });
   let finance: FinanceState = createFinanceState(3_000_000);
   const weeks: OperatingWeekReport[] = [];
   for (const [index, contract] of contracts.entries()) {
     const week = index + 1;
+    const entryCountAtWeekStart = finance.entries.length;
     members = train(members);
     finance = postLedgerEntry(finance, { id: `${contract.id}:training`, date: contract.date, kind: "operating_cost", amount: operatingSimulationV1.trainingRoomCostJPY, category: "training_room", note: "Staff scheduled shared medium training" });
     if (week % 4 === 0) finance = postLedgerEntry(finance, { id: `${contract.id}:payroll`, date: contract.date, kind: "operating_cost", amount: members.reduce((sum, member) => sum + (member.monthlySalary ?? 0), 0), category: "member_payroll", note: "Monthly member payroll" });
     const participants = lineup(members);
-    const live = performance(participants, contract.id);
+    const live = performance(participants, contract.id, options.performanceMultiplierByMember);
     members = members.map((member) => live.members.find((next) => next.id === member.id) ?? member);
-    const outcome = resolveFan({ fan, participantIds: participants.map((member) => member.id), contract, quality: live.quality, seed: `${seed}:${contract.id}` });
+    const outcome = resolveFan({ fan, participantIds: participants.map((member) => member.id), contract, quality: live.quality, memberPerformance: live.memberPerformance, seed: `${seed}:${contract.id}` });
     fan = outcome.fan;
     const event: RuntimeEvent = { id: contract.id, date: contract.date, gate: "G05", kind: contract.kind, status: "RESOLVED", scenarioInstance: contract.id, chekiAllowed: contract.chekiAllowed, participantIds: participants.map((member) => member.id) };
     const cheki = settleChekiSales({ event, members, sales: Object.entries(outcome.sales).flatMap(([memberId, sale]) => ([
@@ -173,7 +201,10 @@ export function runOperatingSimulation(rosterSize: 5 | 9 | 15, seed: string) {
     const ticketRevenueJPY = contract.ticket ? calculateTaibanTicketRevenue(contract.ticket) : 0;
     if (ticketRevenueJPY > 0) finance = postLedgerEntry(finance, { id: `${contract.id}:ticket`, date: contract.date, kind: "operating_revenue", amount: ticketRevenueJPY, category: "ticket_share", eventId: contract.id, note: "Explicit taiban contract settlement" });
     if (contract.venueCostJPY > 0) finance = postLedgerEntry(finance, { id: `${contract.id}:venue`, date: contract.date, kind: "operating_cost", amount: contract.venueCostJPY, category: "venue_contract", eventId: contract.id, note: "Explicit live contract cost" });
-    weeks.push({ week, eventId: contract.id, quality: live.quality, attendance: outcome.attendance.otaku + outcome.attendance.public + outcome.attendance.external, ticketRevenueJPY, chekiGrossJPY: cheki.reduce((sum, line) => sum + line.grossSales, 0), cash: finance.cash, publicCount: fan.publicCount, otakuCount: fan.otakuCount, affinityTotal: Object.values(fan.members).reduce((sum, member) => sum + member.affinityCount, 0), meanCondition: members.reduce((sum, member) => sum + member.fitnessCondition, 0) / members.length });
+    const weekEntries = finance.entries.slice(entryCountAtWeekStart);
+    const operatingRevenueJPY = weekEntries.filter((entry) => entry.kind === "operating_revenue").reduce((sum, entry) => sum + entry.amount, 0);
+    const operatingCostJPY = weekEntries.filter((entry) => entry.kind === "operating_cost").reduce((sum, entry) => sum + entry.amount, 0);
+    weeks.push({ week, eventId: contract.id, quality: live.quality, attendance: outcome.attendance.otaku + outcome.attendance.public + outcome.attendance.external, ticketRevenueJPY, chekiGrossJPY: cheki.reduce((sum, line) => sum + line.grossSales, 0), operatingRevenueJPY, operatingCostJPY, cash: finance.cash, publicCount: fan.publicCount, otakuCount: fan.otakuCount, affinityTotal: Object.values(fan.members).reduce((sum, member) => sum + member.affinityCount, 0), meanCondition: members.reduce((sum, member) => sum + member.fitnessCondition, 0) / members.length, members: Object.fromEntries(Object.entries(fan.members).map(([id, profile]) => [id, { affinityCount: profile.affinityCount, purchaseWeightKJPY: profile.purchaseWeightKJPY, impression: live.memberPerformance[id]?.impression ?? 0, expectedImpression: live.memberPerformance[id]?.expectedImpression ?? 0, quality: live.memberPerformance[id]?.quality ?? 0, eligibleExposedOtaku: outcome.eligibleExposedOWithoutAffinity[id] ?? 0, newAffinity: outcome.newAffinityByMember[id] ?? 0, chekiRequestedJPY: outcome.sales[id]?.requestedJPY ?? 0, chekiGrossJPY: outcome.sales[id]?.grossJPY ?? 0, chekiQueueLostJPY: outcome.sales[id]?.queueLostJPY ?? 0 }])) });
   }
   return { rosterSize, weeks, fan, finance, members };
 }

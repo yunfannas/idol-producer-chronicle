@@ -22,6 +22,8 @@
 
 **12周经营集成夹具**：[Chronicle_Operating_Simulation_v1.md](Chronicle_Operating_Simulation_v1.md) 将 Staff、Performance→Fan、成员级 Cheki 与 Finance 接到同一条确定性回归路径；它明确列出尚待迁移到持久 Calendar Runtime 的边界。
 
+**成员规模与表现校准**：[Chronicle_Operating_Simulation_v2.md](Chronicle_Operating_Simulation_v2.md) 记录固定市场、规模化支持与成员级 Performance 三组 12 周 × 20 seed 对照；它复用 Fan v1 的 `.05 × Q_i`，以临时实际曝光样本驱动 `O→A_i`，不新增长期 Fan Cohort。
+
 **Chronicle 展示与数据裁剪规则（LOCKED）**：不提供 Idol World Tier 表、Overall 评分、行业 Top50、跨团排名、其他团或本团的行业地位评价 UI/API。其他团仅以有必要的活动参演者、剧本人物和竞争日程出现。内部可保留少量由 Scenario 提供的活动难度、资源/曝光权重，但不得因此要求建立完整行业 Tier 或全团评分库。第五份 Tier 文档是历史校准附录，**不属于必读实施规范**。
 
 **实现级优先级**：本 `README` 的冲突禁令 → 同目录专项规范 → Chronicle Game Design 剧本/合同 → 旧 `docs/design/Chronicle_*Kernel_v0.x` 历史提取。历史提取仅作追溯，不能推翻本目录。任何字段或公式若本目录标为 `TUNABLE/INTEGRATION_PENDING`，不得通过阅读旧文档“猜一个锁定值”。

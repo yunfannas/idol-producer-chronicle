@@ -13,6 +13,8 @@ describe("12-week Chronicle operating simulation v1", () => {
     expect(result.finance.entries.some((entry) => entry.category === "member_payroll")).toBe(true);
     expect(result.finance.entries.some((entry) => entry.category === "cheki_sales")).toBe(true);
     expect(result.finance.entries.some((entry) => entry.category === "ticket_share")).toBe(true);
+    expect(result.finance.operatingRevenue).toBe(result.weeks.reduce((sum, week) => sum + week.operatingRevenueJPY, 0));
+    expect(result.finance.operatingCost).toBe(result.weeks.reduce((sum, week) => sum + week.operatingCostJPY, 0));
     const debut = result.weeks.find((week) => week.eventId === "debut-2013-05-24")!;
     const mall = result.weeks.find((week) => week.eventId === "mall-2013-09-29")!;
     expect(debut.ticketRevenueJPY).toBe(0);

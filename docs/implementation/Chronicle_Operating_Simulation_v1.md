@@ -45,9 +45,9 @@ BaseQuality / Arrangement / Env numerical bridge remains TUNABLE.
 
 | Route | Final cash | Final P / O / ΣA | Explicit ticket revenue | Actual Cheki gross | Lowest mean Condition |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 5 | ¥2,689,000 | 294.33 / 43.50 / 28.57 | ¥75,000 | ¥30,000 | 78.81 |
-| 9 | ¥2,572,200 | 290.60 / 40.54 / 24.67 | ¥75,000 | ¥34,000 | 76.25 |
-| 15 | ¥2,386,600 | 301.03 / 40.57 / 25.83 | ¥75,000 | ¥27,000 | 91.74 |
+| 5 | ¥2,689,000 | 294.33 / 43.50 / 30.48 | ¥75,000 | ¥30,000 | 78.81 |
+| 9 | ¥2,605,800 | 293.52 / 40.54 / 27.59 | ¥75,000 | ¥76,000 | 76.25 |
+| 15 | ¥2,390,600 | 301.03 / 40.57 / 32.68 | ¥75,000 | ¥32,000 | 91.74 |
 
 The fifteen-member route's higher mean Condition comes from its explicit
 ten-member lineup limit, not a roster-size income or audience multiplier.
@@ -56,7 +56,7 @@ replacement for Scenario contracts.
 
 ## Verification
 
-- `npm test` — 24 tests, including 5/9/15 deterministic operating routes.
+- `npm test` — full regression suite, including 5/9/15 deterministic operating routes.
 - `npm run lint`
 - `npm run build`
 

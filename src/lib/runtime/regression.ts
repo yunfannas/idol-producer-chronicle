@@ -78,6 +78,9 @@ function shuffled<T>(items: T[], random: () => number): T[] {
 export type ChekiServiceRecord = { fanId: string; memberId: string; startSeconds: number; endSeconds: number; grossJPY: number };
 export function settleChekiQueue(input: {
   fan: FanState; memberIds: string[]; attendeeOtaku: number; seed: string;
+  allowSales?: boolean;
+  /** Event-local actual contact probability; absent means every attendee saw the member. */
+  exposureProbabilityByMember?: Record<string, number>;
   onService?: (record: ChekiServiceRecord) => void;
   onAudience?: (audience: { eligibleExposedOWithoutAffinity: Record<string, number>; stayedOtaku: number }) => void;
   onAffinitySample?: (sample: { fanId: string; memberId: string; stayedForCheki: boolean }) => void;
@@ -117,9 +120,16 @@ export function settleChekiQueue(input: {
       draws: assignedVisitors.length,
       random,
     });
-    eligibleExposedOWithoutAffinity[memberId] = assignedVisitors.length - affinityVisitors;
-    for (const visitor of shuffled(assignedVisitors, random).slice(0, affinityVisitors)) {
+    const affinitySample = shuffled(assignedVisitors, random).slice(0, affinityVisitors);
+    const affinityVisitorIds = new Set(affinitySample.map((visitor) => visitor.id));
+    const notAffinity = assignedVisitors.filter((visitor) => !affinityVisitorIds.has(visitor.id));
+    const exposureProbability = input.exposureProbabilityByMember?.[memberId];
+    eligibleExposedOWithoutAffinity[memberId] = exposureProbability === undefined
+      ? notAffinity.length
+      : sampleBinomial(notAffinity.length, Math.min(1, Math.max(0, exposureProbability)), random);
+    for (const visitor of affinitySample) {
       input.onAffinitySample?.({ fanId: visitor.id, memberId, stayedForCheki: visitor.stayedForCheki });
+      if (input.allowSales === false) continue;
       if (!visitor.stayedForCheki) continue;
       sales[memberId].affinityVisitors += 1;
       const budget = samplePurchaseBudgetKJPY(profile.purchaseWeightKJPY, random);
