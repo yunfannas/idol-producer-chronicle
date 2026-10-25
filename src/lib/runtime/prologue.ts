@@ -1,6 +1,6 @@
 import { chekiLedgerEntries, settleChekiSales } from "./cheki";
 import { createFanState } from "./fan";
-import { createFinanceState, INITIAL_CASH, postLedgerEntry } from "./finance";
+import { createFinanceState, postLedgerEntry } from "./finance";
 import type {
   ChekiSaleInput,
   Difficulty,
@@ -30,6 +30,12 @@ const founders: RuntimeMember[] = [
   contractEndsOn: "2015-01-07",
   chekiCommissionRate: 0.2,
   fitnessCondition: 100,
+  developedPalette: Object.fromEntries(
+    (["red", "pink", "orange", "aqua", "yellow", "green", "blue", "purple"] as const).map((color) => [
+      color,
+      id === "IPC1-001" && color === "pink" ? 10 : id === "IPC1-002" && color === "red" ? 5 : id === "IPC1-003" && color === "yellow" ? 5 : 0,
+    ]),
+  ) as RuntimeMember["developedPalette"],
 }));
 
 function emptyGates(): Record<PrologueGate, boolean> {
@@ -89,12 +95,12 @@ export function createPrologueSchedule(): RuntimeEvent[] {
   ];
 }
 
-export function createPrologueState(input: { saveId: string; difficulty: Difficulty }): PrologueState {
+export function createPrologueState(input: { saveId: string; difficulty?: Difficulty }): PrologueState {
   const gates = emptyGates();
   gates.G00 = true;
   return {
     saveId: input.saveId,
-    difficulty: input.difficulty,
+    difficulty: "normal", // legacy save compatibility; there is no difficulty selection
     date: "2013-01-07",
     apRemaining: 6,
     interviewedCandidateIds: [],
@@ -102,7 +108,7 @@ export function createPrologueState(input: { saveId: string; difficulty: Difficu
     fan: createFanState(founders.map((member) => member.id)),
     gates,
     events: createPrologueSchedule(),
-    finance: createFinanceState(INITIAL_CASH[input.difficulty]),
+    finance: createFinanceState(3_000_000),
     monthlyReports: [],
     resolvedEventKeys: [],
     weeklyReviewHosts: [{ date: "2013-01-07", memberId: "IPC1-001" }],
@@ -135,6 +141,7 @@ export function signRoster(state: PrologueState, candidateIds: string[]): Prolog
     return {
       id: candidate[0], nameJa: candidate[1], active: true,
       contractEndsOn: "2015-01-07", chekiCommissionRate: 0.2, fitnessCondition: 100,
+      developedPalette: { red: 0, pink: 0, orange: 0, aqua: 0, yellow: 0, green: 0, blue: 0, purple: 0 },
     };
   });
   const members = [...founders, ...additions];
