@@ -5,6 +5,25 @@ not establish historical attendance, revenue, or a production Scenario seed.
 
 > **Historical pre-fix results:** the values below were measured before the subsequent correction to actual-attendee-only affinity acquisition and one-stay-decision-per-fan Cheki sampling. The .05 balance parameter remains unchanged, but the numeric results below are **not valid post-fix regression expectations**. See [Fan_Cheki_Stress_Regression_2026-10-24.md](Fan_Cheki_Stress_Regression_2026-10-24.md) for fixes and rerun requirements.
 
+## Verified post-fix rerun
+
+Ran locally on 2026-10-24 after the actual-exposure and single-stay fixes:
+5/9/15 members, 12 weekly taiban Lives, seeds 1–20 for each route. The
+fixture and finance boundary below are unchanged; no ticket income is
+invented. `pExistingOtakuToAffinity=.05` is retained.
+
+| Route | Live attendance, week 1 → 12 | P / O / ΣA / mean W at week 12 | Cheki per member per Live: requested / gross / queue loss | Mean weekly gross / cash flow | Week-4 cash flow |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 5 | 38.35 → 37.65 | 297.09 / 40.70 / 26.63 / 2.00 | ¥706.67 / ¥706.67 / ¥0 | ¥3,533.33 / -¥24,673.33 | -¥62,080 |
+| 9 | 38.35 → 37.65 | 297.09 / 40.70 / 27.26 / 2.00 | ¥396.30 / ¥396.30 / ¥0 | ¥3,566.67 / -¥34,646.67 | -¥102,520 |
+| 15 | 38.35 → 37.65 | 297.09 / 40.70 / 27.22 / 2.00 | ¥283.06 / ¥283.06 / ¥0 | ¥4,245.83 / -¥49,103.33 | -¥161,520 |
+
+Initial total `A` is 24. Post-fix `ΣA` grows only 11–14% over 12 weeks, and
+the zero-exposure regression confirms that it cannot grow without an actual
+Live audience. This is within the intended low-scale neutral-fixture behavior,
+so no further adjustment to `.05` was made. The historical tables below remain
+for traceability only.
+
 ## Method
 
 - Routes: 5, 9, and 15 members; 12 weekly taiban Lives each; seeds 1–20 per

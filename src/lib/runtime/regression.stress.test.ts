@@ -81,6 +81,16 @@ describe("B/C/D stress fixtures — not historical or production Scenario seeds"
     expect(traces.every((record) => record.endSeconds <= 3600)).toBe(true);
     expect(total(sales, "grossJPY")).toBeLessThanOrEqual(total(sales, "requestedJPY"));
     expect(settleChekiQueue({ fan, memberIds: ["star"], attendeeOtaku: 250, seed: "B:hot-member:1" })).toEqual(sales);
+    console.info(`STRESS_B_SUMMARY ${JSON.stringify({
+      requestedJPY: sales.star.requestedJPY,
+      grossJPY: sales.star.grossJPY,
+      queueLostJPY: sales.star.queueLostJPY,
+      requestedUnits: sales.star.requestedUnits,
+      completedUnits: sales.star.completedUnits,
+      uniqueBuyers: new Set(traces.map((trace) => trace.fanId)).size,
+      maxWaitMinutes: Math.max(...sales.star.waitMinutes),
+      serviceWindowUtilization: Math.max(...traces.map((trace) => trace.endSeconds)) / 3600,
+    })}`);
   });
 
   it("C: ΣA>O supports multi-oshi purchases but a fan never serves two members simultaneously", () => {
@@ -112,6 +122,14 @@ describe("B/C/D stress fixtures — not historical or production Scenario seeds"
       expect(sales[member].grossJPY).toBeLessThanOrEqual(sales[member].requestedJPY);
     }
     expect(settleChekiQueue({ fan, memberIds: members, attendeeOtaku: 150, seed: "C:multi-oshi:1" })).toEqual(sales);
+    console.info(`STRESS_C_SUMMARY ${JSON.stringify({
+      requestedJPY: total(sales, "requestedJPY"),
+      grossJPY: total(sales, "grossJPY"),
+      queueLostJPY: total(sales, "queueLostJPY"),
+      uniqueBuyers: byFan.size,
+      multiOshiBuyers: [...byFan.values()].filter((records) => new Set(records.map((record) => record.memberId)).size > 1).length,
+      completedServices: traces.length,
+    })}`);
   });
 
   it("D: stronger live exposure and actual interaction improve O, A and W over 12 weeks", () => {
