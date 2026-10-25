@@ -56,7 +56,7 @@ describe("Staff autoplay prologue E2E", () => {
       Array.from({ length: 20 }, (_, index) => runStaffAutoplayPrologue({ route, seed: index + 1 })),
     );
     expect(routes).toHaveLength(60);
-    expect(routes.every((result) => result.scenarioVersion === "staff-autoplay-scenario-v5-s3c-familiarity-key-duty:S3-C")).toBe(true);
+    expect(routes.every((result) => result.scenarioVersion === "staff-autoplay-scenario-v6-fan-acquisition-weekly-resolution:S3-C")).toBe(true);
     expect(routes.every((result) => result.stageStatus !== "BLOCKED_BUG")).toBe(true);
   });
 
@@ -77,5 +77,23 @@ describe("Staff autoplay prologue E2E", () => {
     expect(s3c.state.performanceProgression.arrangements["prologue-staff-default-song:v1"]).toBeDefined();
     expect(s3c.state.performanceProgression.arrangements["prologue-staff-default-song:v2-after-rina-graduation"]).toBeDefined();
     expect(s3c.memberDevelopment["IPC1-001"]).toMatchObject({ active: false, trainingHours: 420 });
+  });
+
+  it("keeps contract attendance capacity-bounded and applies pending Fan momentum exactly once per week", () => {
+    const result = runStaffAutoplayPrologue({ route: "B", seed: 1, s3Variant: "S3-C" });
+    const eventFlow = result.events.reduce((total, event) => ({
+      publicToOtaku: total.publicToOtaku + event.fanFlow.publicToOtaku,
+      externalToOtaku: total.externalToOtaku + event.fanFlow.externalToOtaku,
+      externalToPublic: total.externalToPublic + event.fanFlow.externalToPublic,
+    }), { publicToOtaku: 0, externalToOtaku: 0, externalToPublic: 0 });
+    const weeklyFlow = result.fanWeeklyResolutions.reduce((total, week) => ({
+      publicToOtaku: total.publicToOtaku + week.publicToOtaku,
+      externalToOtaku: total.externalToOtaku + week.externalToOtaku,
+      externalToPublic: total.externalToPublic + week.externalToPublic,
+    }), { publicToOtaku: 0, externalToOtaku: 0, externalToPublic: 0 });
+
+    expect(result.events.every((event) => event.fanFlow.otakuAttendance + event.fanFlow.publicAttendance + event.fanFlow.externalAudience <= event.actualAttendance)).toBe(true);
+    expect(eventFlow).toEqual(weeklyFlow);
+    expect(result.fanWeeklyResolutions.flatMap((week) => week.eventIds).sort()).toEqual(result.events.map((event) => event.liveId).sort());
   });
 });

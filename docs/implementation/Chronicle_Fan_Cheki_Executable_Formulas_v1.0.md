@@ -2,6 +2,8 @@
 
 **Status: IMPLEMENTATION BASELINE / TUNABLE, 2026-10-24.** 本文件是可运行的第一版数值提案；除引用的既有 `P/O/A_i/W_i`、购买力、Cheki 时长、20%佣金、Policy 权限等规则外，**全部具体概率/系数/分布是新提出的可调参数，不是历史事实或此前冻结公式**。后续必须通过 5/9/15 人、序章周/月模拟校准。此文件优先于 `Chronicle_Fan_Cheki_Finance_v1.0.md` 的同名 `TUNABLE` 空位，不覆盖既有 `LOCKED` 规则。
 
+**当前 Runtime 校准（fan-acquisition-v2）**：在修复合同容量分源与周度 momentum 后，`fanChekiBalanceV1.version` 为 `fanChekiBalanceV1-fan-acquisition-v2`。仅周度自然流失改为下表的 `.004/.0015/.00075`；P/O 转化率、合同、Performance、Finance 和评级阈值保持不变。实跑证据见 `reports/staff-baseline/fan-acquisition-v2/`。
+
 ## 0. 核心定义与不可违反的约束
 
 长期仅保存 `P=publicCount`、`O=otakuCount`、逐成员 `A_i=affinityCount`、`W_i=purchaseWeightKJPY`，以及毕业过渡期 `U=temporarilyUnassignedOtaku`。其中 `0≤A_i≤O-U`，允许 `ΣA_i>O`；不保存 `Core`、Fan Cohort、粉丝个体、团际转移、复出轨迹、独立 BoxRate。允许浮点期望状态（持久存档），事件参与和购买采用整数抽样。P 与 O 分开统计，不重复计数。
@@ -26,9 +28,9 @@
 | `pOFromChekiTrial` | .10 | .10 | 发生实际试买后，独立的增量转化机会 |
 | `baseExistingOToAffinityPerShow` | .10 | .10 | **整场** O 产生额外成员 affinity 的总强度，按成员有效曝光份额分配 |
 | `baseExtraAffinityForNewO` | .05 | .05 | 新 O 在首推外增加其他 affinity 的**整场**总强度，按成员曝光份额分配 |
-| `pWeeklyPChurn` | .008 | .008 | 周度自然衰减 |
-| `pWeeklyOChurn` | .003 | .003 | 已分配 O 的自然流失 |
-| `pWeeklyAffinityChurn` | .0015 | .0015 | O 留存前提下的成员 affinity 额外流失 |
+| `pWeeklyPChurn` | .004 | .004 | 周度自然衰减；fan-acquisition-v2 |
+| `pWeeklyOChurn` | .0015 | .0015 | 已分配 O 的自然流失；fan-acquisition-v2 |
+| `pWeeklyAffinityChurn` | .00075 | .00075 | O 留存前提下的成员 affinity 额外流失；fan-acquisition-v2 |
 | `pUnassignedWeeklyChurn` | .08 | .08 | 毕业后临时 U 的周流失 |
 | `pUnassignedWeeklyReassign` | .04 | .04 | U 在本团存续成员间自然转推 |
 | `chekiMinutes` | 60 | 60 | 由合同覆盖；R1/R2/R3 不得越权 |

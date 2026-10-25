@@ -3,7 +3,7 @@ import { DEFAULT_CHEKI_TIERS, settleChekiSales } from "./cheki";
 import { calculateTaibanTicketRevenue, postLedgerEntry } from "./finance";
 import { applyActivityLoad, conditionAmplifier, liveSongGeneralLoad } from "./performance";
 import { advanceWithStaff, startTestRoute } from "./operations";
-import { applyWeeklyFanDecay, createFanState, requestProductsForBudget, sampleFanAttendance, samplePurchaseBudgetKJPY } from "./fan";
+import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1, requestProductsForBudget, sampleFanAttendance, samplePurchaseBudgetKJPY } from "./fan";
 import { createSeededRandom } from "./random";
 import { emptyPalette, finalPaletteExecution, paletteMultiplier } from "./palette";
 import {
@@ -50,7 +50,7 @@ describe("Chronicle parent-runtime contracts", () => {
     expect(first).toEqual(replay);
     expect(first.frequencyFactor).toBe(1);
     const decayed = applyWeeklyFanDecay(fan);
-    expect(decayed.publicCount).toBeCloseTo(496);
+    expect(decayed.publicCount).toBeCloseTo(500 * (1 - fanChekiBalanceV1.pWeeklyPChurn));
     expect(decayed.members.member.affinityCount).toBeLessThan(80);
     expect("coreCount" in decayed).toBe(false);
   });

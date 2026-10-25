@@ -9,7 +9,7 @@
  */
 import { settleChekiSales } from "./cheki";
 import { arrangementFor, createArrangementVersion, recordArrangementExposure, settleArrangementFamiliarityWeek, type FamiliaritySettlement } from "./arrangement-familiarity";
-import { applyWeeklyFanDecay, createFanState } from "./fan";
+import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1 } from "./fan";
 import { calculateTaibanTicketRevenue, createMonthlyOperatingReport, postLedgerEntry } from "./finance";
 import {
   type CoreAttributes,
@@ -36,8 +36,8 @@ export type StaffAutoplayS3Variant = "S3-A" | "S3-B" | "S3-C";
 export type StageStatus = "COMPLETED_TIF" | "BANKRUPT_OR_DEBT_DISTRESS" | "BLOCKED_BUG";
 
 export const staffAutoplayScenarioV1 = {
-  version: "staff-autoplay-scenario-v5-s3c-familiarity-key-duty",
-  tuningVersion: "fanChekiBalanceV1",
+  version: "staff-autoplay-scenario-v6-fan-acquisition-weekly-resolution",
+  tuningVersion: "fanChekiBalanceV1-fan-acquisition-v2",
   // Source: v0.10 locks the dates and contract kinds but intentionally leaves
   // specific capacity, receipts and rent to Scenario data. These are named
   // starting calibration inputs, never result-dependent subsidies.
@@ -158,6 +158,7 @@ export type StaffAutoplayResult = {
   state: PrologueState;
   events: StaffAutoplayEventAudit[];
   fanMonths: StaffAutoplayFanMonth[];
+  fanWeeklyResolutions: WeeklyFanResolution[];
   familiaritySettlements: ({ weekEnd: string } & FamiliaritySettlement)[];
   months: StaffAutoplayMonth[];
   minCash: number;
@@ -166,6 +167,25 @@ export type StaffAutoplayResult = {
 };
 
 type MonthSnapshot = { publicCount: number; otakuCount: number; activeRoster: number };
+
+type PendingFanMomentum = {
+  eventId: string;
+  auditIndex: number;
+  publicToOtakuHazard: number;
+  externalToOtaku: number;
+  externalToPublic: number;
+  newAffinityByMember: Record<string, number>;
+  logWByMember: Record<string, number>;
+  memberWeights: Record<string, number>;
+};
+
+type WeeklyFanResolution = {
+  weekEnd: string;
+  eventIds: string[];
+  publicToOtaku: number;
+  externalToOtaku: number;
+  externalToPublic: number;
+};
 
 function snapshotFan(fan: FanState): StaffAutoplayFanSnapshot {
   return {
@@ -239,13 +259,17 @@ function contractFor(event: RuntimeEvent, seed: string) {
 }
 
 function updateFanFromEvent(input: {
-  fan: FanState; participants: OperatingMember[]; event: RuntimeEvent; actualExternal: number;
+  fan: FanState; participants: OperatingMember[]; event: RuntimeEvent; totalAudience: number;
   quality: number; exposure: Record<string, { exposureProbability: number; quality: number }>; seed: string;
 }) {
-  // Reuse the executable Fan/Cheki queue via its event-local reconstruction.
-  // The small aggregate conversion below is deliberately the v1 P/O/A/W
-  // shape; it does not fabricate a Core cohort or a roster-size multiplier.
-  const attendance = Math.min(Math.round(input.fan.otakuCount), Math.round(input.fan.otakuCount * (eventClass(input.event.kind) ? 0.32 : 0.12)));
+  // Contract attendance is the actual total audience.  O/P attendance consumes
+  // that capacity first; only the residual is the temporary external X pool.
+  const oneMan = eventClass(input.event.kind);
+  const pOAttend = oneMan ? fanChekiBalanceV1.pOtakuAttendBase.oneMan : fanChekiBalanceV1.pOtakuAttendBase.taiban;
+  const pPAttend = oneMan ? fanChekiBalanceV1.pPublicAttendBase.oneMan : fanChekiBalanceV1.pPublicAttendBase.taiban;
+  const attendance = Math.min(Math.round(input.fan.otakuCount), sampleBinomial(input.fan.otakuCount, pOAttend, createSeededRandom(`${input.seed}:otaku-attendance`)));
+  const publicAttend = Math.min(Math.max(0, input.totalAudience - attendance), sampleBinomial(input.fan.publicCount, pPAttend, createSeededRandom(`${input.seed}:public-attendance`)));
+  const externalAudience = Math.max(0, input.totalAudience - attendance - publicAttend);
   let eligible: Record<string, number> = {};
   const sales = settleChekiQueue({
     fan: input.fan, memberIds: input.participants.map((member) => member.id), attendeeOtaku: attendance,
@@ -255,35 +279,103 @@ function updateFanFromEvent(input: {
   });
   const random = createSeededRandom(`${input.seed}:fan`);
   const q = Math.max(0.5, Math.min(1.5, input.quality));
-  const publicAttend = sampleBinomial(input.fan.publicCount, eventClass(input.event.kind) ? 0.07 : 0.012, random);
-  const publicToO = sampleBinomial(publicAttend, Math.min(0.2, 0.025 * q), random);
-  const externalToO = sampleBinomial(input.actualExternal, Math.min(0.1, 0.004 * q), random);
-  const externalToP = sampleBinomial(input.actualExternal - externalToO, Math.min(0.3, 0.08 * q), random);
-  const nextO = Math.max(0, input.fan.otakuCount + publicToO + externalToO);
+  const publicToOtakuHazard = Math.min(0.2, pPAttend * fanChekiBalanceV1.pPublicToOtaku * q);
+  const externalToO = sampleBinomial(externalAudience, Math.min(0.1, fanChekiBalanceV1.pExternalToOtaku * q), random);
+  const externalToP = sampleBinomial(externalAudience - externalToO, Math.min(0.3, fanChekiBalanceV1.pExternalToPublic * q), random);
   const weights = input.participants.map((member) => Math.max(0, input.exposure[member.id]?.quality ?? 0));
   const denominator = weights.reduce((total, value) => total + value, 0);
   const newByMember = Object.fromEntries(input.participants.map((member) => [member.id, 0])) as Record<string, number>;
-  for (let index = 0; index < publicToO + externalToO; index += 1) {
+  for (let index = 0; index < externalToO; index += 1) {
     let point = random() * denominator;
     for (let position = 0; position < input.participants.length; position += 1) {
       point -= weights[position];
       if (point <= 0 || position === input.participants.length - 1) { newByMember[input.participants[position].id] += 1; break; }
     }
   }
-  const members = Object.fromEntries(Object.entries(input.fan.members).map(([id, profile]) => {
-    if (!input.participants.some((member) => member.id === id)) return [id, profile];
-    const queue = sales[id];
+  const newAffinityByMember = Object.fromEntries(Object.entries(input.fan.members).map(([id]) => {
+    if (!input.participants.some((member) => member.id === id)) return [id, 0];
     const share = denominator > 0 ? Math.max(0, input.exposure[id]?.quality ?? 0) / denominator : 0;
     const newAffinity = (newByMember[id] ?? 0) + sampleBinomial(eligible[id] ?? 0, Math.min(0.12, 0.10 * share * (input.exposure[id]?.quality ?? 1)), random);
+    return [id, newAffinity];
+  }));
+  const logWByMember = Object.fromEntries(input.participants.map((member) => {
+    const queue = sales[member.id];
     const served = queue.buyerCount / Math.max(1, queue.affinityVisitors);
     const lost = queue.queueLostBuyers / Math.max(1, queue.affinityVisitors);
-    const logW = Math.max(-0.05, Math.min(0.05, 0.015 * served * (q - 1) - 0.01 * lost));
-    return [id, {
-      affinityCount: Math.min(nextO, profile.affinityCount + newAffinity),
-      purchaseWeightKJPY: profile.purchaseWeightKJPY > 0 ? profile.purchaseWeightKJPY * Math.exp(logW) : (newAffinity > 0 ? 1.8 : 0),
+    return [member.id, Math.max(-0.05, Math.min(0.05, 0.015 * served * (q - 1) - 0.01 * lost))];
+  }));
+  return {
+    sales,
+    flow: { otakuAttendance: attendance, publicAttendance: publicAttend, externalAudience, publicToOtaku: 0, externalToOtaku: externalToO, externalToPublic: externalToP },
+    momentum: {
+      publicToOtakuHazard,
+      externalToOtaku: externalToO,
+      externalToPublic: externalToP,
+      newAffinityByMember,
+      logWByMember,
+      memberWeights: Object.fromEntries(input.participants.map((member, index) => [member.id, weights[index]])),
+    },
+  };
+}
+
+function resolveWeeklyFanMomentum(input: {
+  fan: FanState;
+  momenta: PendingFanMomentum[];
+  audits: StaffAutoplayEventAudit[];
+  weekEnd: string;
+  seed: string;
+  applyDecay?: boolean;
+}): { fan: FanState; resolution: WeeklyFanResolution } {
+  const decayed = input.applyDecay === false ? input.fan : applyWeeklyFanDecay(input.fan);
+  const publicHazard = 1 - input.momenta.reduce((survival, momentum) => survival * (1 - momentum.publicToOtakuHazard), 1);
+  const random = createSeededRandom(`${input.seed}:fan-week:${input.weekEnd}`);
+  const publicToOtaku = sampleBinomial(decayed.publicCount, publicHazard, random);
+  const externalToOtaku = input.momenta.reduce((sum, momentum) => sum + momentum.externalToOtaku, 0);
+  const externalToPublic = input.momenta.reduce((sum, momentum) => sum + momentum.externalToPublic, 0);
+  const additionalAffinity: Record<string, number> = Object.fromEntries(Object.keys(decayed.members).map((memberId) => [memberId, 0]));
+  const logW: Record<string, number> = Object.fromEntries(Object.keys(decayed.members).map((memberId) => [memberId, 0]));
+  for (const momentum of input.momenta) {
+    for (const [memberId, amount] of Object.entries(momentum.newAffinityByMember)) additionalAffinity[memberId] = (additionalAffinity[memberId] ?? 0) + amount;
+    for (const [memberId, amount] of Object.entries(momentum.logWByMember)) logW[memberId] = (logW[memberId] ?? 0) + amount;
+  }
+  const choose = <T,>(items: T[], weight: (item: T) => number) => {
+    const total = items.reduce((sum, item) => sum + Math.max(0, weight(item)), 0);
+    if (total <= 0) return items[0];
+    let point = random() * total;
+    for (const item of items) {
+      point -= Math.max(0, weight(item));
+      if (point <= 0) return item;
+    }
+    return items.at(-1)!;
+  };
+  for (let index = 0; index < publicToOtaku; index += 1) {
+    const momentum = choose(input.momenta, (item) => item.publicToOtakuHazard);
+    if (!momentum) break;
+    input.audits[momentum.auditIndex].fanFlow.publicToOtaku += 1;
+    const memberId = choose(Object.keys(momentum.memberWeights), (id) => momentum.memberWeights[id]);
+    if (memberId) additionalAffinity[memberId] = (additionalAffinity[memberId] ?? 0) + 1;
+  }
+  const otakuCount = decayed.otakuCount + publicToOtaku + externalToOtaku;
+  const assignedOtaku = Math.max(0, otakuCount - decayed.temporarilyUnassignedOtaku);
+  const members = Object.fromEntries(Object.entries(decayed.members).map(([memberId, profile]) => {
+    const newAffinity = additionalAffinity[memberId] ?? 0;
+    const weekLogW = Math.max(-0.05, Math.min(0.05, logW[memberId] ?? 0));
+    return [memberId, {
+      affinityCount: Math.min(assignedOtaku, profile.affinityCount + newAffinity),
+      purchaseWeightKJPY: profile.purchaseWeightKJPY > 0
+        ? profile.purchaseWeightKJPY * Math.exp(weekLogW)
+        : (newAffinity > 0 ? fanChekiBalanceV1.defaultNewAffinityW : 0),
     }];
   }));
-  return { fan: { publicCount: Math.max(0, input.fan.publicCount - publicToO + externalToP), otakuCount: nextO, temporarilyUnassignedOtaku: input.fan.temporarilyUnassignedOtaku, members }, sales, flow: { otakuAttendance: attendance, publicAttendance: publicAttend, externalAudience: input.actualExternal, publicToOtaku: publicToO, externalToOtaku: externalToO, externalToPublic: externalToP } };
+  return {
+    fan: {
+      publicCount: Math.max(0, decayed.publicCount - publicToOtaku + externalToPublic),
+      otakuCount,
+      temporarilyUnassignedOtaku: decayed.temporarilyUnassignedOtaku,
+      members,
+    },
+    resolution: { weekEnd: input.weekEnd, eventIds: input.momenta.map((momentum) => momentum.eventId), publicToOtaku, externalToOtaku, externalToPublic },
+  };
 }
 
 function eventClass(kind: RuntimeEvent["kind"]) { return kind === "one-man"; }
@@ -353,12 +445,15 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
   let operating = state.members.map(operatingMember);
   const audits: StaffAutoplayEventAudit[] = [];
   const familiaritySettlements: ({ weekEnd: string } & FamiliaritySettlement)[] = [];
+  const fanWeeklyResolutions: WeeklyFanResolution[] = [];
+  let pendingFanMomenta: PendingFanMomentum[] = [];
   const fanMonths = new Map<string, StaffAutoplayFanMonth>();
   const minCashByMonth = new Map<string, number>();
   const monthSnapshots = new Map<string, MonthSnapshot>();
   let date = state.date;
   let minCash = state.finance.cash;
   let augmented = false;
+  let pendingGraduationFanTransition = false;
 
   while (date <= "2014-08-02") {
     const month = date.slice(0, 7);
@@ -453,12 +548,11 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       }
       operating = operating.map((member) => resolved.members.find((updated) => updated.id === member.id) ?? member);
       const fanOpening = snapshotFan(state.fan);
-      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, actualExternal: contract.attendees, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}` });
+      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: contract.attendees, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}` });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
         { memberId, tierId: "1000" as const, units: sale.completedUnitsByTier["1000"] },
         { memberId, tierId: "2000" as const, units: sale.completedUnitsByTier["2000"] },
       ]).filter((sale) => sale.units > 0);
-      state = { ...state, fan: fanOutcome.fan };
       // resolveLive owns event lifecycle, idempotency key and Cheki gross/share/cost ledger rows.
       const offered = { ...state, events: state.events.map((item) => item.id === event.id ? { ...item, status: "OFFERED" as const } : item) };
       state = resolveLive({ state: offered, eventId: event.id, participantIds: participants.map((member) => member.id), chekiSales });
@@ -472,12 +566,12 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       fanMonth.eventFlow.otakuAttendance += fanOutcome.flow.otakuAttendance;
       fanMonth.eventFlow.publicAttendance += fanOutcome.flow.publicAttendance;
       fanMonth.eventFlow.externalAudience += fanOutcome.flow.externalAudience;
-      fanMonth.eventFlow.publicToOtaku += fanOutcome.flow.publicToOtaku;
-      fanMonth.eventFlow.externalToOtaku += fanOutcome.flow.externalToOtaku;
-      fanMonth.eventFlow.externalToPublic += fanOutcome.flow.externalToPublic;
       audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, fanFlow: { opening: fanOpening, ...fanOutcome.flow } });
+      pendingFanMomenta.push({ eventId: event.id, auditIndex: audits.length - 1, ...fanOutcome.momentum });
       if (event.id === "graduation-2014-05-11") {
-        state = graduateRina(state);
+        // The completed graduation Live participates in this week's momentum;
+        // apply the fan departure only after that weekly resolution.
+        pendingGraduationFanTransition = true;
         if (s3Variant === "S3-C") {
           state = {
             ...state,
@@ -504,12 +598,22 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
         familiaritySettlements.push(...settled.settlements.map((settlement) => ({ weekEnd: date, ...settlement })));
       }
       const beforeDecay = state.fan;
+      const settledFan = resolveWeeklyFanMomentum({ fan: beforeDecay, momenta: pendingFanMomenta, audits, weekEnd: date, seed: `${input.seed}:${input.route}` });
       const afterDecay = applyWeeklyFanDecay(beforeDecay);
       const fanMonth = fanMonths.get(month)!;
       fanMonth.weeklyChurn.publicCount += beforeDecay.publicCount - afterDecay.publicCount;
       fanMonth.weeklyChurn.otakuCount += beforeDecay.otakuCount - afterDecay.otakuCount;
       fanMonth.weeklyChurn.affinityTotal += Object.values(beforeDecay.members).reduce((sum, profile) => sum + profile.affinityCount, 0) - Object.values(afterDecay.members).reduce((sum, profile) => sum + profile.affinityCount, 0);
-      state = { ...state, fan: afterDecay };
+      fanMonth.eventFlow.publicToOtaku += settledFan.resolution.publicToOtaku;
+      fanMonth.eventFlow.externalToOtaku += settledFan.resolution.externalToOtaku;
+      fanMonth.eventFlow.externalToPublic += settledFan.resolution.externalToPublic;
+      state = { ...state, fan: settledFan.fan };
+      fanWeeklyResolutions.push(settledFan.resolution);
+      pendingFanMomenta = [];
+      if (pendingGraduationFanTransition) {
+        state = graduateRina(state);
+        pendingGraduationFanTransition = false;
+      }
     }
     minCash = Math.min(minCash, state.finance.cash);
     minCashByMonth.set(month, Math.min(minCashByMonth.get(month) ?? Number.POSITIVE_INFINITY, state.finance.cash));
@@ -521,6 +625,20 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     fanMonths.get(month)!.closing = snapshotFan(state.fan);
     state = { ...state, date };
     date = nextDate(date);
+  }
+  // TIF is a Saturday. Commit its event momentum at chapter close without
+  // inventing a second weekly churn pass before the next Sunday.
+  if (pendingFanMomenta.length > 0) {
+    const settledFan = resolveWeeklyFanMomentum({ fan: state.fan, momenta: pendingFanMomenta, audits, weekEnd: "2014-08-02:chapter-close", seed: `${input.seed}:${input.route}`, applyDecay: false });
+    const fanMonth = fanMonths.get("2014-08")!;
+    fanMonth.eventFlow.publicToOtaku += settledFan.resolution.publicToOtaku;
+    fanMonth.eventFlow.externalToOtaku += settledFan.resolution.externalToOtaku;
+    fanMonth.eventFlow.externalToPublic += settledFan.resolution.externalToPublic;
+    state = { ...state, fan: settledFan.fan };
+    fanWeeklyResolutions.push(settledFan.resolution);
+    fanMonth.closing = snapshotFan(state.fan);
+    monthSnapshots.set("2014-08", { publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, activeRoster: state.members.filter((member) => member.active).length });
+    pendingFanMomenta = [];
   }
   // TIF falls on Saturday. Close the partial final week so its actual stage
   // time is not silently discarded merely because the chapter ends before
@@ -558,5 +676,5 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     paletteMean: Object.values(member.palette).reduce((sum, value) => sum + value, 0) / 8,
     palette: member.palette,
   }]));
-  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: `${staffAutoplayScenarioV1.version}:${s3Variant}`, s3Variant, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, fanMonths: [...fanMonths.values()], familiaritySettlements, months, minCash, grades, memberDevelopment };
+  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: `${staffAutoplayScenarioV1.version}:${s3Variant}`, s3Variant, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, fanMonths: [...fanMonths.values()], fanWeeklyResolutions, familiaritySettlements, months, minCash, grades, memberDevelopment };
 }

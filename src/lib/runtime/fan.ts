@@ -2,12 +2,15 @@ import { createSeededRandom, sampleBinomial } from "./random";
 import type { FanAttendance, FanState, LiveKind } from "./types";
 
 export const fanChekiBalanceV1 = {
-  version: "fanChekiBalanceV1",
+  version: "fanChekiBalanceV1-fan-acquisition-v2",
   pOtakuAttendBase: { taiban: 0.12, oneMan: 0.32 },
   pPublicAttendBase: { taiban: 0.012, oneMan: 0.07 },
-  pWeeklyPChurn: 0.008,
-  pWeeklyOChurn: 0.003,
-  pWeeklyAffinityChurn: 0.0015,
+  // S4 Fan-acquisition calibration: v1's .8%/.3% weekly natural churn
+  // consumed virtually every acquired O across the prologue. These remain
+  // TUNABLE model inputs and are changed independently of conversion rates.
+  pWeeklyPChurn: 0.004,
+  pWeeklyOChurn: 0.0015,
+  pWeeklyAffinityChurn: 0.00075,
   pPublicToOtaku: 0.025,
   pExternalToOtaku: 0.004,
   pExternalToPublic: 0.08,
