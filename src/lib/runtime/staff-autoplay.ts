@@ -33,7 +33,7 @@ export type StaffAutoplayRoute = "A" | "B" | "C";
 export type StageStatus = "COMPLETED_TIF" | "BANKRUPT_OR_DEBT_DISTRESS" | "BLOCKED_BUG";
 
 export const staffAutoplayScenarioV1 = {
-  version: "staff-autoplay-scenario-v3-performance-recovery",
+  version: "staff-autoplay-scenario-v4-founder-fan-seed",
   tuningVersion: "fanChekiBalanceV1",
   // Source: v0.10 locks the dates and contract kinds but intentionally leaves
   // specific capacity, receipts and rent to Scenario data. These are named
@@ -57,7 +57,14 @@ const DEFAULT_SONG_DIRECTION: Record<Color8, number> = {
   red: 0.25, pink: 0.1, orange: 0.1, aqua: 0.1, yellow: 0.1, green: 0.1, blue: 0.1, purple: 0.15,
 };
 
-type EventAudit = {
+export type StaffAutoplayFanSnapshot = {
+  publicCount: number;
+  otakuCount: number;
+  temporarilyUnassignedOtaku: number;
+  members: Record<string, { affinityCount: number; purchaseWeightKJPY: number }>;
+};
+
+export type StaffAutoplayEventAudit = {
   date: string;
   liveId: string;
   kind: RuntimeEvent["kind"];
@@ -76,7 +83,30 @@ type EventAudit = {
   otakuCount: number;
   affinityTotal: number;
   cashAfterJPY: number;
-  fanFlow: { otakuAttendance: number; publicAttendance: number; externalAudience: number; publicToOtaku: number; externalToOtaku: number; externalToPublic: number };
+  fanFlow: {
+    opening: StaffAutoplayFanSnapshot;
+    otakuAttendance: number;
+    publicAttendance: number;
+    externalAudience: number;
+    publicToOtaku: number;
+    externalToOtaku: number;
+    externalToPublic: number;
+  };
+};
+
+export type StaffAutoplayFanMonth = {
+  month: string;
+  opening: StaffAutoplayFanSnapshot;
+  closing: StaffAutoplayFanSnapshot;
+  eventFlow: {
+    otakuAttendance: number;
+    publicAttendance: number;
+    externalAudience: number;
+    publicToOtaku: number;
+    externalToOtaku: number;
+    externalToPublic: number;
+  };
+  weeklyChurn: { publicCount: number; otakuCount: number; affinityTotal: number };
 };
 
 export type StaffAutoplayMonth = {
@@ -103,7 +133,8 @@ export type StaffAutoplayResult = {
   tuningVersion: string;
   stageStatus: StageStatus;
   state: PrologueState;
-  events: EventAudit[];
+  events: StaffAutoplayEventAudit[];
+  fanMonths: StaffAutoplayFanMonth[];
   months: StaffAutoplayMonth[];
   minCash: number;
   grades: { fans: string; performance: string; business: string; overall: string };
@@ -111,6 +142,15 @@ export type StaffAutoplayResult = {
 };
 
 type MonthSnapshot = { publicCount: number; otakuCount: number; activeRoster: number };
+
+function snapshotFan(fan: FanState): StaffAutoplayFanSnapshot {
+  return {
+    publicCount: fan.publicCount,
+    otakuCount: fan.otakuCount,
+    temporarilyUnassignedOtaku: fan.temporarilyUnassignedOtaku,
+    members: Object.fromEntries(Object.entries(fan.members).map(([memberId, profile]) => [memberId, { ...profile }])),
+  };
+}
 
 const C_NEWCOMERS: (RuntimeMember & { attributes: CoreAttributes })[] = [
   ["C2-001", "秋月澪", { agility: 13, naturalFitness: 13, stamina: 13, pitch: 13, tone: 12, breath: 12, rhythm: 13, power: 12, stagePresence: 13 }],
@@ -234,7 +274,7 @@ function applyPaletteExposure(member: OperatingMember, hours: number): Operating
 
 function grade(value: number, c: number) { return value >= c * 1.5 ? "A" : value >= c * 1.15 ? "B" : value >= c ? "C" : value >= c * 0.65 ? "D" : "E"; }
 
-function finalizeMonths(state: PrologueState, eventAudits: EventAudit[], minCashByMonth: Map<string, number>, snapshots: Map<string, MonthSnapshot>): StaffAutoplayMonth[] {
+function finalizeMonths(state: PrologueState, eventAudits: StaffAutoplayEventAudit[], minCashByMonth: Map<string, number>, snapshots: Map<string, MonthSnapshot>): StaffAutoplayMonth[] {
   let openingCash = 3_000_000;
   const months = Array.from({ length: 20 }, (_, index) => {
     const date = new Date("2013-01-01T00:00:00Z");
@@ -261,7 +301,8 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
   state = signRoster(completeMandatoryInterview(state), rosterForRoute(input.route));
   state = completeStrategyAndOriginals(state);
   let operating = state.members.map(operatingMember);
-  const audits: EventAudit[] = [];
+  const audits: StaffAutoplayEventAudit[] = [];
+  const fanMonths = new Map<string, StaffAutoplayFanMonth>();
   const minCashByMonth = new Map<string, number>();
   const monthSnapshots = new Map<string, MonthSnapshot>();
   let date = state.date;
@@ -269,6 +310,16 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
   let augmented = false;
 
   while (date <= "2014-08-02") {
+    const month = date.slice(0, 7);
+    if (!fanMonths.has(month)) {
+      fanMonths.set(month, {
+        month,
+        opening: snapshotFan(state.fan),
+        closing: snapshotFan(state.fan),
+        eventFlow: { otakuAttendance: 0, publicAttendance: 0, externalAudience: 0, publicToOtaku: 0, externalToOtaku: 0, externalToPublic: 0 },
+        weeklyChurn: { publicCount: 0, otakuCount: 0, affinityTotal: 0 },
+      });
+    }
     // Condition is a single live state.  The former long-run adapter applied
     // load but omitted every intervening day of recovery, forcing otherwise
     // healthy members to the technical floor.  This is a state-flow repair;
@@ -299,6 +350,7 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       const rehearsed = participants.map((member) => applyPaletteExposure(member, staffAutoplayScenarioV1.performanceGrowth.livePaletteHours));
       const resolved = resolveOperatingPerformance(rehearsed, `${state.saveId}:${event.id}`);
       operating = operating.map((member) => resolved.members.find((updated) => updated.id === member.id) ?? member);
+      const fanOpening = snapshotFan(state.fan);
       const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, actualExternal: contract.attendees, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}` });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
         { memberId, tierId: "1000" as const, units: sale.completedUnitsByTier["1000"] },
@@ -314,21 +366,36 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       if (ticketRevenue > 0) state = post(state, { id: `${event.id}:ticket`, date, kind: "operating_revenue", amount: ticketRevenue, category: "ticket_revenue", eventId: event.id, note: "Scenario contract ticket settlement" });
       if (contract.venueCostJPY > 0) state = post(state, { id: `${event.id}:venue`, date, kind: "operating_cost", amount: contract.venueCostJPY, category: "venue_cost", eventId: event.id, note: "Scenario contract venue cost" });
       const lines = settleChekiSales({ event: state.events.find((item) => item.id === event.id)!, members: state.members, sales: chekiSales });
-      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, fanFlow: fanOutcome.flow });
+      const fanMonth = fanMonths.get(month)!;
+      fanMonth.eventFlow.otakuAttendance += fanOutcome.flow.otakuAttendance;
+      fanMonth.eventFlow.publicAttendance += fanOutcome.flow.publicAttendance;
+      fanMonth.eventFlow.externalAudience += fanOutcome.flow.externalAudience;
+      fanMonth.eventFlow.publicToOtaku += fanOutcome.flow.publicToOtaku;
+      fanMonth.eventFlow.externalToOtaku += fanOutcome.flow.externalToOtaku;
+      fanMonth.eventFlow.externalToPublic += fanOutcome.flow.externalToPublic;
+      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, fanFlow: { opening: fanOpening, ...fanOutcome.flow } });
       if (event.id === "graduation-2014-05-11") {
         state = graduateRina(state);
         operating = operating.map((member) => member.id === "IPC1-001" ? { ...member, active: false } : member);
       }
     }
-    if (weekEnds(date)) state = { ...state, fan: applyWeeklyFanDecay(state.fan) };
+    if (weekEnds(date)) {
+      const beforeDecay = state.fan;
+      const afterDecay = applyWeeklyFanDecay(beforeDecay);
+      const fanMonth = fanMonths.get(month)!;
+      fanMonth.weeklyChurn.publicCount += beforeDecay.publicCount - afterDecay.publicCount;
+      fanMonth.weeklyChurn.otakuCount += beforeDecay.otakuCount - afterDecay.otakuCount;
+      fanMonth.weeklyChurn.affinityTotal += Object.values(beforeDecay.members).reduce((sum, profile) => sum + profile.affinityCount, 0) - Object.values(afterDecay.members).reduce((sum, profile) => sum + profile.affinityCount, 0);
+      state = { ...state, fan: afterDecay };
+    }
     minCash = Math.min(minCash, state.finance.cash);
-    const month = date.slice(0, 7);
     minCashByMonth.set(month, Math.min(minCashByMonth.get(month) ?? Number.POSITIVE_INFINITY, state.finance.cash));
     monthSnapshots.set(month, {
       publicCount: state.fan.publicCount,
       otakuCount: state.fan.otakuCount,
       activeRoster: state.members.filter((member) => member.active).length,
     });
+    fanMonths.get(month)!.closing = snapshotFan(state.fan);
     state = { ...state, date };
     date = nextDate(date);
   }
@@ -350,5 +417,5 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     paletteMean: Object.values(member.palette).reduce((sum, value) => sum + value, 0) / 8,
     palette: member.palette,
   }]));
-  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: staffAutoplayScenarioV1.version, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, months, minCash, grades, memberDevelopment };
+  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: staffAutoplayScenarioV1.version, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, fanMonths: [...fanMonths.values()], months, minCash, grades, memberDevelopment };
 }

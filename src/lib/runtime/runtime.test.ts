@@ -16,6 +16,7 @@ import {
   markEventEligible,
   offerEligibleEvent,
   resolveLive,
+  prologueFounderFanSeedV1,
   routeCandidateIds,
   signRoster,
   spendInterviewAp,
@@ -177,6 +178,30 @@ describe("schedule integrity", () => {
       category: "loan", note: "Bridge loan",
     });
     expect(finance).toMatchObject({ cash: 1_500, loans: 500, operatingRevenue: 0 });
+  });
+});
+
+describe("prologue founder fan seed", () => {
+  it("maps the historical founder asset once into O and member affinity", () => {
+    const state = createPrologueState({ saveId: "founder-fan-seed" });
+    expect(state.fan.publicCount).toBe(0);
+    expect(state.fan.otakuCount).toBe(30);
+    expect(state.fan.temporarilyUnassignedOtaku).toBe(0);
+    expect(state.fan.members["IPC1-001"]).toEqual({ affinityCount: 20, purchaseWeightKJPY: 1.8 });
+    expect(state.fan.members["IPC1-002"]).toEqual({ affinityCount: 10, purchaseWeightKJPY: 1.8 });
+    expect(state.fan.members["IPC1-003"]).toEqual({ affinityCount: 0, purchaseWeightKJPY: 0 });
+    expect(prologueFounderFanSeedV1.otakuCount).toBe(30);
+  });
+
+  it("preserves the founder seed while signing newcomers without copying it", () => {
+    const opened = completeMandatoryInterview(createPrologueState({ saveId: "founder-fan-sign" }));
+    const signed = signRoster(opened, routeCandidateIds(9));
+    expect(signed.fan.otakuCount).toBe(30);
+    expect(signed.fan.members["IPC1-001"].affinityCount).toBe(20);
+    expect(signed.fan.members["IPC1-002"].affinityCount).toBe(10);
+    for (const memberId of routeCandidateIds(9)) {
+      expect(signed.fan.members[memberId]).toEqual({ affinityCount: 0, purchaseWeightKJPY: 0 });
+    }
   });
 });
 

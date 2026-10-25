@@ -1,0 +1,4486 @@
+{
+  "runId": "staff-autoplay:B:1",
+  "scenarioVersion": "staff-autoplay-scenario-v4-founder-fan-seed",
+  "tuningVersion": "fanChekiBalanceV1",
+  "founderSeedVersion": "prologue-founder-fan-seed-v1",
+  "fanMonths": [
+    {
+      "month": "2013-01",
+      "opening": {
+        "publicCount": 0,
+        "otakuCount": 30,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 20,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 10,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 0,
+        "otakuCount": 29.730809190000002,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 19.73148075417704,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.86574037708852,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 0,
+        "publicAttendance": 0,
+        "externalAudience": 0,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "weeklyChurn": {
+        "publicCount": 0,
+        "otakuCount": 0.2691908099999978,
+        "affinityTotal": 0.402778868734444
+      }
+    },
+    {
+      "month": "2013-02",
+      "opening": {
+        "publicCount": 0,
+        "otakuCount": 29.730809190000002,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 19.73148075417704,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.86574037708852,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 0,
+        "otakuCount": 29.375641734897062,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 19.379054687303512,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.689527343651756,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 0,
+        "publicAttendance": 0,
+        "externalAudience": 0,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "weeklyChurn": {
+        "publicCount": 0,
+        "otakuCount": 0.35516745510294,
+        "affinityTotal": 0.5286391003102864
+      }
+    },
+    {
+      "month": "2013-03",
+      "opening": {
+        "publicCount": 0,
+        "otakuCount": 29.375641734897062,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 19.379054687303512,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.689527343651756,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 0,
+        "otakuCount": 28.937642997096475,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 18.947360832850734,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.473680416425367,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 0,
+        "publicAttendance": 0,
+        "externalAudience": 0,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "weeklyChurn": {
+        "publicCount": 0,
+        "otakuCount": 0.4379987378005872,
+        "affinityTotal": 0.6475407816791687
+      }
+    },
+    {
+      "month": "2013-04",
+      "opening": {
+        "publicCount": 0,
+        "otakuCount": 28.937642997096475,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 18.947360832850734,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.473680416425367,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 0,
+        "otakuCount": 28.59195079093167,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 18.608940014912804,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.304470007456402,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 0,
+        "publicAttendance": 0,
+        "externalAudience": 0,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "weeklyChurn": {
+        "publicCount": 0,
+        "otakuCount": 0.3456922061648058,
+        "affinityTotal": 0.507631226906895
+      }
+    },
+    {
+      "month": "2013-05",
+      "opening": {
+        "publicCount": 0,
+        "otakuCount": 28.59195079093167,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 18.608940014912804,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.304470007456402,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 0.992,
+        "otakuCount": 28.250388261168464,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 18.276563767035267,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.138281883517633,
+            "purchaseWeightKJPY": 1.7878822122532154
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 80,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "weeklyChurn": {
+        "publicCount": 0.008000000000000007,
+        "otakuCount": 0.34156252976320545,
+        "affinityTotal": 0.4985643718163075
+      }
+    },
+    {
+      "month": "2013-06",
+      "opening": {
+        "publicCount": 0.992,
+        "otakuCount": 28.250388261168464,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 18.276563767035267,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-002": {
+            "affinityCount": 9.138281883517633,
+            "purchaseWeightKJPY": 1.7878822122532154
+          },
+          "IPC1-003": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 8.841333821243653,
+        "otakuCount": 28.826167356024154,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 17.869429343501565,
+            "purchaseWeightKJPY": 1.7726344280283897
+          },
+          "IPC1-002": {
+            "affinityCount": 8.934714671750783,
+            "purchaseWeightKJPY": 1.7703582933241369
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9955045,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.9865337095202502,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 6,
+        "publicAttendance": 0,
+        "externalAudience": 152,
+        "publicToOtaku": 0,
+        "externalToOtaku": 1,
+        "externalToPublic": 8
+      },
+      "weeklyChurn": {
+        "publicCount": 0.1506661787563457,
+        "otakuCount": 0.42422090514430977,
+        "affinityTotal": 0.628663425780303
+      }
+    },
+    {
+      "month": "2013-07",
+      "opening": {
+        "publicCount": 8.841333821243653,
+        "otakuCount": 28.826167356024154,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 17.869429343501565,
+            "purchaseWeightKJPY": 1.7726344280283897
+          },
+          "IPC1-002": {
+            "affinityCount": 8.934714671750783,
+            "purchaseWeightKJPY": 1.7703582933241369
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9955045,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.9865337095202502,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 13.56178814031365,
+        "otakuCount": 28.481806849897936,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 17.55026157402377,
+            "purchaseWeightKJPY": 1.7671111801068915
+          },
+          "IPC1-002": {
+            "affinityCount": 8.775130787011886,
+            "purchaseWeightKJPY": 1.7593431690984258
+          },
+          "IPC1-003": {
+            "affinityCount": 0.977723688723805,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.9510520206049522,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 70,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 5
+      },
+      "weeklyChurn": {
+        "publicCount": 0.27954568093000276,
+        "otakuCount": 0.34436050612621827,
+        "affinityTotal": 0.5320141544081807
+      }
+    },
+    {
+      "month": "2013-08",
+      "opening": {
+        "publicCount": 13.56178814031365,
+        "otakuCount": 28.481806849897936,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 17.55026157402377,
+            "purchaseWeightKJPY": 1.7671111801068915
+          },
+          "IPC1-002": {
+            "affinityCount": 8.775130787011886,
+            "purchaseWeightKJPY": 1.7593431690984258
+          },
+          "IPC1-003": {
+            "affinityCount": 0.977723688723805,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.9510520206049522,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 13.132990927476467,
+        "otakuCount": 28.14156011154094,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 17.236794493869358,
+            "purchaseWeightKJPY": 1.7671111801068915
+          },
+          "IPC1-002": {
+            "affinityCount": 8.618397246934679,
+            "purchaseWeightKJPY": 1.7593431690984258
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9602604624004046,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.9162040738920887,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 0,
+        "publicAttendance": 0,
+        "externalAudience": 0,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "weeklyChurn": {
+        "publicCount": 0.42879721283718375,
+        "otakuCount": 0.3402467383569956,
+        "affinityTotal": 0.5225117932678813
+      }
+    },
+    {
+      "month": "2013-09",
+      "opening": {
+        "publicCount": 13.132990927476467,
+        "otakuCount": 28.14156011154094,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 17.236794493869358,
+            "purchaseWeightKJPY": 1.7671111801068915
+          },
+          "IPC1-002": {
+            "affinityCount": 8.618397246934679,
+            "purchaseWeightKJPY": 1.7593431690984258
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9602604624004046,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.9162040738920887,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 17.568073432190758,
+        "otakuCount": 27.721961863447124,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 16.852822294320124,
+            "purchaseWeightKJPY": 1.7569717806266132
+          },
+          "IPC1-002": {
+            "affinityCount": 8.426411147160062,
+            "purchaseWeightKJPY": 1.749048062043477
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9388694014337503,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.8735181154733551,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 9,
+        "publicAttendance": 0,
+        "externalAudience": 193,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 5
+      },
+      "weeklyChurn": {
+        "publicCount": 0.5649174952857088,
+        "otakuCount": 0.4195982480938163,
+        "affinityTotal": 0.6400353187092414
+      }
+    },
+    {
+      "month": "2013-10",
+      "opening": {
+        "publicCount": 17.568073432190758,
+        "otakuCount": 27.721961863447124,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 16.852822294320124,
+            "purchaseWeightKJPY": 1.7569717806266132
+          },
+          "IPC1-002": {
+            "affinityCount": 8.426411147160062,
+            "purchaseWeightKJPY": 1.749048062043477
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9388694014337503,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.8735181154733551,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 20.901815183391054,
+        "otakuCount": 27.390792315299983,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 16.551812250983744,
+            "purchaseWeightKJPY": 1.7277767794042997
+          },
+          "IPC1-002": {
+            "affinityCount": 8.275906125491872,
+            "purchaseWeightKJPY": 1.749048062043477
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9221001556494393,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.840055010049156,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 6,
+        "publicAttendance": 0,
+        "externalAudience": 127,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "weeklyChurn": {
+        "publicCount": 0.6662582487997035,
+        "otakuCount": 0.33116954814714106,
+        "affinityTotal": 0.5017474162130817
+      }
+    },
+    {
+      "month": "2013-11",
+      "opening": {
+        "publicCount": 20.901815183391054,
+        "otakuCount": 27.390792315299983,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 16.551812250983744,
+            "purchaseWeightKJPY": 1.7277767794042997
+          },
+          "IPC1-002": {
+            "affinityCount": 8.275906125491872,
+            "purchaseWeightKJPY": 1.749048062043477
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9221001556494393,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.840055010049156,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 24.1144684976333,
+        "otakuCount": 27.063578954314494,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 16.256178579901643,
+            "purchaseWeightKJPY": 1.718507597455093
+          },
+          "IPC1-002": {
+            "affinityCount": 8.128089289950822,
+            "purchaseWeightKJPY": 1.7396647638545881
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9056304271395702,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.807189592693934,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 68,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "weeklyChurn": {
+        "publicCount": 0.787346685757754,
+        "otakuCount": 0.32721336098548903,
+        "affinityTotal": 0.4927856524882408
+      }
+    },
+    {
+      "month": "2013-12",
+      "opening": {
+        "publicCount": 24.1144684976333,
+        "otakuCount": 27.063578954314494,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 16.256178579901643,
+            "purchaseWeightKJPY": 1.718507597455093
+          },
+          "IPC1-002": {
+            "affinityCount": 8.128089289950822,
+            "purchaseWeightKJPY": 1.7396647638545881
+          },
+          "IPC1-003": {
+            "affinityCount": 0.9056304271395702,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.807189592693934,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 25.08646984545634,
+        "otakuCount": 26.66005369589352,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 15.894050885694337,
+            "purchaseWeightKJPY": 1.709796877617009
+          },
+          "IPC1-002": {
+            "affinityCount": 7.947025442847169,
+            "purchaseWeightKJPY": 1.7396647638545881
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8854563218434157,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.7669320747919837,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 6,
+        "publicAttendance": 0,
+        "externalAudience": 135,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 2
+      },
+      "weeklyChurn": {
+        "publicCount": 1.0279986521769615,
+        "otakuCount": 0.40352525842097364,
+        "affinityTotal": 0.6036231645090631
+      }
+    },
+    {
+      "month": "2014-01",
+      "opening": {
+        "publicCount": 25.08646984545634,
+        "otakuCount": 26.66005369589352,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 15.894050885694337,
+            "purchaseWeightKJPY": 1.709796877617009
+          },
+          "IPC1-002": {
+            "affinityCount": 7.947025442847169,
+            "purchaseWeightKJPY": 1.7396647638545881
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8854563218434157,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.7669320747919837,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 28.277348740486328,
+        "otakuCount": 26.341569817316046,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 15.610165559999905,
+            "purchaseWeightKJPY": 1.6942448102981458
+          },
+          "IPC1-002": {
+            "affinityCount": 7.805082779999952,
+            "purchaseWeightKJPY": 1.7396647638545881
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8696410927289199,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.7353727139254764,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 6,
+        "publicAttendance": 2,
+        "externalAudience": 59,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "weeklyChurn": {
+        "publicCount": 0.8091211049700107,
+        "otakuCount": 0.3184838785774744,
+        "affinityTotal": 0.4732025785226561
+      }
+    },
+    {
+      "month": "2014-02",
+      "opening": {
+        "publicCount": 28.277348740486328,
+        "otakuCount": 26.341569817316046,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 15.610165559999905,
+            "purchaseWeightKJPY": 1.6942448102981458
+          },
+          "IPC1-002": {
+            "affinityCount": 7.805082779999952,
+            "purchaseWeightKJPY": 1.7396647638545881
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8696410927289199,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.7353727139254764,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 29.351402286520912,
+        "otakuCount": 26.02689058152252,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 15.331350740164813,
+            "purchaseWeightKJPY": 1.6799164665878052
+          },
+          "IPC1-002": {
+            "affinityCount": 7.665675370082407,
+            "purchaseWeightKJPY": 1.7396647638545881
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8541083410961174,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.704377038144837,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 6,
+        "publicAttendance": 0,
+        "externalAudience": 48,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 2
+      },
+      "weeklyChurn": {
+        "publicCount": 0.9259464539654161,
+        "otakuCount": 0.31467923579352686,
+        "affinityTotal": 0.4647506571660749
+      }
+    },
+    {
+      "month": "2014-03",
+      "opening": {
+        "publicCount": 29.351402286520912,
+        "otakuCount": 26.02689058152252,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 15.331350740164813,
+            "purchaseWeightKJPY": 1.6799164665878052
+          },
+          "IPC1-002": {
+            "affinityCount": 7.665675370082407,
+            "purchaseWeightKJPY": 1.7396647638545881
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8541083410961174,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.704377038144837,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 35.08461936959468,
+        "otakuCount": 25.638822626226123,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 14.989824798792377,
+            "purchaseWeightKJPY": 1.6666576471297543
+          },
+          "IPC1-002": {
+            "affinityCount": 7.494912399396188,
+            "purchaseWeightKJPY": 1.7325399925719864
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8350819578262656,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.6664098047111233,
+            "purchaseWeightKJPY": 1.793074213428163
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 12,
+        "publicAttendance": 0,
+        "externalAudience": 158,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 7
+      },
+      "weeklyChurn": {
+        "publicCount": 1.2667829169262355,
+        "otakuCount": 0.38806795529639615,
+        "affinityTotal": 0.5692825287622227
+      }
+    },
+    {
+      "month": "2014-04",
+      "opening": {
+        "publicCount": 35.08461936959468,
+        "otakuCount": 25.638822626226123,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 14.989824798792377,
+            "purchaseWeightKJPY": 1.6666576471297543
+          },
+          "IPC1-002": {
+            "affinityCount": 7.494912399396188,
+            "purchaseWeightKJPY": 1.7325399925719864
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8350819578262656,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-004": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.6664098047111233,
+            "purchaseWeightKJPY": 1.793074213428163
+          },
+          "IPC1-008": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 42.79296917829971,
+        "otakuCount": 27.326547484217127,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 14.72208995097345,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 7.361044975486725,
+            "purchaseWeightKJPY": 1.7266635043300664
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8201664705610003,
+            "purchaseWeightKJPY": 1.7933744849516469
+          },
+          "IPC1-004": {
+            "affinityCount": 1,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.6366458827535932,
+            "purchaseWeightKJPY": 1.7871661598362583
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9910292095202501,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 15,
+        "publicAttendance": 3,
+        "externalAudience": 208,
+        "publicToOtaku": 0,
+        "externalToOtaku": 2,
+        "externalToPublic": 9
+      },
+      "weeklyChurn": {
+        "publicCount": 1.2916501912949698,
+        "otakuCount": 0.3122751420089962,
+        "affinityTotal": 0.45525247143093495
+      }
+    },
+    {
+      "month": "2014-05",
+      "opening": {
+        "publicCount": 42.79296917829971,
+        "otakuCount": 27.326547484217127,
+        "temporarilyUnassignedOtaku": 0,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 14.72208995097345,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 7.361044975486725,
+            "purchaseWeightKJPY": 1.7266635043300664
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8201664705610003,
+            "purchaseWeightKJPY": 1.7933744849516469
+          },
+          "IPC1-004": {
+            "affinityCount": 1,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-005": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 1.6366458827535932,
+            "purchaseWeightKJPY": 1.7871661598362583
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9910292095202501,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 59.1379825920377,
+        "otakuCount": 27.99411059891699,
+        "temporarilyUnassignedOtaku": 8.99195802797234,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 7.2295685718092795,
+            "purchaseWeightKJPY": 1.7198712600128014
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8055173903929967,
+            "purchaseWeightKJPY": 1.7933744849516469
+          },
+          "IPC1-004": {
+            "affinityCount": 0.9821388941223318,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-005": {
+            "affinityCount": 0.9910292095202501,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 2.598442786877732,
+            "purchaseWeightKJPY": 1.7871661598362583
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9733283318811472,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 15,
+        "publicAttendance": 3,
+        "externalAudience": 232,
+        "publicToOtaku": 0,
+        "externalToOtaku": 1,
+        "externalToPublic": 18
+      },
+      "weeklyChurn": {
+        "publicCount": 1.6549865862620052,
+        "otakuCount": 0.3324368853001367,
+        "affinityTotal": 0.2950445090924365
+      }
+    },
+    {
+      "month": "2014-06",
+      "opening": {
+        "publicCount": 59.1379825920377,
+        "otakuCount": 27.99411059891699,
+        "temporarilyUnassignedOtaku": 8.99195802797234,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 7.2295685718092795,
+            "purchaseWeightKJPY": 1.7198712600128014
+          },
+          "IPC1-003": {
+            "affinityCount": 0.8055173903929967,
+            "purchaseWeightKJPY": 1.7933744849516469
+          },
+          "IPC1-004": {
+            "affinityCount": 0.9821388941223318,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-005": {
+            "affinityCount": 0.9910292095202501,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 2.598442786877732,
+            "purchaseWeightKJPY": 1.7871661598362583
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9733283318811472,
+            "purchaseWeightKJPY": 1.8
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 67.65877597195228,
+        "otakuCount": 27.57671086280809,
+        "temporarilyUnassignedOtaku": 8.857885509586161,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 7.06852045191106,
+            "purchaseWeightKJPY": 1.7066966419412029
+          },
+          "IPC1-003": {
+            "affinityCount": 0.787573434266214,
+            "purchaseWeightKJPY": 1.7933744849516469
+          },
+          "IPC1-004": {
+            "affinityCount": 0.9602604624004046,
+            "purchaseWeightKJPY": 1.7947248125559654
+          },
+          "IPC1-005": {
+            "affinityCount": 0.9689527343651755,
+            "purchaseWeightKJPY": 1.7899754365051879
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 2.5405590665238598,
+            "purchaseWeightKJPY": 1.7796961341699888
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9516461669862228,
+            "purchaseWeightKJPY": 1.7889607857524896
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 15,
+        "publicAttendance": 3,
+        "externalAudience": 206,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 11
+      },
+      "weeklyChurn": {
+        "publicCount": 2.479206620085421,
+        "otakuCount": 0.41739973610890146,
+        "affinityTotal": 0.30251286815079936
+      }
+    },
+    {
+      "month": "2014-07",
+      "opening": {
+        "publicCount": 67.65877597195228,
+        "otakuCount": 27.57671086280809,
+        "temporarilyUnassignedOtaku": 8.857885509586161,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 7.06852045191106,
+            "purchaseWeightKJPY": 1.7066966419412029
+          },
+          "IPC1-003": {
+            "affinityCount": 0.787573434266214,
+            "purchaseWeightKJPY": 1.7933744849516469
+          },
+          "IPC1-004": {
+            "affinityCount": 0.9602604624004046,
+            "purchaseWeightKJPY": 1.7947248125559654
+          },
+          "IPC1-005": {
+            "affinityCount": 0.9689527343651755,
+            "purchaseWeightKJPY": 1.7899754365051879
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 2.5405590665238598,
+            "purchaseWeightKJPY": 1.7796961341699888
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9516461669862228,
+            "purchaseWeightKJPY": 1.7889607857524896
+          },
+          "IPC1-009": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 82.3126212229722,
+        "otakuCount": 27.247276498789923,
+        "temporarilyUnassignedOtaku": 8.7520682533545,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 6.942268859721013,
+            "purchaseWeightKJPY": 1.6912032878500742
+          },
+          "IPC1-003": {
+            "affinityCount": 0.7735065017703464,
+            "purchaseWeightKJPY": 1.7933744849516469
+          },
+          "IPC1-004": {
+            "affinityCount": 0.9431091486113324,
+            "purchaseWeightKJPY": 1.78573626375881
+          },
+          "IPC1-005": {
+            "affinityCount": 0.9516461669862228,
+            "purchaseWeightKJPY": 1.7899754365051879
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 2.4951818720482075,
+            "purchaseWeightKJPY": 1.7796961341699888
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9346487140396049,
+            "purchaseWeightKJPY": 1.7889607857524896
+          },
+          "IPC1-009": {
+            "affinityCount": 0.9910292095202501,
+            "purchaseWeightKJPY": 1.8
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 24,
+        "publicAttendance": 5,
+        "externalAudience": 286,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 17
+      },
+      "weeklyChurn": {
+        "publicCount": 2.3461547489800836,
+        "otakuCount": 0.32943436401816584,
+        "affinityTotal": 0.24612184375596158
+      }
+    },
+    {
+      "month": "2014-08",
+      "opening": {
+        "publicCount": 82.3126212229722,
+        "otakuCount": 27.247276498789923,
+        "temporarilyUnassignedOtaku": 8.7520682533545,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 6.942268859721013,
+            "purchaseWeightKJPY": 1.6912032878500742
+          },
+          "IPC1-003": {
+            "affinityCount": 0.7735065017703464,
+            "purchaseWeightKJPY": 1.7933744849516469
+          },
+          "IPC1-004": {
+            "affinityCount": 0.9431091486113324,
+            "purchaseWeightKJPY": 1.78573626375881
+          },
+          "IPC1-005": {
+            "affinityCount": 0.9516461669862228,
+            "purchaseWeightKJPY": 1.7899754365051879
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 2.4951818720482075,
+            "purchaseWeightKJPY": 1.7796961341699888
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9346487140396049,
+            "purchaseWeightKJPY": 1.7889607857524896
+          },
+          "IPC1-009": {
+            "affinityCount": 0.9910292095202501,
+            "purchaseWeightKJPY": 1.8
+          }
+        }
+      },
+      "closing": {
+        "publicCount": 88.3126212229722,
+        "otakuCount": 27.247276498789923,
+        "temporarilyUnassignedOtaku": 8.7520682533545,
+        "members": {
+          "IPC1-001": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 1.643554524285123
+          },
+          "IPC1-002": {
+            "affinityCount": 6.942268859721013,
+            "purchaseWeightKJPY": 1.6912032878500742
+          },
+          "IPC1-003": {
+            "affinityCount": 0.7735065017703464,
+            "purchaseWeightKJPY": 1.7811203227203947
+          },
+          "IPC1-004": {
+            "affinityCount": 0.9431091486113324,
+            "purchaseWeightKJPY": 1.78573626375881
+          },
+          "IPC1-005": {
+            "affinityCount": 0.9516461669862228,
+            "purchaseWeightKJPY": 1.7899754365051879
+          },
+          "IPC1-006": {
+            "affinityCount": 0,
+            "purchaseWeightKJPY": 0
+          },
+          "IPC1-007": {
+            "affinityCount": 2.4951818720482075,
+            "purchaseWeightKJPY": 1.7796961341699888
+          },
+          "IPC1-008": {
+            "affinityCount": 0.9346487140396049,
+            "purchaseWeightKJPY": 1.7889607857524896
+          },
+          "IPC1-009": {
+            "affinityCount": 0.9910292095202501,
+            "purchaseWeightKJPY": 1.8
+          }
+        }
+      },
+      "eventFlow": {
+        "otakuAttendance": 3,
+        "publicAttendance": 2,
+        "externalAudience": 130,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 6
+      },
+      "weeklyChurn": {
+        "publicCount": 0,
+        "otakuCount": 0,
+        "affinityTotal": 0
+      }
+    }
+  ],
+  "events": [
+    {
+      "date": "2013-05-24",
+      "eventId": "debut-2013-05-24",
+      "contractId": "scenario:debut",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 0,
+          "otakuCount": 28.33539444450197,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 18.359097087994346,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-002": {
+              "affinityCount": 9.179548543997173,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-003": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 80,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 2000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-06-18",
+      "eventId": "taiban-2013-06-18",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 0.9683819560959999,
+          "otakuCount": 27.996896764540516,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 18.031183311087293,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-002": {
+              "affinityCount": 9.015591655543647,
+              "purchaseWeightKJPY": 1.7878822122532154
+            },
+            "IPC1-003": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 79,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 6
+      },
+      "chekiGrossJPY": 8000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-06-29",
+      "eventId": "taiban-2013-06-29",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 6.912634900447231,
+          "otakuCount": 27.912906074246894,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 17.9501241265123,
+              "purchaseWeightKJPY": 1.7843014168851192
+            },
+            "IPC1-002": {
+              "affinityCount": 8.97506206325615,
+              "purchaseWeightKJPY": 1.7761747424401886
+            },
+            "IPC1-003": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 0.9955045,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 73,
+        "publicToOtaku": 0,
+        "externalToOtaku": 1,
+        "externalToPublic": 2
+      },
+      "chekiGrossJPY": 7000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-07-30",
+      "eventId": "taiban-2013-07-30",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 8.56178814031365,
+          "otakuCount": 28.481806849897936,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 17.55026157402377,
+              "purchaseWeightKJPY": 1.7726344280283897
+            },
+            "IPC1-002": {
+              "affinityCount": 8.775130787011886,
+              "purchaseWeightKJPY": 1.7703582933241369
+            },
+            "IPC1-003": {
+              "affinityCount": 0.977723688723805,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.9510520206049522,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 70,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 5
+      },
+      "chekiGrossJPY": 3000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-09-18",
+      "eventId": "taiban-2013-09-18",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 12.820313955383753,
+          "otakuCount": 27.889045132837957,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 17.0053739409744,
+              "purchaseWeightKJPY": 1.7671111801068915
+            },
+            "IPC1-002": {
+              "affinityCount": 8.5026869704872,
+              "purchaseWeightKJPY": 1.7593431690984258
+            },
+            "IPC1-003": {
+              "affinityCount": 0.9473680416425364,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.8904771902538688,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 60,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-09-25",
+      "eventId": "taiban-2013-09-25",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 13.709751443740682,
+          "otakuCount": 27.805377997439443,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 16.928926282422754,
+              "purchaseWeightKJPY": 1.7671111801068915
+            },
+            "IPC1-002": {
+              "affinityCount": 8.464463141211377,
+              "purchaseWeightKJPY": 1.749048062043477
+            },
+            "IPC1-003": {
+              "affinityCount": 0.9431091486113324,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.8819785500450827,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 61,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "chekiGrossJPY": 3000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-09-29",
+      "eventId": "mall-2013-09-29",
+      "contractId": "scenario:free-mall",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 13.709751443740682,
+          "otakuCount": 27.805377997439443,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 16.928926282422754,
+              "purchaseWeightKJPY": 1.7569717806266132
+            },
+            "IPC1-002": {
+              "affinityCount": 8.464463141211377,
+              "purchaseWeightKJPY": 1.749048062043477
+            },
+            "IPC1-003": {
+              "affinityCount": 0.9431091486113324,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.8819785500450827,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 72,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-10-05",
+      "eventId": "taiban-2013-10-05",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 17.568073432190758,
+          "otakuCount": 27.721961863447124,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 16.852822294320124,
+              "purchaseWeightKJPY": 1.7569717806266132
+            },
+            "IPC1-002": {
+              "affinityCount": 8.426411147160062,
+              "purchaseWeightKJPY": 1.749048062043477
+            },
+            "IPC1-003": {
+              "affinityCount": 0.9388694014337503,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.8735181154733551,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 57,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 3
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-10-19",
+      "eventId": "taiban-2013-10-19",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 20.240300613975364,
+          "otakuCount": 27.555879589923215,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 16.701639156525317,
+              "purchaseWeightKJPY": 1.7469753445068406
+            },
+            "IPC1-002": {
+              "affinityCount": 8.350819578262659,
+              "purchaseWeightKJPY": 1.749048062043477
+            },
+            "IPC1-003": {
+              "affinityCount": 0.93044700074564,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.8567111769994278,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 70,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 3000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-11-03",
+      "eventId": "taiban-2013-11-03",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 20.901815183391054,
+          "otakuCount": 27.390792315299983,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 16.551812250983744,
+              "purchaseWeightKJPY": 1.7277767794042997
+            },
+            "IPC1-002": {
+              "affinityCount": 8.275906125491872,
+              "purchaseWeightKJPY": 1.749048062043477
+            },
+            "IPC1-003": {
+              "affinityCount": 0.9221001556494393,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.840055010049156,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 68,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "chekiGrossJPY": 2000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-12-01",
+      "eventId": "taiban-2013-12-01",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 24.1144684976333,
+          "otakuCount": 27.063578954314494,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 16.256178579901643,
+              "purchaseWeightKJPY": 1.718507597455093
+            },
+            "IPC1-002": {
+              "affinityCount": 8.128089289950822,
+              "purchaseWeightKJPY": 1.7396647638545881
+            },
+            "IPC1-003": {
+              "affinityCount": 0.9056304271395702,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.807189592693934,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 73,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 2
+      },
+      "chekiGrossJPY": 3000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2013-12-25",
+      "eventId": "taiban-2013-12-25",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 25.288780086145504,
+          "otakuCount": 26.740274519451877,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.965825253119737,
+              "purchaseWeightKJPY": 1.709796877617009
+            },
+            "IPC1-002": {
+              "affinityCount": 7.982912626559869,
+              "purchaseWeightKJPY": 1.7396647638545881
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8894548661943926,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.7749111880378075,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 62,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-01-15",
+      "eventId": "experimental-2014-01-15",
+      "contractId": "scenario:experimental-regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 24.686691861999147,
+          "otakuCount": 26.500333314201423,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.75146868532429,
+              "purchaseWeightKJPY": 1.709796877617009
+            },
+            "IPC1-002": {
+              "affinityCount": 7.875734342662145,
+              "purchaseWeightKJPY": 1.7396647638545881
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8775130787011884,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.751081297357075,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 2,
+        "externalAudience": 32,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-01-29",
+      "eventId": "experimental-2014-01-29",
+      "contractId": "scenario:experimental-regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 25.277348740486328,
+          "otakuCount": 26.341569817316046,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.610165559999905,
+              "purchaseWeightKJPY": 1.7018437743911103
+            },
+            "IPC1-002": {
+              "affinityCount": 7.805082779999952,
+              "purchaseWeightKJPY": 1.7396647638545881
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8696410927289199,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.7353727139254764,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 27,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 3
+      },
+      "chekiGrossJPY": 2000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-02-12",
+      "eventId": "experimental-2014-02-12",
+      "contractId": "scenario:experimental-regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 27.82672091095794,
+          "otakuCount": 26.183757472540506,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.470130035406937,
+              "purchaseWeightKJPY": 1.6942448102981458
+            },
+            "IPC1-002": {
+              "affinityCount": 7.7350650177034685,
+              "purchaseWeightKJPY": 1.7396647638545881
+            },
+            "IPC1-003": {
+              "affinityCount": 0.861839724693468,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.719805048904576,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 23,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 2
+      },
+      "chekiGrossJPY": 5000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-02-26",
+      "eventId": "experimental-2014-02-26",
+      "contractId": "scenario:experimental-regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 29.351402286520912,
+          "otakuCount": 26.02689058152252,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.331350740164813,
+              "purchaseWeightKJPY": 1.6833881250653209
+            },
+            "IPC1-002": {
+              "affinityCount": 7.665675370082407,
+              "purchaseWeightKJPY": 1.7396647638545881
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8541083410961174,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.704377038144837,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 25,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "chekiGrossJPY": 2000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-03-05",
+      "eventId": "regular-2014-03-05",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 29.116591068228743,
+          "otakuCount": 25.94880990977795,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.262428652912403,
+              "purchaseWeightKJPY": 1.6799164665878052
+            },
+            "IPC1-002": {
+              "affinityCount": 7.631214326456202,
+              "purchaseWeightKJPY": 1.7396647638545881
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8502686970487199,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.696715011169857,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 38,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-03-12",
+      "eventId": "regular-2014-03-12",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 29.875658339682914,
+          "otakuCount": 25.870963480048616,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.193816404903236,
+              "purchaseWeightKJPY": 1.6799164665878052
+            },
+            "IPC1-002": {
+              "affinityCount": 7.596908202451618,
+              "purchaseWeightKJPY": 1.7325399925719864
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8464463141211375,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.689087428837143,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 35,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-03-19",
+      "eventId": "regular-2014-03-19",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 29.63665307296545,
+          "otakuCount": 25.79335058960847,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.125512603254995,
+              "purchaseWeightKJPY": 1.6731350854457214
+            },
+            "IPC1-002": {
+              "affinityCount": 7.5627563016274975,
+              "purchaseWeightKJPY": 1.7325399925719864
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8426411147160059,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6814941363008058,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 51,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-03-26",
+      "eventId": "regular-2014-03-26",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 33.36755984838173,
+          "otakuCount": 25.71597053783964,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 15.057515861347062,
+              "purchaseWeightKJPY": 1.6666576471297543
+            },
+            "IPC1-002": {
+              "affinityCount": 7.528757930673531,
+              "purchaseWeightKJPY": 1.7325399925719864
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8388530215848001,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6739349794110656,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 34,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 2
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-04-02",
+      "eventId": "regular-2014-04-02",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 35.08461936959468,
+          "otakuCount": 25.638822626226123,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 14.989824798792377,
+              "purchaseWeightKJPY": 1.6666576471297543
+            },
+            "IPC1-002": {
+              "affinityCount": 7.494912399396188,
+              "purchaseWeightKJPY": 1.7325399925719864
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8350819578262656,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6664098047111233,
+              "purchaseWeightKJPY": 1.793074213428163
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 1,
+        "externalAudience": 43,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 3
+      },
+      "chekiGrossJPY": 4000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-04-09",
+      "eventId": "regular-2014-04-09",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 37.77994241463792,
+          "otakuCount": 25.561906158347444,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 14.922438041409407,
+              "purchaseWeightKJPY": 1.660522944173359
+            },
+            "IPC1-002": {
+              "affinityCount": 7.4612190207047036,
+              "purchaseWeightKJPY": 1.7325399925719864
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8313278468848577,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6589184594340445,
+              "purchaseWeightKJPY": 1.793074213428163
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 1,
+        "externalAudience": 37,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 2
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-04-16",
+      "eventId": "graduation-announcement-2014-04-16",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 39.46170287532082,
+          "otakuCount": 25.485220439872403,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 14.85535422119425,
+              "purchaseWeightKJPY": 1.657574025097987
+            },
+            "IPC1-002": {
+              "affinityCount": 7.427677110597125,
+              "purchaseWeightKJPY": 1.7325399925719864
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8275906125491869,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6514607914996586,
+              "purchaseWeightKJPY": 1.793074213428163
+            },
+            "IPC1-008": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 1,
+        "externalAudience": 41,
+        "publicToOtaku": 0,
+        "externalToOtaku": 1,
+        "externalToPublic": 2
+      },
+      "chekiGrossJPY": 4000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-04-23",
+      "eventId": "regular-2014-04-23",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 41.13000925231825,
+          "otakuCount": 26.405764778552786,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 14.788571976292873,
+              "purchaseWeightKJPY": 1.65179150414872
+            },
+            "IPC1-002": {
+              "affinityCount": 7.394285988146437,
+              "purchaseWeightKJPY": 1.7325399925719864
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8238701789504721,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.644036649511472,
+              "purchaseWeightKJPY": 1.793074213428163
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9955045,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 42,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 6000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-04-30",
+      "eventId": "regular-2014-04-30",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 41.79296917829971,
+          "otakuCount": 26.326547484217127,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 14.72208995097345,
+              "purchaseWeightKJPY": 1.648987823341985
+            },
+            "IPC1-002": {
+              "affinityCount": 7.361044975486725,
+              "purchaseWeightKJPY": 1.7266635043300664
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8201664705610003,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6366458827535932,
+              "purchaseWeightKJPY": 1.793074213428163
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9910292095202501,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 45,
+        "publicToOtaku": 0,
+        "externalToOtaku": 1,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 4000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-05-07",
+      "eventId": "regular-2014-05-07",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 42.45062542487331,
+          "otakuCount": 27.244567841764475,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 14.655906795598849,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.3279533977994245,
+              "purchaseWeightKJPY": 1.7266635043300664
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8164794121925933,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9955045,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6292883411876744,
+              "purchaseWeightKJPY": 1.7871661598362583
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9865740377088519,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 41,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 5
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-05-11",
+      "eventId": "graduation-2014-05-11",
+      "contractId": "scenario:graduation",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 47.45062542487331,
+          "otakuCount": 27.244567841764475,
+          "temporarilyUnassignedOtaku": 0,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 14.655906795598849,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.3279533977994245,
+              "purchaseWeightKJPY": 1.7266635043300664
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8164794121925933,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9955045,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6292883411876744,
+              "purchaseWeightKJPY": 1.7871661598362583
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9865740377088519,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 1,
+        "externalAudience": 72,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-05-14",
+      "eventId": "regular-2014-05-14",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 51.03902042147432,
+          "otakuCount": 27.162834138239177,
+          "temporarilyUnassignedOtaku": 9.046153533793296,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.295010583299618,
+              "purchaseWeightKJPY": 1.7266635043300664
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8128089289950816,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9910292095202501,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-005": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 1.6219638754498653,
+              "purchaseWeightKJPY": 1.7871661598362583
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9821388941223318,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 1,
+        "externalAudience": 44,
+        "publicToOtaku": 0,
+        "externalToOtaku": 1,
+        "externalToPublic": 5
+      },
+      "chekiGrossJPY": 2000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-05-21",
+      "eventId": "regular-2014-05-21",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 55.590708258102524,
+          "otakuCount": 28.078345635824462,
+          "temporarilyUnassignedOtaku": 9.019015073191916,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.262215863222395,
+              "purchaseWeightKJPY": 1.7198712600128014
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8091549464547843,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9865740377088519,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9955045,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.610176836847781,
+              "purchaseWeightKJPY": 1.7871661598362583
+            },
+            "IPC1-008": {
+              "affinityCount": 0.977723688723805,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 38,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-05-28",
+      "eventId": "regular-2014-05-28",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 56.1379825920377,
+          "otakuCount": 27.99411059891699,
+          "temporarilyUnassignedOtaku": 8.99195802797234,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.2295685718092795,
+              "purchaseWeightKJPY": 1.7198712600128014
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8055173903929967,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9821388941223318,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9910292095202501,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.598442786877732,
+              "purchaseWeightKJPY": 1.7871661598362583
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9733283318811472,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 1,
+        "externalAudience": 37,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 3
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-06-04",
+      "eventId": "regular-2014-06-04",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 58.6648787313014,
+          "otakuCount": 27.910128267120243,
+          "temporarilyUnassignedOtaku": 8.964982153888423,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.197068046294712,
+              "purchaseWeightKJPY": 1.7198712600128014
+            },
+            "IPC1-003": {
+              "affinityCount": 0.8018961869644851,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.977723688723805,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9865740377088519,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.586761487329323,
+              "purchaseWeightKJPY": 1.7871661598362583
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9689527343651755,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 34,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "chekiGrossJPY": 13000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-06-11",
+      "eventId": "regular-2014-06-11",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 58.19555970145099,
+          "otakuCount": 27.826397882318883,
+          "temporarilyUnassignedOtaku": 8.938087207426758,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.164713626892594,
+              "purchaseWeightKJPY": 1.7066966419412029
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7982912626559863,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9733283318811472,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9821388941223318,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.5751327010630343,
+              "purchaseWeightKJPY": 1.7871661598362583
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9645968073478368,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 36,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "chekiGrossJPY": 1000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-06-18",
+      "eventId": "regular-2014-06-18",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 61.69799522383938,
+          "otakuCount": 27.742918688671924,
+          "temporarilyUnassignedOtaku": 8.911272945804477,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.132504656782899,
+              "purchaseWeightKJPY": 1.7066966419412029
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7947025442847163,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9689527343651755,
+              "purchaseWeightKJPY": 1.7947248125559654
+            },
+            "IPC1-005": {
+              "affinityCount": 0.977723688723805,
+              "purchaseWeightKJPY": 1.8
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.5635561920054055,
+              "purchaseWeightKJPY": 1.7871661598362583
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9602604624004046,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 1,
+        "externalAudience": 38,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 0
+      },
+      "chekiGrossJPY": 8000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-06-25",
+      "eventId": "regular-2014-06-25",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 61.204411262048666,
+          "otakuCount": 27.659689932605907,
+          "temporarilyUnassignedOtaku": 8.884539126967063,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.100440482098333,
+              "purchaseWeightKJPY": 1.7066966419412029
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7911299589968844,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9645968073478368,
+              "purchaseWeightKJPY": 1.7947248125559654
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9733283318811472,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.5520317251442455,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9559436114916836,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 37,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 3
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-06-26",
+      "eventId": "taiban-2014-06-26",
+      "contractId": "scenario:taiban",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 64.20441126204867,
+          "otakuCount": 27.659689932605907,
+          "temporarilyUnassignedOtaku": 8.884539126967063,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.100440482098333,
+              "purchaseWeightKJPY": 1.7066966419412029
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7911299589968844,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9645968073478368,
+              "purchaseWeightKJPY": 1.7947248125559654
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9733283318811472,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.5520317251442455,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9559436114916836,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 2,
+        "externalAudience": 61,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 4
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-07-02",
+      "eventId": "regular-2014-07-02",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 67.65877597195228,
+          "otakuCount": 27.57671086280809,
+          "temporarilyUnassignedOtaku": 8.857885509586161,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.06852045191106,
+              "purchaseWeightKJPY": 1.7066966419412029
+            },
+            "IPC1-003": {
+              "affinityCount": 0.787573434266214,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9602604624004046,
+              "purchaseWeightKJPY": 1.7947248125559654
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9689527343651755,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.5405590665238598,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9516461669862228,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 30,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 2
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-07-09",
+      "eventId": "regular-2014-07-09",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 69.10150576417666,
+          "otakuCount": 27.49398073021966,
+          "temporarilyUnassignedOtaku": 8.831311853057402,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.036743918219494,
+              "purchaseWeightKJPY": 1.7066966419412029
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7840328978924703,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9559436114916836,
+              "purchaseWeightKJPY": 1.7947248125559654
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9645968073478368,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.529137983240302,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9473680416425364,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 1,
+        "externalAudience": 35,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-07-16",
+      "eventId": "regular-2014-07-16",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 69.54069371806325,
+          "otakuCount": 27.411498788029004,
+          "temporarilyUnassignedOtaku": 8.80481791749823,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 7.005110235935138,
+              "purchaseWeightKJPY": 1.7066966419412029
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7805082779999948,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9516461669862228,
+              "purchaseWeightKJPY": 1.7947248125559654
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9602604624004046,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.5177682434366457,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9431091486113324,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 35,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 2
+      },
+      "chekiGrossJPY": 6000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-07-23",
+      "eventId": "regular-2014-07-23",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 70.96836816831875,
+          "otakuCount": 27.329264291664916,
+          "temporarilyUnassignedOtaku": 8.778403463745736,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 6.973618762869492,
+              "purchaseWeightKJPY": 1.7005822781673314
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7769995030362459,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9473680416425364,
+              "purchaseWeightKJPY": 1.7904357616691435
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9559436114916836,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.5064496162982763,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9388694014337503,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0.9955045,
+              "purchaseWeightKJPY": 1.8
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 41,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 3
+      },
+      "chekiGrossJPY": 0,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-07-27",
+      "eventId": "one-man-2014-07-27",
+      "contractId": "scenario:one-man",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 73.96836816831875,
+          "otakuCount": 27.329264291664916,
+          "temporarilyUnassignedOtaku": 8.778403463745736,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 6.973618762869492,
+              "purchaseWeightKJPY": 1.7005822781673314
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7769995030362459,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9473680416425364,
+              "purchaseWeightKJPY": 1.7904357616691435
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9559436114916836,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.5064496162982763,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9388694014337503,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0.9955045,
+              "purchaseWeightKJPY": 1.8
+            }
+          }
+        },
+        "otakuAttendance": 9,
+        "publicAttendance": 4,
+        "externalAudience": 108,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 8
+      },
+      "chekiGrossJPY": 2000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-07-30",
+      "eventId": "regular-2014-07-30",
+      "contractId": "scenario:regular",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 81.3126212229722,
+          "otakuCount": 27.247276498789923,
+          "temporarilyUnassignedOtaku": 8.7520682533545,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 6.942268859721013,
+              "purchaseWeightKJPY": 1.6961186257796315
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7735065017703464,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9431091486113324,
+              "purchaseWeightKJPY": 1.78573626375881
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9516461669862228,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.4951818720482075,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9346487140396049,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0.9910292095202501,
+              "purchaseWeightKJPY": 1.8
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 0,
+        "externalAudience": 37,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 1
+      },
+      "chekiGrossJPY": 2000,
+      "queueLostJPY": 0
+    },
+    {
+      "date": "2014-08-02",
+      "eventId": "tif-2014-08-02",
+      "contractId": "scenario:festival",
+      "fanFlow": {
+        "opening": {
+          "publicCount": 82.3126212229722,
+          "otakuCount": 27.247276498789923,
+          "temporarilyUnassignedOtaku": 8.7520682533545,
+          "members": {
+            "IPC1-001": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 1.643554524285123
+            },
+            "IPC1-002": {
+              "affinityCount": 6.942268859721013,
+              "purchaseWeightKJPY": 1.6912032878500742
+            },
+            "IPC1-003": {
+              "affinityCount": 0.7735065017703464,
+              "purchaseWeightKJPY": 1.7933744849516469
+            },
+            "IPC1-004": {
+              "affinityCount": 0.9431091486113324,
+              "purchaseWeightKJPY": 1.78573626375881
+            },
+            "IPC1-005": {
+              "affinityCount": 0.9516461669862228,
+              "purchaseWeightKJPY": 1.7899754365051879
+            },
+            "IPC1-006": {
+              "affinityCount": 0,
+              "purchaseWeightKJPY": 0
+            },
+            "IPC1-007": {
+              "affinityCount": 2.4951818720482075,
+              "purchaseWeightKJPY": 1.7796961341699888
+            },
+            "IPC1-008": {
+              "affinityCount": 0.9346487140396049,
+              "purchaseWeightKJPY": 1.7889607857524896
+            },
+            "IPC1-009": {
+              "affinityCount": 0.9910292095202501,
+              "purchaseWeightKJPY": 1.8
+            }
+          }
+        },
+        "otakuAttendance": 3,
+        "publicAttendance": 2,
+        "externalAudience": 130,
+        "publicToOtaku": 0,
+        "externalToOtaku": 0,
+        "externalToPublic": 6
+      },
+      "chekiGrossJPY": 3000,
+      "queueLostJPY": 0
+    }
+  ]
+}

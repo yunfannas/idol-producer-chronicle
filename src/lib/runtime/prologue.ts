@@ -13,6 +13,30 @@ import type {
 
 const FOUNDER_IDS = ["IPC1-001", "IPC1-002", "IPC1-003"] as const;
 
+/**
+ * Scenario-owned opening fan asset for the three founding members.
+ *
+ * v0.9 §17.1 is historical context only: it gives the founding team 30
+ * existing Otaku (20 associated with Rina, 10 with Yuka), but does not give a
+ * de-duplicated Public count or a measured purchasing propensity.  Runtime
+ * v1 does not persist Core, so the 30 are represented once as team O and the
+ * two associations as member affinity.  The purchase weight deliberately
+ * uses the named executable-formula default as a TUNABLE Scenario input; it
+ * is not a claim about historical spending.
+ */
+export const prologueFounderFanSeedV1 = {
+  version: "prologue-founder-fan-seed-v1",
+  source: "Chronicle v0.9 §17.1 founder-history reference; v0.10 contains no conflicting opening fan seed",
+  publicCount: 0,
+  otakuCount: 30,
+  initialPurchaseWeightKJPY: 1.8,
+  affinityByFounder: {
+    "IPC1-001": 20,
+    "IPC1-002": 10,
+    "IPC1-003": 0,
+  },
+} as const;
+
 const CANDIDATES = [
   ["IPC1-004", "水瀬紗月"], ["IPC1-005", "瀬戸夏帆"], ["IPC1-006", "藤咲美緒"],
   ["IPC1-007", "朝倉七海"], ["IPC1-008", "白石凛花"], ["IPC1-009", "桐谷玲音"],
@@ -98,6 +122,16 @@ export function createPrologueSchedule(): RuntimeEvent[] {
 export function createPrologueState(input: { saveId: string; difficulty?: Difficulty }): PrologueState {
   const gates = emptyGates();
   gates.G00 = true;
+  const fan = createFanState(founders.map((member) => member.id), {
+    publicCount: prologueFounderFanSeedV1.publicCount,
+    otakuCount: prologueFounderFanSeedV1.otakuCount,
+  });
+  for (const [memberId, affinityCount] of Object.entries(prologueFounderFanSeedV1.affinityByFounder)) {
+    fan.members[memberId] = {
+      affinityCount,
+      purchaseWeightKJPY: affinityCount > 0 ? prologueFounderFanSeedV1.initialPurchaseWeightKJPY : 0,
+    };
+  }
   return {
     saveId: input.saveId,
     difficulty: "normal", // legacy save compatibility; there is no difficulty selection
@@ -105,7 +139,7 @@ export function createPrologueState(input: { saveId: string; difficulty?: Diffic
     apRemaining: 6,
     interviewedCandidateIds: [],
     members: founders,
-    fan: createFanState(founders.map((member) => member.id)),
+    fan,
     gates,
     events: createPrologueSchedule(),
     finance: createFinanceState(3_000_000),
@@ -145,7 +179,14 @@ export function signRoster(state: PrologueState, candidateIds: string[]): Prolog
     };
   });
   const members = [...founders, ...additions];
-  return { ...state, members, fan: createFanState(members.map((member) => member.id)), gates: { ...state.gates, G02: true } };
+  // Contracting newcomers must extend the existing P/O/A/W state, never
+  // recreate it.  In particular, the Scenario's founding asset is not a
+  // reward for signing six members and may not be copied to them.
+  const fanMembers = {
+    ...state.fan.members,
+    ...Object.fromEntries(additions.map((member) => [member.id, { affinityCount: 0, purchaseWeightKJPY: 0 }])),
+  };
+  return { ...state, members, fan: { ...state.fan, members: fanMembers }, gates: { ...state.gates, G02: true } };
 }
 
 export function completeStrategyAndOriginals(state: PrologueState): PrologueState {

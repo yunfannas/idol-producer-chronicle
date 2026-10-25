@@ -1,0 +1,164 @@
+{
+  "scenarioVersion": "staff-autoplay-scenario-v4-founder-fan-seed",
+  "tuningVersion": "fanChekiBalanceV1",
+  "founderSeedVersion": "prologue-founder-fan-seed-v1",
+  "B100": {
+    "seedCount": 100,
+    "completedTif": 100,
+    "debtDistress": 0,
+    "finalOtaku": {
+      "mean": 29.97784553441665,
+      "p10": 27.136366816867085,
+      "p50": 30.068129731164476,
+      "p90": 33.004679694159364
+    },
+    "finalPublicMean": 103.63038044248971,
+    "finalCash": {
+      "mean": 404603.5,
+      "p10": 345250,
+      "p50": 404550,
+      "p90": 464500
+    },
+    "globalMinimumCash": 191150,
+    "chekiGross": {
+      "mean": 110270,
+      "positiveRuns": 100
+    },
+    "grades": {
+      "fans": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 100
+      },
+      "performance": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 100,
+        "E": 0
+      },
+      "business": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 100
+      },
+      "overall": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 100
+      }
+    }
+  },
+  "A20": {
+    "seedCount": 20,
+    "completedTif": 0,
+    "debtDistress": 20,
+    "finalOtaku": {
+      "mean": 29.364176266417367,
+      "p10": 27.247276498789923,
+      "p50": 29.228391722330134,
+      "p90": 31.06036338607489
+    },
+    "finalPublicMean": 103.8151360439293,
+    "finalCash": {
+      "mean": -888140,
+      "p10": -967400,
+      "p50": -885900,
+      "p90": -835450
+    },
+    "globalMinimumCash": -1003650,
+    "chekiGross": {
+      "mean": 104450,
+      "positiveRuns": 20
+    },
+    "grades": {
+      "fans": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      },
+      "performance": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 20,
+        "E": 0
+      },
+      "business": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      },
+      "overall": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      }
+    }
+  },
+  "C20": {
+    "seedCount": 20,
+    "completedTif": 20,
+    "debtDistress": 0,
+    "finalOtaku": {
+      "mean": 28.618880051337367,
+      "p10": 25.437180942942007,
+      "p50": 28.203965741727835,
+      "p90": 31.057310432134088
+    },
+    "finalPublicMean": 88.43566884199397,
+    "finalCash": {
+      "mean": 883340,
+      "p10": 801000,
+      "p50": 885300,
+      "p90": 942400
+    },
+    "globalMinimumCash": 700750,
+    "chekiGross": {
+      "mean": 106300,
+      "positiveRuns": 20
+    },
+    "grades": {
+      "fans": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      },
+      "performance": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 20,
+        "E": 0
+      },
+      "business": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      },
+      "overall": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 20
+      }
+    }
+  }
+}
