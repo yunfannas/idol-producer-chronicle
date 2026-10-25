@@ -4,6 +4,12 @@
 **作用域**：将研究数据和设计规则转化为 Chronicle 自有的游戏状态、函数接口、结算顺序和测试，不在游戏里导入研究脚本或复制 L1/L2 推断流程。  
 **与 Chronicle v0.10 的关系**：v0.10 负责剧情、时间、产品交互和序章合同；本文件负责共用 Simulation Kernel 的**当前权威模型迁移边界**。遇到旧 v0.10 对 persistent Core 的描述，以本文件引用的 Fan Market v0.2 为准；待正式合并时清除旧字段。
 
+## 已完成的专项公式提取（2026-10-24）
+
+- **[Member · Training · Condition · Performance Kernel v0.1](Chronicle_Member_Training_Condition_Performance_Kernel_v0.1.md)**：17 Attr、EXP、Formation Familiarity、Condition、逐曲消耗/恢复、Part/Team/Member Impression、Staff AP 约束与 12 项测试。八色 Palette 的精确公式仍为 `SOURCE_PENDING`，不把旧十色算法当最终实现。
+- **[Fan Market · Cheki · Commercial Kernel v0.1](Chronicle_Fan_Cheki_Commercial_Kernel_v0.1.md)**：P/O/A_i/W_i、逐成员购买力与双档 Cheki、5 秒换粉 overhead、60 分钟基线、收入唯一性、周转化接口与 12 项测试。获客/留存概率和队列购买行为仍为 `TUNABLE`。
+- **后续待提取**：八色 Palette v2.0 最新冻结数据契约、World/Operations/Staff 的完整可执行参数、L3 导出 schema 与历史回归 fixtures。专项文件优先于本总索引中简化摘要；旧 03 v0.3 的十色/Core/旧 Overall 不得复活。
+
 ## 1. 来源权威与迁移纪律
 
 - **L1**（可核事实）→ **L2A/L2B**（证据/研究与推断）→ **L3**（特定剧本日期的游戏开档状态）→ **L4**（玩家存档、反事实世界）。只把 L3 经过校验的静态数据和 Runtime 参数带进 Chronicle；**L2 评分、销量和历史推断不应在玩家每周更新时重复施加**。
