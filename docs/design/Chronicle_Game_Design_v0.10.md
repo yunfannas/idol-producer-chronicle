@@ -49,7 +49,7 @@
 - **两首原创**各暂定 ¥180,000，走唯一确定的委托→制作→交付→编舞→排练流程，**在 2013-05-24 出道前按固定制作进度完成，不设置随机失败/延期分支**；练习熟练度与实际演出效果可变。制作预算是否含编舞老师须明确费用归属，严禁重复收费。
 - 虚构翻唱候选库 12 首，推荐六首（年度报价合计 ¥93,000，TUNABLE），玩家可选择更多或更少；无“必须六首”硬门槛。只有已授权、已编排的曲目可用，未熟练可演出但表现真实受损。
 - 首套服装设计 ¥30,000 + ¥25,000 × 正式成员数；训练 Low 2×2h/周、Medium 3×2h/周、High 4×3h/周，排练室 ¥2,500/h；按真实执行扣费，禁止按成员人数重复扣共享排练室租金。
-- Song intrinsic Palette、presented Palette、Formation/Lead、Familiarity、成员17 Attr/Traits 与 Performance 均调用已审核父系统/Runtime，不因 Chronicle 创建第二套算法。
+- Song intrinsic Palette、八色 Palette Execution、Key-Part Assignment、Familiarity、成员17 Attr/Traits 与 Performance 按已审核的共用模型实现；Chronicle **不模拟站位/Center/Front/Back 的曝光加成**，只保留关键段落的第一/第二/第三候补与 Staff 自动补位。完整优先级、轮换边界、简化 Impression 公式见 [Key-Part Assignment & Rotation v0.1](Chronicle_Key_Part_Assignment_and_Rotation_v0.1.md)。
 - 小/中团正常 Live 默认全员；大团由既定 Live Policy/Staff 形成出征名单，玩家可在策略会议或关键活动介入；不在名单的成员不获该场舞台曝光或 Cheki（**出道场全体正式成员可参加特典会的特殊合同除外**）。
 
 ## 4. 活动合同和 Live 经济
