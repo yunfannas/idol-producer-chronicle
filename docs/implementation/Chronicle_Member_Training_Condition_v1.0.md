@@ -6,6 +6,7 @@
 
 - 17 项 Attribute（0–20）、8 核心 Attribute EXP、Morale/Confidence、单一 Condition、Vocal/Physical 异常；**不使用持久 PhysicalFatigue/VocalFatigue 或隐藏 WorkRate 等属性**。
 - Chronicle **不模拟站位**；下文历史术语 `Arrangement Familiarity` 即“歌曲版本与关键段落的排练熟练度”，不是位置/center/front 加成。临时替补读取实际担当的熟练度，不继承第一候补的个人准备。
+- `TeamTierFactor` 为源公式的历史名称：Chronicle 用 `TrainingEnvironmentFactor`（Scenario 隐藏参数，`TUNABLE`）替代；原 E–S 倍率表只供校准，不要求计算或显示 Tier。
 - Training intensity 属于章节已确定的 R2/R3 运营配置，**不是**玩家每周可更改的自由 Policy。玩家可通过剧本授权的开局决策设定一次；Staff 按章节配置自动执行。
 - 本文件包含已抽取的确定公式；`StaminaMultiplier`、`NFMultiplier` 完整插值、异常风险系数、BaseQuality Fit 曲线未锁定，统一见实施入口的缺口表。
 
@@ -53,7 +54,7 @@ type CoreAttribute = "pitch"|"tone"|"breath"|"rhythm"|"agility"|"power"|"stage_p
 GrowthEXP_a =
   EffectiveHours × 1.0 × SourceFactor × AttributeDifficulty_a
   × FocusFactor_a × WitFactor × AgeFactor × TenureFactor
-  × TeamTierFactor × CurrentLevelFactor_a × AbnormalityFactor_a
+  × TrainingEnvironmentFactor × CurrentLevelFactor_a × AbnormalityFactor_a
 
 WitFactor = clamp(1 + 0.035 × (Wit−12), 0.75, 1.30)
 AgeFactor = clamp(1.15 − 0.025 × (Age−18), 0.65, 1.15)
@@ -62,7 +63,7 @@ CurrentLevelFactor_a = 1 − 0.02 × max(0, Attribute_a−10)
 AttributeDifficulty_a = 0.8 if a∈{tone,agility}, else 1.0
 ```
 
-TeamTierFactor：E=.94、D=1.00、C=1.06、B=1.12、A=1.18、S=1.24，细分 +/- 约每半档 ±.02（**需要统一插值表**）。
+**历史校准锚（非 Chronicle Tier 表）**：原 E=.94、D=1.00、C=1.06、B=1.12、A=1.18、S=1.24。Chronicle 仅从 Scenario 读取 `TrainingEnvironmentFactor`，无跨团评级、无 +/- 插值要求；具体章值 `TUNABLE`。
 
 | 真实活动 | SourceFactor | Focus |
 |---|---:|---|
