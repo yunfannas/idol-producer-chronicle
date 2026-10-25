@@ -8,9 +8,10 @@
 |---|---|---|
 | 1 | [Policy / Scenario / Workflows](Chronicle_Policy_Scenario_Workflows_v1.0.md) | R4 全游戏固定；R2/R3 章节固定；仅 R1 可调；剧本甄选、Staff、玩家交互 |
 | 2 | [Member / Training / Condition](Chronicle_Member_Training_Condition_v1.0.md) | 17 Attr、8 EXP、Familiarity、单一 Condition、恢复/风险、Staff AP |
-| 3 | [Performance / Palette / Assignment](Chronicle_Performance_Palette_Assignment_v1.0.md) | 八色、Opp3、PE、关键段落 1/2/3、Env 单次作用、Part/Member/Team Impression |
-| 4 | [Fan / Cheki / Finance](Chronicle_Fan_Cheki_Finance_v1.0.md) | P/O/A_i/W_i、特典会队列与实收、普通拼盘合同、财务唯一账本 |
-| 5 | [Tier / Brand Calibration — archive only](Chronicle_Tier_Brand_Calibration_v1.0.md) | **非 Chronicle Runtime 必需**；仅供开发者历史标定查阅，不实现完整 0–10000 Tier、跨团排行或行业地位评价 |
+| 3 | [Technical Performance — attribute-specific](Chronicle_Technical_Performance_Kernel_v1.0.md) | Breath/Rhythm 连续基线；Pitch/Agility 概率失误；Tone/Power 正向加成；Stage Presence 最终系数；Stamina 负荷 |
+| 4 | [Performance / Palette / Assignment](Chronicle_Performance_Palette_Assignment_v1.0.md) | 八色、Opp3、PE、关键段落 1/2/3、Env 单次作用、Part/Member/Team Impression |
+| 5 | [Fan / Cheki / Finance](Chronicle_Fan_Cheki_Finance_v1.0.md) | P/O/A_i/W_i、特典会队列与实收、普通拼盘合同、财务唯一账本 |
+| Appendix | [Tier / Brand Calibration — archive only](Chronicle_Tier_Brand_Calibration_v1.0.md) | **非 Chronicle Runtime 必需**；仅供开发者历史标定查阅，不实现完整 0–10000 Tier、跨团排行或行业地位评价 |
 | 6 | [Chronicle Game Design v0.10](../design/Chronicle_Game_Design_v0.10.md) | 序章人物、具体日期、剧情里程碑、合同和验收；**若旧 UI/Policy 描述冲突，以本目录 1–5 优先** |
 
 **Chronicle 展示与数据裁剪规则（LOCKED）**：不提供 Idol World Tier 表、Overall 评分、行业 Top50、跨团排名、其他团或本团的行业地位评价 UI/API。其他团仅以有必要的活动参演者、剧本人物和竞争日程出现。内部可保留少量由 Scenario 提供的活动难度、资源/曝光权重，但不得因此要求建立完整行业 Tier 或全团评分库。第五份 Tier 文档是历史校准附录，**不属于必读实施规范**。
@@ -47,7 +48,7 @@ chapter opening snapshot / cutoff → scripted policy & roster
   → resolve first/second/third key duty candidates (else staff)
   → song-by-song: Condition/abnormality → technical Fit
   → BasePE + key contrast → EnvPalette once → PaletteMultiplier
-  → Part Impression → Team / Member Impression → Condition cost/EXP
+  → Attribute-specific Vocal/Dance + StagePresence → Part Impression → Team / Member Impression → Condition cost/EXP
   → Completed Live outcome (immutable, unique liveId)
   → ticket/ordinary goods contract ledger
   → per-member Cheki queue → actual units → gross/share/cost ledger
@@ -65,7 +66,7 @@ chapter opening snapshot / cutoff → scripted policy & roster
 | Attributes | 17项；8 EXP、Wit/Age/Tenure/level、weekly decay、Familiarity维护 | Ability 五轴内部精确权重；章节训练环境倍率、异常 EXP 折扣 |
 | Condition | 单一 Condition；A(E)、Wraw/song；恢复/睡眠；FatigueDebt | Stamina/NF 全域插值、异常风险 BaseRisk、StatusFactor 标定 |
 | Palette | 8色语义/归一化；BasePE；Opp3；key bonus cap12；PE multiplier；8色 Load/Capacity | **Env×PE 的单次合并函数**、Env World/Live动态、成长 EventScale/Venue/Role 系数、历史八色回归 |
-| Performance | BaseQuality×aesthetic×PartExposure×ArrangementExecution；DutyShare 无 standing；Expected 四输入 | Technical Fit、PartExposure、ArrangementExecution、观众层权重、Expected 因子/alpha |
+| Performance | Singing(Breath/Rhythm baseline, Pitch failure, Tone bonus)；Dance(Rhythm baseline, Agility failure, Power bonus)；StagePresence final；Palette×PartExposure×ArrangementExecution；DutyShare 无 standing | 各属性连续函数与失误概率曲线、Tone/Power bonus、StagePresence、PartExposure、ArrangementExecution、观众层权重、Expected 因子/alpha |
 | Fan | P/O/A/W、购买力 A×W、周 momentum、毕业处理 | P→O、O→A、W变化、流失、multi-oshi overlap、EventFactor/PublicTrial、竞争 |
 | Cheki | 1000/2000双档、20% gross佣金、每粉5s overhead、60min基线、真实容量/ledger | 商品时长/耗材、购买选择/复购/放弃、临时延长 |
 | Live/Finance | 普通拼盘 15%/N + 25%目当池、特殊合同、现金唯一性 | 目当缺失 fallback、到场概率、预算/借款具体校准 |
@@ -87,7 +88,7 @@ chapter opening snapshot / cutoff → scripted policy & roster
 | I05 | Key contrast | yellow对向紫/红/粉按.25/.5/.25；Ochi上限+8、全曲key总cap+12 |
 | I06 | PE→M | PE0=.4，45=1，100=2；Env=1退化原 PE（集成测试） |
 | I07 | Live Condition | 逐曲扣/恢复，不建双疲劳；排练 EXP 和 Familiarity 不重复 |
-| I08 | 现场表现 | MemberImpression 只按实际 DutyShare；不存在 StandingExposure |
+| I08 | 现场表现 | Breath/Rhythm 连续、Pitch/Agility 只在不足时概率扣分、Tone/Power 正向 bonus、StagePresence 最终乘数；MemberImpression 只按实际 DutyShare；无 StandingExposure |
 | I09 | Fan/Cheki | 允许 ΣA_i>O；2000元商品不是两张1000；佣金按 gross 20%；5秒换粉 |
 | I10 | 财务 | 免费商场0收费收入；5/24出道门票0/场租0；特殊活动不套普通拼盘 |
 | I11 | 月度进展 | 展示本团动员、收入、粉丝变化、歌曲/成员成长及章节目标；无完整 Tier 分段、跨团排名、本团行业地位评价 |
@@ -97,6 +98,6 @@ chapter opening snapshot / cutoff → scripted policy & roster
 
 ## 6. Agent 交付与验收
 
-1. **只读取本目录 1–4 + 本地 Game Design v0.10**，禁止把研究仓库作为实现依赖。
+1. **只读取本目录 1–5 + 本地 Game Design v0.10**，禁止把研究仓库作为实现依赖。
 2. 在 PR 中提供：本地公式→代码函数/字段的映射、`LOCKED/TUNABLE/NOT_IMPLEMENTED` 清单、seeded regression fixtures、逐模块单测、端到端 3/5/9/15 人序章回归。
 3. 不得把设计文档提交视为 Runtime 完成；每个缺口需显式 issue/测试标记。当前仅完成文档迁移，**未声称运行测试**。
