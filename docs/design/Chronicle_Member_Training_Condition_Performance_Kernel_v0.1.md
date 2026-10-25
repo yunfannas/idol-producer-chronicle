@@ -1,5 +1,7 @@
 # Chronicle｜Member · Training · Condition · Performance Kernel v0.1
 
+> **2026-10-24 更新后的权威覆盖**：`idol-data-lab/main@5499e7c5355b` 已将 03C/03E/03H 改为八色。本文件 §0 关于“03H仍是十色”和 §6 的 `SOURCE_PENDING`/旧十色公式**现已失效**；八色执行、Opp3、PE倍率、成长求和及最新测试请直接使用 [Eight-Color Palette · Performance Kernel v0.2](Chronicle_Eight_Color_Palette_Performance_Kernel_v0.2.md)。本文件其他成员属性、Training、Condition 和 Part/Impression 结构继续有效，直到更高版本替代。禁止实现本文件 §6 历史十色公式。
+
 **状态**：公式抽取 / Implementation handoff（2026-10-24）。本文件把 `idol-data-lab` 已确认的游戏规则变成可实现的输入、持久状态、运算和测试。**不是 Runtime 已实现证明**。  
 **适用**：所有 Chronicle 剧本、AI 背景团和玩家团；序章以 2013–2014 的实际成员/歌曲/日程为输入，不复制另一套序章专用表现公式。  
 **权威冲突处理**：当前 Fan Market v0.2 与八色 Palette v2.0 覆盖早期三层 Core 与十色色轮；本文件**不会**把十色权重直接换成八个槽位。各条以 `LOCKED`（源有确定规则）、`TUNABLE`（形状确定、参数缺失）、`SOURCE_PENDING`（当前来源未找到最终公式）、`DEPRECATED` 标记。
