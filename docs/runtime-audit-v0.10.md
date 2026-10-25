@@ -99,3 +99,16 @@ to produce the actual Performance, attendance, Fan conversion/retention, or
 member-level Cheki demand required to resolve the Live. This is the correct
 Staff-automation boundary; resolving it with zero or fabricated demand would
 make a checkable-looking but false 5/9/15 route report.
+
+## Implementation Pack migration (2026-10-24)
+
+The repository now supplies `docs/implementation/README.md` and its v1.0
+modules as the local authority. The earlier “wait for a parent Runtime” gap is
+therefore superseded. This first migration adds the executable, replay-stable
+eight-color PE/contrast kernel and Fan Market state (`P/O/A_i/W_i`, with no
+persisted Core), attendance sampling, weekly aggregate decay, Gamma purchase
+intent and product-request step. These are separate from actual Cheki sales:
+the shared queue must still determine capacity and completed units before the
+Finance ledger posts cash. Remaining technical Fit, EnvPalette bridge, complete
+queue/event momentum and Scenario seed calibration stay explicitly
+`TUNABLE`/`NOT_IMPLEMENTED` until their v1 contracts are wired end-to-end.

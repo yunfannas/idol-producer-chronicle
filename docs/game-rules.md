@@ -8,16 +8,17 @@ events, balances, or mandatory historical outcomes.
 | Concern | Authoritative source |
 | --- | --- |
 | Story scope, chronology, gates, and scenario consequences | [Game Design v0.10](design/Chronicle_Game_Design_v0.10.md), especially §§0–9 |
-| Fan, Live, Member Feedback, and Weekly Review presentation | [Game Design v0.10](design/Chronicle_Game_Design_v0.10.md) §§5 and 8, plus [Feedback rhythm v0.1](design/Feedback_Rhythm_and_Milestones_v0.1.md) where it does not conflict |
+| Runtime formulas, Fan/Cheki, Performance, Finance and policy | [Implementation Pack v1.0](implementation/README.md) and its linked v1.0 modules |
+| Live, Member Feedback, Weekly Review presentation | [Game Design v0.10](design/Chronicle_Game_Design_v0.10.md) §§5 and 8, plus [Feedback rhythm v0.1](design/Feedback_Rhythm_and_Milestones_v0.1.md) where it does not conflict |
 | Localization and player-visible naming | [Terminology v0.2](design/Terminology_ZH_JA_EN_v0.2.md) |
 | Initial roster calibration and October candidate pool | [data directory](data/) and v0.10 §2 |
 | Superseded reasoning or source context | [design archive](design/archive/) and v0.9 only, subject to v0.10 precedence |
 | Implementation sequencing | [Project tracker](PROJECT_TRACKER.md) and v0.10 §9 |
 
-Inherited engine formulas (17 attributes, traits, palette, Performance, fan
-and economy calculations) remain outside this navigation document. Use the
-reviewed parent-game and `idol-data-lab` contracts; do not recreate a formula
-from prose or turn a calibration value into a new formula.
+Runtime formulas live in the checked-in Implementation Pack. Implement its
+`LOCKED` kernels directly; keep its `TUNABLE` and `INTEGRATION_PENDING`
+parameters versioned and explicit rather than deriving replacements from old
+research prose.
 
 ## Implementation invariants
 

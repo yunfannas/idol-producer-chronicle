@@ -16,6 +16,7 @@ entry points, not replacement specifications.
 
 - For story-mode scope, chronology, implementation priority, and source
   precedence: `docs/product-context.md`, then
+  `docs/implementation/README.md`, then
   `docs/design/Chronicle_Game_Design_v0.10.md`.
 - For Inbox, Calendar, Members, Manage, mobile interaction, reports, and
   language: `docs/ux-flows.md`, the v0.10 sections it links, and
@@ -24,11 +25,12 @@ entry points, not replacement specifications.
   `docs/art-direction.md`, `docs/design/Visual_Asset_Inventory_v0.1.md`, and
   `docs/portrait-generation.md` when applicable.
 - For scenario rules, data boundaries, auditions, Live, finance, and event
-  implementation: `docs/game-rules.md`, v0.10, `docs/data/`, and the relevant
-  archived note under `docs/design/archive/`.
+  implementation: `docs/game-rules.md`, the relevant module in
+  `docs/implementation/`, v0.10, `docs/data/`, and the relevant archived note
+  under `docs/design/archive/`.
 
-`Chronicle_Game_Design_v0.10.md` governs Chronicle story UX. The parent game
-design and `idol-data-lab` govern inherited engine formulas; do not recreate
-or silently alter those formulas here. Treat the pending-integration register
+`docs/implementation/README.md` and its linked v1.0 modules govern Chronicle
+Runtime formulas; `Chronicle_Game_Design_v0.10.md` governs story UX, dates and
+contracts. Treat the pending-integration register
 in `docs/game-rules.md` as design input only: it is not a Runtime contract
 until it is reconciled into an authoritative specification.

@@ -1,4 +1,5 @@
 import { chekiLedgerEntries, settleChekiSales } from "./cheki";
+import { createFanState } from "./fan";
 import { createFinanceState, INITIAL_CASH, postLedgerEntry } from "./finance";
 import type {
   ChekiSaleInput,
@@ -98,6 +99,7 @@ export function createPrologueState(input: { saveId: string; difficulty: Difficu
     apRemaining: 6,
     interviewedCandidateIds: [],
     members: founders,
+    fan: createFanState(founders.map((member) => member.id)),
     gates,
     events: createPrologueSchedule(),
     finance: createFinanceState(INITIAL_CASH[input.difficulty]),
@@ -135,7 +137,8 @@ export function signRoster(state: PrologueState, candidateIds: string[]): Prolog
       contractEndsOn: "2015-01-07", chekiCommissionRate: 0.2, fitnessCondition: 100,
     };
   });
-  return { ...state, members: [...founders, ...additions], gates: { ...state.gates, G02: true } };
+  const members = [...founders, ...additions];
+  return { ...state, members, fan: createFanState(members.map((member) => member.id)), gates: { ...state.gates, G02: true } };
 }
 
 export function completeStrategyAndOriginals(state: PrologueState): PrologueState {

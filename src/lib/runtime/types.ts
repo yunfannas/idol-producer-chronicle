@@ -4,6 +4,9 @@
  */
 
 export type Difficulty = "easy" | "normal" | "hard";
+export type Color8 = "red" | "pink" | "orange" | "aqua" | "yellow" | "green" | "blue" | "purple";
+export type SongPalette = Record<Color8, number>;
+export type DevelopedPalette = Record<Color8, number>;
 export type EventStatus =
   | "DORMANT"
   | "ELIGIBLE"
@@ -44,6 +47,22 @@ export type RuntimeMember = {
   chekiCommissionRate: number;
   monthlySalary?: number;
   fitnessCondition: number;
+  developedPalette?: DevelopedPalette;
+};
+
+/** Fan Market v0.2 / executable v1: Core and BoxRate are intentionally absent. */
+export type FanState = {
+  publicCount: number;
+  otakuCount: number;
+  temporarilyUnassignedOtaku: number;
+  members: Record<string, { affinityCount: number; purchaseWeightKJPY: number }>;
+};
+
+export type FanAttendance = {
+  otaku: number;
+  public: number;
+  external: number;
+  frequencyFactor: number;
 };
 
 export type ActivityLoad = {
@@ -114,11 +133,7 @@ export type ChekiSettlementLine = {
   slotsUsed: number;
 };
 
-/**
- * The parent runtime owns these hidden systems. Chronicle supplies actual
- * completed-event facts, then consumes its result without inspecting raw
- * Performance or conversion values in player-facing reports.
- */
+/** Optional integration hooks; local implementation owns its persisted state. */
 export type ParentRuntimePorts = {
   performance?: (input: {
     liveId: string;
@@ -144,6 +159,7 @@ export type PrologueState = {
   apRemaining: number;
   interviewedCandidateIds: string[];
   members: RuntimeMember[];
+  fan: FanState;
   gates: Record<PrologueGate, boolean>;
   events: RuntimeEvent[];
   finance: FinanceState;

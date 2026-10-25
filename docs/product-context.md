@@ -5,8 +5,10 @@ authoritative specifications instead of reproducing their rules or numbers.
 
 ## Read first
 
+- [Chronicle Runtime Implementation Pack v1.0](implementation/README.md) is
+  the current implementation authority for Runtime formulas and contracts.
 - [Chronicle Game Design v0.10](design/Chronicle_Game_Design_v0.10.md) is the
-  sole current implementation authority for Chronicle story mode and mobile UX.
+  authority for Chronicle story mode, dates, contracts and mobile UX.
   [v0.9](design/Chronicle_Game_Design_v0.9.md) is historical/supplementary only
   where it does not conflict with v0.10.
 - [Project tracker](PROJECT_TRACKER.md) maps the work to Vertical Slice A–C
@@ -16,10 +18,10 @@ authoritative specifications instead of reproducing their rules or numbers.
 - [Feedback rhythm](design/Feedback_Rhythm_and_Milestones_v0.1.md) is the
   detailed Live Report → Member Feedback → Weekly Review protocol.
 
-The parent game design and `idol-data-lab` remain authoritative for inherited
-performance, palette, member-attribute, fan, and economy formulas. This repo
-consumes reviewed, versioned data; it does not create a parallel simulation
-specification.
+The checked-in Implementation Pack is the approved local source for inherited
+performance, palette, member-attribute, fan and economy formulas. Do not make
+`idol-data-lab` a Runtime dependency or use it to fill a local implementation
+gap without an explicit versioned update.
 
 ## Product frame
 
@@ -37,7 +39,7 @@ before opening a new implementation stream.
 
 ## Source precedence
 
-1. Approved, current upstream specifications and reviewed Runtime contracts.
+1. `docs/implementation/README.md` and its linked v1.0 modules for Runtime.
 2. v0.10 for Chronicle's prologue and mobile requirements when those
    requirements do not change inherited engine behavior.
 3. The terminology, feedback, visual-inventory, calibration, and tracker files

@@ -3,6 +3,9 @@ import { DEFAULT_CHEKI_TIERS, settleChekiSales } from "./cheki";
 import { calculateTaibanTicketRevenue, postLedgerEntry } from "./finance";
 import { applyActivityLoad, conditionAmplifier, liveSongGeneralLoad } from "./performance";
 import { advanceWithStaff, startTestRoute } from "./operations";
+import { applyWeeklyFanDecay, createFanState, requestProductsForBudget, sampleFanAttendance, samplePurchaseBudgetKJPY } from "./fan";
+import { createSeededRandom } from "./random";
+import { emptyPalette, finalPaletteExecution, paletteMultiplier } from "./palette";
 import {
   completeMandatoryInterview,
   completeStrategyAndOriginals,
@@ -25,6 +28,44 @@ function offer(state: ReturnType<typeof createPrologueState>, eventId: string) {
 }
 
 describe("Chronicle parent-runtime contracts", () => {
+  it("uses the locked eight-color PE and applies its multiplier once", () => {
+    const yellowSong = { ...emptyPalette(), yellow: 1 };
+    const participant = { ...emptyPalette(0), yellow: 100, red: 100 };
+    const finalPE = finalPaletteExecution({
+      song: yellowSong,
+      participantPalettes: [participant],
+      keyParts: [{ maxBonus: 8, dutyPalette: participant, familiarity: 100 }],
+    });
+    expect(finalPE).toBe(100);
+    expect(paletteMultiplier(45)).toBe(1);
+    expect(paletteMultiplier(100)).toBe(2);
+  });
+
+  it("uses one deterministic P/O audience and keeps fan decay aggregate-only", () => {
+    const fan = createFanState(["member"], { publicCount: 500, otakuCount: 300 });
+    fan.members.member = { affinityCount: 80, purchaseWeightKJPY: 3 };
+    const first = sampleFanAttendance({ fan, kind: "taiban", seed: "live-1" });
+    const replay = sampleFanAttendance({ fan, kind: "taiban", seed: "live-1" });
+    expect(first).toEqual(replay);
+    expect(first.frequencyFactor).toBe(1);
+    const decayed = applyWeeklyFanDecay(fan);
+    expect(decayed.publicCount).toBeCloseTo(496);
+    expect(decayed.members.member.affinityCount).toBeLessThan(80);
+    expect("coreCount" in decayed).toBe(false);
+  });
+
+  it("models W as mean purchase intent before the queue, not guaranteed sales", () => {
+    const random = createSeededRandom("gamma-smoke");
+    const samples = Array.from({ length: 20_000 }, () => samplePurchaseBudgetKJPY(3, random));
+    expect(samples.reduce((sum, sample) => sum + sample, 0) / samples.length).toBeCloseTo(3, 1);
+    const request = requestProductsForBudget({
+      budgetKJPY: 3, weightKJPY: 3,
+      products: [{ id: "1000", priceJPY: 1000 }, { id: "2000", priceJPY: 2000 }],
+      random: createSeededRandom("products"),
+    });
+    expect((request["1000"] ?? 0) + (request["2000"] ?? 0)).toBeGreaterThan(0);
+  });
+
   it("uses the locked unified condition load equation without separate fatigue bars", () => {
     const member: RuntimeMember = {
       id: "member", nameJa: "Test", active: true, contractEndsOn: "2015-01-07",
