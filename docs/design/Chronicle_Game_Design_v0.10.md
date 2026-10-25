@@ -25,6 +25,7 @@
 - **Inbox**：Blocking → 待办/截止 → Report → Ambient。完整详情页；支持 Attend、Delegate、Approve、Decline、Archive；委托也必须留下决策主体、执行结果和失败原因。
 - **Calendar**：日期/场次/邀请、合同、成员冲突、推进控制；同日多个 Live 各有独立 `live_id`，不可重复结算。
 - **Members**：成员 Card/List/Detail、人物关系、粉丝、个人 Cheki 业绩、履历、可知能力范围；面试估计不暴露后台 17 Attr。
+- **不显示行业地位**：不提供完整 E−…S Tier 分段、0–10000 Live/Music/Brand/Overall 评分、Top50/行业排名、其他团或本团的行业位置分析；不需要全行业可浏览团体库。其他团只在具体共演、竞争日程和剧情背景中出现。本团成长通过动员、收入、粉丝、歌曲、成员状态、演出机会和章节评价体现。章节评价的 S–E 是**本章目标完成度**，不是偶像行业 Tier。
 - **Manage**：Making / Training / Live / Finance 与 R1 Tuning；Audition 只在 Scenario 触发时显示事件工作流，不提供自主发起入口；Policy R2/R3/R4 仅可查看本章/世界设定，不提供常规编辑。成员与歌曲的 Card/List/Detail 读同一实体；不添加固定月会。
 - 首页、主视觉、日/中/英语言切换、存档/recovery key、移动端优先的交互继承 v0.9 §1/§19；语言不改变模拟状态。
 
