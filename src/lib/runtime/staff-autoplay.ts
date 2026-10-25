@@ -27,13 +27,13 @@ import {
 } from "./prologue";
 import { createSeededRandom, sampleBinomial } from "./random";
 import { settleChekiQueue } from "./regression";
-import type { FanState, PrologueState, RuntimeEvent, RuntimeMember } from "./types";
+import type { Color8, FanState, PrologueState, RuntimeEvent, RuntimeMember } from "./types";
 
 export type StaffAutoplayRoute = "A" | "B" | "C";
 export type StageStatus = "COMPLETED_TIF" | "BANKRUPT_OR_DEBT_DISTRESS" | "BLOCKED_BUG";
 
 export const staffAutoplayScenarioV1 = {
-  version: "staff-autoplay-scenario-v1",
+  version: "staff-autoplay-scenario-v3-performance-recovery",
   tuningVersion: "fanChekiBalanceV1",
   // Source: v0.10 locks the dates and contract kinds but intentionally leaves
   // specific capacity, receipts and rent to Scenario data. These are named
@@ -48,7 +48,14 @@ export const staffAutoplayScenarioV1 = {
   oneMan: { capacity: 300, sellThrough: 0.34, ticketJPY: 3_000, venueCostJPY: 180_000 },
   festival: { capacity: 250, sellThrough: 0.55, ticketJPY: 0, venueCostJPY: 0 },
   grades: { fanC: 120, performanceC: 0.9, businessC: 2_000_000 },
+  // Performance-only calibration surface. It is applied only to actual
+  // rehearsal/live Palette exposure, not to Fan, ticket, or Cheki inputs.
+  performanceGrowth: { memberPalettePerHour: 0.6, livePaletteHours: 1.5, rehearsalHoursPerSong: 3, dailyConditionRecovery: 2 },
 } as const;
+
+const DEFAULT_SONG_DIRECTION: Record<Color8, number> = {
+  red: 0.25, pink: 0.1, orange: 0.1, aqua: 0.1, yellow: 0.1, green: 0.1, blue: 0.1, purple: 0.15,
+};
 
 type EventAudit = {
   date: string;
@@ -69,6 +76,7 @@ type EventAudit = {
   otakuCount: number;
   affinityTotal: number;
   cashAfterJPY: number;
+  fanFlow: { otakuAttendance: number; publicAttendance: number; externalAudience: number; publicToOtaku: number; externalToOtaku: number; externalToPublic: number };
 };
 
 export type StaffAutoplayMonth = {
@@ -99,6 +107,7 @@ export type StaffAutoplayResult = {
   months: StaffAutoplayMonth[];
   minCash: number;
   grades: { fans: string; performance: string; business: string; overall: string };
+  memberDevelopment: Record<string, { trainingHours: number; paletteMean: number; palette: Record<Color8, number> }>;
 };
 
 type MonthSnapshot = { publicCount: number; otakuCount: number; activeRoster: number };
@@ -210,10 +219,18 @@ function updateFanFromEvent(input: {
       purchaseWeightKJPY: profile.purchaseWeightKJPY > 0 ? profile.purchaseWeightKJPY * Math.exp(logW) : (newAffinity > 0 ? 1.8 : 0),
     }];
   }));
-  return { fan: { publicCount: Math.max(0, input.fan.publicCount - publicToO + externalToP), otakuCount: nextO, temporarilyUnassignedOtaku: input.fan.temporarilyUnassignedOtaku, members }, sales };
+  return { fan: { publicCount: Math.max(0, input.fan.publicCount - publicToO + externalToP), otakuCount: nextO, temporarilyUnassignedOtaku: input.fan.temporarilyUnassignedOtaku, members }, sales, flow: { otakuAttendance: attendance, publicAttendance: publicAttend, externalAudience: input.actualExternal, publicToOtaku: publicToO, externalToOtaku: externalToO, externalToPublic: externalToP } };
 }
 
 function eventClass(kind: RuntimeEvent["kind"]) { return kind === "one-man"; }
+
+function applyPaletteExposure(member: OperatingMember, hours: number): OperatingMember {
+  const palette = Object.fromEntries((Object.keys(DEFAULT_SONG_DIRECTION) as Color8[]).map((color) => [
+    color,
+    Math.min(100, member.palette[color] + hours * staffAutoplayScenarioV1.performanceGrowth.memberPalettePerHour * DEFAULT_SONG_DIRECTION[color]),
+  ])) as Record<Color8, number>;
+  return { ...member, palette };
+}
 
 function grade(value: number, c: number) { return value >= c * 1.5 ? "A" : value >= c * 1.15 ? "B" : value >= c ? "C" : value >= c * 0.65 ? "D" : "E"; }
 
@@ -252,6 +269,11 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
   let augmented = false;
 
   while (date <= "2014-08-02") {
+    // Condition is a single live state.  The former long-run adapter applied
+    // load but omitted every intervening day of recovery, forcing otherwise
+    // healthy members to the technical floor.  This is a state-flow repair;
+    // it does not alter Fan or commercial inputs.
+    operating = operating.map((member) => ({ ...member, fitnessCondition: Math.min(100, member.fitnessCondition + staffAutoplayScenarioV1.performanceGrowth.dailyConditionRecovery) }));
     if (input.route === "C" && !augmented && date === "2013-10-01") {
       // Scenario-only October audition: a fresh pool, not rejected January IDs.
       state = { ...state, members: [...state.members, ...C_NEWCOMERS], fan: {
@@ -264,7 +286,7 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
     if (weekday === 1) {
       state = post(state, { id: `training-room:${date}`, date, kind: "operating_cost", amount: staffAutoplayScenarioV1.normalTrainingRoomJPY, category: "training_room", note: "Staff default Medium shared training" });
-      operating = operating.map((member) => ({ ...member, fitnessCondition: Math.max(55, Math.min(100, member.fitnessCondition - 8 + 11)), trainingExp: member.trainingExp + staffAutoplayScenarioV1.normalTrainingHours }));
+      operating = operating.map((member) => applyPaletteExposure({ ...member, fitnessCondition: Math.max(55, Math.min(100, member.fitnessCondition - 8 + 11)), trainingExp: member.trainingExp + staffAutoplayScenarioV1.normalTrainingHours }, staffAutoplayScenarioV1.performanceGrowth.rehearsalHoursPerSong));
     }
     if (date.endsWith("-01")) {
       const payroll = state.members.filter((member) => member.active).length * staffAutoplayScenarioV1.monthlySalaryJPY;
@@ -274,7 +296,8 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
     for (const event of due) {
       const participants = eligibleLineup(operating.filter((member) => member.active));
       const contract = contractFor(event, String(input.seed));
-      const resolved = resolveOperatingPerformance(participants, `${state.saveId}:${event.id}`);
+      const rehearsed = participants.map((member) => applyPaletteExposure(member, staffAutoplayScenarioV1.performanceGrowth.livePaletteHours));
+      const resolved = resolveOperatingPerformance(rehearsed, `${state.saveId}:${event.id}`);
       operating = operating.map((member) => resolved.members.find((updated) => updated.id === member.id) ?? member);
       const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, actualExternal: contract.attendees, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}` });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
@@ -291,7 +314,7 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       if (ticketRevenue > 0) state = post(state, { id: `${event.id}:ticket`, date, kind: "operating_revenue", amount: ticketRevenue, category: "ticket_revenue", eventId: event.id, note: "Scenario contract ticket settlement" });
       if (contract.venueCostJPY > 0) state = post(state, { id: `${event.id}:venue`, date, kind: "operating_cost", amount: contract.venueCostJPY, category: "venue_cost", eventId: event.id, note: "Scenario contract venue cost" });
       const lines = settleChekiSales({ event: state.events.find((item) => item.id === event.id)!, members: state.members, sales: chekiSales });
-      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash });
+      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, fanFlow: fanOutcome.flow });
       if (event.id === "graduation-2014-05-11") {
         state = graduateRina(state);
         operating = operating.map((member) => member.id === "IPC1-001" ? { ...member, active: false } : member);
@@ -322,5 +345,10 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
   const stageStatus: StageStatus = state.events.some((event) => event.id === "tif-2014-08-02" && event.status === "RESOLVED")
     ? (minCash < 0 ? "BANKRUPT_OR_DEBT_DISTRESS" : "COMPLETED_TIF") : "BLOCKED_BUG";
   const months = finalizeMonths(state, audits, minCashByMonth, monthSnapshots);
-  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: staffAutoplayScenarioV1.version, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, months, minCash, grades };
+  const memberDevelopment = Object.fromEntries(operating.map((member) => [member.id, {
+    trainingHours: member.trainingExp,
+    paletteMean: Object.values(member.palette).reduce((sum, value) => sum + value, 0) / 8,
+    palette: member.palette,
+  }]));
+  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: staffAutoplayScenarioV1.version, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, months, minCash, grades, memberDevelopment };
 }

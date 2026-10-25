@@ -51,7 +51,7 @@ describe("Staff autoplay prologue E2E", () => {
       Array.from({ length: 20 }, (_, index) => runStaffAutoplayPrologue({ route, seed: index + 1 })),
     );
     expect(routes).toHaveLength(60);
-    expect(routes.every((result) => result.scenarioVersion === "staff-autoplay-scenario-v1")).toBe(true);
+    expect(routes.every((result) => result.scenarioVersion === "staff-autoplay-scenario-v3-performance-recovery")).toBe(true);
     expect(routes.every((result) => result.stageStatus !== "BLOCKED_BUG")).toBe(true);
   });
 });
