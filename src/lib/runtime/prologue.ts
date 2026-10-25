@@ -101,6 +101,7 @@ export function createPrologueState(input: { saveId: string; difficulty: Difficu
     gates,
     events: createPrologueSchedule(),
     finance: createFinanceState(INITIAL_CASH[input.difficulty]),
+    monthlyReports: [],
     resolvedEventKeys: [],
     weeklyReviewHosts: [{ date: "2013-01-07", memberId: "IPC1-001" }],
   };
@@ -139,7 +140,19 @@ export function signRoster(state: PrologueState, candidateIds: string[]): Prolog
 
 export function completeStrategyAndOriginals(state: PrologueState): PrologueState {
   if (!state.gates.G02) throw new Error("Roster contracts are required before strategy and production");
-  return { ...state, gates: { ...state.gates, G03: true, G04: true } };
+  let finance = state.finance;
+  const production = [
+    { id: "making:original-1", amount: 180_000, category: "original_song" },
+    { id: "making:original-2", amount: 180_000, category: "original_song" },
+    { id: "making:initial-costume", amount: 30_000 + 25_000 * state.members.filter((member) => member.active).length, category: "initial_costume" },
+  ];
+  for (const item of production) {
+    finance = postLedgerEntry(finance, {
+      id: item.id, date: "2013-01-07", kind: "capitalized_asset", amount: item.amount,
+      category: item.category, note: "Approved prologue production asset",
+    });
+  }
+  return { ...state, finance, gates: { ...state.gates, G03: true, G04: true } };
 }
 
 function eventKey(state: PrologueState, runtimeEvent: RuntimeEvent): string {

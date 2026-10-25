@@ -83,3 +83,19 @@ or retention calibration output. The missing parent document
 `FITNESS_CONDITION_AND_WORKLOAD_SYSTEM.md`, linked by the portable spec, was
 also not present in the fetched parent repository; no undocumented recovery or
 risk constants were invented.
+
+## Follow-up: persisted UI, day advance, and operating ledger
+
+The Calendar and global day control now read a local Runtime save rather than
+the old date-only cookie. `save-repository.server.ts` writes an atomic JSON
+snapshot under the ignored `.chronicle-saves/` directory, and the regression
+suite verifies a full save/reload round trip.
+
+`advanceWithStaff` advances one to seven JST dates, applies shared weekly
+training-room costs and monthly payroll, emits ledger-derived monthly operating
+reports, and changes a due routine event through `DORMANT → ELIGIBLE → OFFERED`.
+It deliberately stops at `OFFERED`: no parent settlement adapter is available
+to produce the actual Performance, attendance, Fan conversion/retention, or
+member-level Cheki demand required to resolve the Live. This is the correct
+Staff-automation boundary; resolving it with zero or fabricated demand would
+make a checkable-looking but false 5/9/15 route report.

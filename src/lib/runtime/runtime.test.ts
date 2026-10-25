@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_CHEKI_TIERS, settleChekiSales } from "./cheki";
 import { calculateTaibanTicketRevenue, postLedgerEntry } from "./finance";
 import { applyActivityLoad, conditionAmplifier, liveSongGeneralLoad } from "./performance";
+import { advanceWithStaff, startTestRoute } from "./operations";
 import {
   completeMandatoryInterview,
   completeStrategyAndOriginals,
@@ -17,6 +18,7 @@ import {
   spendInterviewAp,
 } from "./prologue";
 import type { RuntimeEvent, RuntimeMember } from "./types";
+import { loadOrCreateSave, resetLocalSave, savePrologueState } from "./save-repository.server";
 
 function offer(state: ReturnType<typeof createPrologueState>, eventId: string) {
   return offerEligibleEvent(markEventEligible(state, eventId), eventId);
@@ -84,6 +86,7 @@ describe.each([3, 5, 9, 15] as const)("%i-member prologue route", (rosterSize) =
     expect(state.members.filter((member) => member.active)).toHaveLength(rosterSize);
     expect(isOctoberSmallGroupAugmentationEligible(state)).toBe(rosterSize <= 5);
     state = completeStrategyAndOriginals(state);
+    const cashBeforeDebut = state.finance.cash;
 
     state = resolveLive({
       state: offer(state, "debut-2013-05-24"),
@@ -93,7 +96,7 @@ describe.each([3, 5, 9, 15] as const)("%i-member prologue route", (rosterSize) =
     // The special debut contract permits every signed member. Ticket revenue
     // and venue rent are absent unless an explicit event contract posts them.
     expect(state.events.find((event) => event.id === "debut-2013-05-24")?.participantIds).toHaveLength(rosterSize);
-    expect(state.finance.cash).toBe(3_000_800);
+    expect(state.finance.cash).toBe(cashBeforeDebut + 800);
     const onceSettled = state;
     // A replay cannot post another ledger entry; a second offer is also
     // rejected by the explicit event lifecycle.
@@ -111,7 +114,7 @@ describe.each([3, 5, 9, 15] as const)("%i-member prologue route", (rosterSize) =
     expect(state.gates.G11).toBe(true);
     expect(state.members.find((member) => member.id === "IPC1-001")?.active).toBe(false);
     expect(state.weeklyReviewHosts.at(-1)?.memberId).not.toBe("IPC1-001");
-    expect(state.finance.cash).toBe(3_000_800);
+    expect(state.finance.cash).toBe(cashBeforeDebut + 800);
   });
 });
 
@@ -133,5 +136,30 @@ describe("schedule integrity", () => {
       category: "loan", note: "Bridge loan",
     });
     expect(finance).toMatchObject({ cash: 1_500, loans: 500, operatingRevenue: 0 });
+  });
+});
+
+describe("daily advancement and recovery", () => {
+  it("stops on a blocking opening gate, posts shared training/payroll, and emits a ledger-led month report", () => {
+    const blocked = advanceWithStaff(createPrologueState({ saveId: "blocked", difficulty: "normal" }));
+    expect(blocked).toMatchObject({ advancedDays: 0, blockingGate: "G01" });
+
+    let state = startTestRoute(createPrologueState({ saveId: "daily", difficulty: "normal" }), 5);
+    while (state.date < "2013-02-01") {
+      const result = advanceWithStaff(state);
+      expect(result.awaitingSettlementEventId).toBeUndefined();
+      state = result.state;
+    }
+    expect(state.monthlyReports.map((report) => report.month)).toContain("2013-01");
+    expect(state.finance.entries.some((entry) => entry.category === "training_room")).toBe(true);
+    expect(state.finance.entries.some((entry) => entry.category === "member_payroll")).toBe(true);
+  });
+
+  it("persists and restores a complete save snapshot", async () => {
+    const reset = await resetLocalSave();
+    const progressed = startTestRoute(reset, 9);
+    await savePrologueState(progressed);
+    const restored = await loadOrCreateSave();
+    expect(restored).toEqual(progressed);
   });
 });

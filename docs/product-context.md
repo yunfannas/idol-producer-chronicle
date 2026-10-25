@@ -29,10 +29,11 @@ meetings—not pages—are the decision spaces. The initial scenario starts on
 2013-01-07 JST with the three founders and progresses through the 2014-08
 prologue snapshot. See v0.10 §§0–9 for the normative scope.
 
-The current codebase is only the beginning of Vertical Slice A. Its existing
-mock shell must not be mistaken for an implemented simulation or an approved
-replacement for the scenario contract. Use the tracker before opening a new
-implementation stream.
+The Calendar/header now read a persisted local prologue Runtime and its
+ledger-derived month reports, but the rest of the mobile shell still contains
+mock presentation. This is not an approved replacement for the parent
+Performance, Fan, Cheki-demand, or Staff eligibility Runtime. Use the tracker
+before opening a new implementation stream.
 
 ## Source precedence
 

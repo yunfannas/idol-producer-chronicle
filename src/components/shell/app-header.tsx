@@ -1,5 +1,6 @@
 import { DayAdvance } from "@/components/shell/day-advance";
-import { readGameDate } from "@/lib/game-date-cookie";
+import { formatGameDateJa } from "@/lib/mock/game-date";
+import { loadOrCreateSave } from "@/lib/runtime/save-repository.server";
 
 export async function AppHeader({
   title,
@@ -10,9 +11,9 @@ export async function AppHeader({
   subtitle?: string;
   showAdvance?: boolean;
 }) {
-  const { dateLabel } = showAdvance
-    ? await readGameDate()
-    : { dateLabel: "" };
+  const dateLabel = showAdvance
+    ? formatGameDateJa((await loadOrCreateSave()).date)
+    : "";
 
   return (
     <header className="sticky top-0 z-30 border-b border-[var(--stage-line)] bg-[var(--stage-paper)]/90 backdrop-blur-md">

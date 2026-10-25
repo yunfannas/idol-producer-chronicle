@@ -51,7 +51,9 @@ operative—in [game rules](game-rules.md#pending-integration-register).
 
 ## Current implementation boundary
 
-The current application provides a navigable mobile shell with mock Inbox,
-Calendar, Members, and Manage content. It does not yet implement the gated
-scenario, meetings, true data visibility, Live/feedback loop, or simulation.
-Do not label mock buttons or static sample data as completed product flows.
+The Calendar and the shared day control now read the persisted prologue state,
+display scheduled events and ledger-derived month reports, and stop honestly at
+an unintegrated Live settlement. Inbox, Members and Manage remain mock
+presentation; the app does not yet implement meetings, true data visibility,
+or the parent Live/feedback simulation. Do not label mock buttons or static
+sample data as completed product flows.

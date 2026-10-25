@@ -1,7 +1,13 @@
 import { AppHeader } from "@/components/shell/app-header";
-import { MOCK_CALENDAR } from "@/lib/mock/calendar";
+import { resetPrologueAction, startTestRouteAction } from "@/app/actions/advance-day";
+import { loadOrCreateSave } from "@/lib/runtime/save-repository.server";
+import { formatGameDateJa } from "@/lib/mock/game-date";
 
-export default function CalendarPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CalendarPage() {
+  const state = await loadOrCreateSave();
+  const outstanding = state.events.find((event) => event.status === "OFFERED");
   return (
     <>
       <AppHeader
@@ -9,28 +15,65 @@ export default function CalendarPage() {
         subtitle="JST 日程・招待・日推進。"
         showAdvance
       />
-      <main className="space-y-1 px-4 pt-2">
+      <main className="space-y-4 px-4 pt-3">
+        {!state.gates.G01 ? (
+          <section className="rounded-xl border border-[var(--stage-line)] bg-white p-4">
+            <p className="text-sm font-medium text-[var(--stage-ink)]">序章テストルート</p>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              統一15名面接を記録してから、確認用の初期人数を選びます。これは保存・日進行の接続確認用です。
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[3, 5, 9, 15].map((size) => (
+                <form key={size} action={startTestRouteAction}>
+                  <input type="hidden" name="rosterSize" value={size} />
+                  <button className="rounded-lg bg-[var(--stage-ink)] px-3 py-2 text-sm text-white">{size} 人で開始</button>
+                </form>
+              ))}
+            </div>
+          </section>
+        ) : null}
+        {outstanding ? (
+          <section className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+            <p className="font-medium">結算待ち：{outstanding.id}</p>
+            <p className="mt-1 leading-relaxed">Staff は契約を Offer しました。Performance／Fan／Cheki 需要の承認済みアダプターが未接続のため、実績を捏造せず日進行を停止しています。</p>
+          </section>
+        ) : null}
         <ul className="divide-y divide-[var(--stage-line)]">
-          {MOCK_CALENDAR.map((event) => (
+          {state.events.filter((event) => event.date >= state.date).slice(0, 12).map((event) => (
             <li key={event.id} className="py-4">
               <p className="text-xs tracking-wide text-[var(--stage-teal)]">
-                {event.dateLabel}
+                {formatGameDateJa(event.date)}
                 <span className="mx-1.5 text-border">·</span>
                 {event.kind}
               </p>
               <p className="mt-1 font-medium text-[var(--stage-ink)]">
-                {event.title}
+                {event.id}
               </p>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                {event.note}
+                {event.status} · Cheki {event.chekiAllowed ? "可" : "不可"}
               </p>
             </li>
           ))}
         </ul>
-        <p className="pt-4 pb-2 text-xs leading-relaxed text-muted-foreground">
-          未来の出演はここから確認し、Setlist や人員の変更は Manage → Live
-          の会議へ。この画面はモック予定表です。
-        </p>
+        <section className="rounded-xl bg-muted/60 p-4 text-sm text-muted-foreground">
+          <p>現金 ¥{state.finance.cash.toLocaleString("ja-JP")} · 営業収益 ¥{state.finance.operatingRevenue.toLocaleString("ja-JP")} · 費用 ¥{state.finance.operatingCost.toLocaleString("ja-JP")}</p>
+          <p className="mt-1">月次レポート {state.monthlyReports.length} 件。保存はローカル Runtime repository に原子的に書き込みます。</p>
+          <form action={resetPrologueAction} className="mt-3"><button className="text-xs underline">ローカル保存をリセット</button></form>
+        </section>
+        {state.monthlyReports.length > 0 ? (
+          <section className="rounded-xl border border-[var(--stage-line)] p-4">
+            <h2 className="font-medium text-[var(--stage-ink)]">月次運営レポート</h2>
+            <ul className="mt-2 divide-y divide-[var(--stage-line)] text-sm">
+              {state.monthlyReports.slice(-3).reverse().map((report) => (
+                <li key={report.month} className="py-3">
+                  <p className="font-medium text-[var(--stage-ink)]">{report.month}</p>
+                  <p className="mt-1 text-muted-foreground">営業収益 ¥{report.operatingRevenue.toLocaleString("ja-JP")} · 費用 ¥{report.operatingCost.toLocaleString("ja-JP")} · 資産 ¥{report.capitalizedAssets.toLocaleString("ja-JP")}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">期首 ¥{report.openingCash.toLocaleString("ja-JP")} → 期末 ¥{report.closingCash.toLocaleString("ja-JP")}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </main>
     </>
   );

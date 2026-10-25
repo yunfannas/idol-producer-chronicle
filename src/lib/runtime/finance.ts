@@ -1,4 +1,4 @@
-import type { FinanceState, LedgerEntry, LedgerKind } from "./types";
+import type { FinanceState, LedgerEntry, LedgerKind, MonthlyOperatingReport } from "./types";
 
 export const INITIAL_CASH: Record<"easy" | "normal" | "hard", number> = {
   easy: 5_000_000,
@@ -63,6 +63,31 @@ export function postLedgerEntry(
       break;
   }
   return next;
+}
+
+export function createMonthlyOperatingReport(input: {
+  finance: FinanceState;
+  month: string;
+  openingCash: number;
+}): MonthlyOperatingReport {
+  const entries = input.finance.entries.filter((entry) => entry.date.startsWith(input.month));
+  const amountFor = (kind: LedgerKind) => entries
+    .filter((entry) => entry.kind === kind)
+    .reduce((sum, entry) => sum + entry.amount, 0);
+  const revenue = amountFor("operating_revenue");
+  const cost = amountFor("operating_cost");
+  const capitalizedAssets = amountFor("capitalized_asset");
+  const loanChange = amountFor("loan_proceeds") - amountFor("loan_repayment");
+  return {
+    month: input.month,
+    openingCash: input.openingCash,
+    closingCash: input.openingCash + revenue - cost - capitalizedAssets + loanChange,
+    operatingRevenue: revenue,
+    operatingCost: cost,
+    capitalizedAssets,
+    loans: loanChange,
+    note: "Fan cohort and hidden Performance values require the approved parent Runtime adapter.",
+  };
 }
 
 /** v0.10 §4: safe fallback when the attribution pool has no denominator. */

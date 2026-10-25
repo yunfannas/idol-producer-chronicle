@@ -2,6 +2,8 @@ import { AppHeader } from "@/components/shell/app-header";
 import { InboxList } from "@/components/inbox/inbox-list";
 import { MOCK_INBOX } from "@/lib/mock/inbox";
 
+export const dynamic = "force-dynamic";
+
 export default function InboxPage() {
   return (
     <>

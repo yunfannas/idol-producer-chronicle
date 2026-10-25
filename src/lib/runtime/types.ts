@@ -42,6 +42,7 @@ export type RuntimeMember = {
   active: boolean;
   contractEndsOn: string;
   chekiCommissionRate: number;
+  monthlySalary?: number;
   fitnessCondition: number;
 };
 
@@ -146,6 +147,25 @@ export type PrologueState = {
   gates: Record<PrologueGate, boolean>;
   events: RuntimeEvent[];
   finance: FinanceState;
+  monthlyReports: MonthlyOperatingReport[];
   resolvedEventKeys: string[];
   weeklyReviewHosts: { date: string; memberId: string }[];
+};
+
+export type MonthlyOperatingReport = {
+  month: string;
+  openingCash: number;
+  closingCash: number;
+  operatingRevenue: number;
+  operatingCost: number;
+  capitalizedAssets: number;
+  loans: number;
+  note: string;
+};
+
+export type DayAdvanceResult = {
+  state: PrologueState;
+  advancedDays: number;
+  blockingGate?: PrologueGate;
+  awaitingSettlementEventId?: string;
 };
