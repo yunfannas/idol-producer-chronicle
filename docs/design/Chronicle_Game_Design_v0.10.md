@@ -3,6 +3,7 @@
 **日期**：2026-10-24  
 **状态**：**序章设计基线 / Agent implementation handoff**。设计冻结不等于已实现、已测试或数值已校准。  
 **范围**：Chronicle 序章 2013-01-07 → 2014-08-02；共用的移动端、Staff、Live、Fans、Cheki、Finance 接口；其余章节延续 v0.9 中**不冲突**的长期剧情设计。  
+**实现入口**：[Chronicle Runtime Implementation Pack v1.0](../implementation/README.md) 是全部已提取公式、Policy 权限、结算顺序与待校准参数的**本地唯一实施入口**；Agent 不需要读取 `idol-data-lab`。本文件仅作为剧情/日期/合同和 UI 细节来源；若与 Implementation Pack 冲突，以后者为准。
 **优先级**：本文件是 Chronicle 剧情与 UI 的当前实施入口；共用游戏模拟公式及其研究来源见 [`Chronicle_Simulation_Model_Extraction_v0.1.md`](Chronicle_Simulation_Model_Extraction_v0.1.md)。`idol-data-lab` 保存研究/设计而非可直接导入的 Runtime；Chronicle 负责按最新权威模型实现可执行 Kernel，不能重造冲突模型。v0.9 与 `Chronicle_Prologue_Live_Schedule_v0.10_Draft.md` 是历史参考；Fan v0.2 与 Tier v1.0 专项权威优先于本文件残存旧描述。
 
 ## 0. 冻结决定与边界
