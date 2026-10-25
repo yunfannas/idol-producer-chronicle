@@ -3,7 +3,7 @@
 **日期**：2026-10-24  
 **状态**：**序章设计基线 / Agent implementation handoff**。设计冻结不等于已实现、已测试或数值已校准。  
 **范围**：Chronicle 序章 2013-01-07 → 2014-08-02；共用的移动端、Staff、Live、Fans、Cheki、Finance 接口；其余章节延续 v0.9 中**不冲突**的长期剧情设计。  
-**优先级**：本文件是 Chronicle 剧情与 UI 的唯一当前实施入口；已有 Performance、Fan Conversion、Fan Retention、成员级特典会等系统的**权威算法和数据结构**仍在其各自已审核规范／Runtime 中，本文只约定接入与行为，**不得复制一套简化替代模型**。v0.9 及 `Chronicle_Prologue_Live_Schedule_v0.10_Draft.md` 是历史/起草参考，冲突时一律以本文件为准。
+**优先级**：本文件是 Chronicle 剧情与 UI 的当前实施入口；共用游戏模拟公式及其研究来源见 [`Chronicle_Simulation_Model_Extraction_v0.1.md`](Chronicle_Simulation_Model_Extraction_v0.1.md)。`idol-data-lab` 保存研究/设计而非可直接导入的 Runtime；Chronicle 负责按最新权威模型实现可执行 Kernel，不能重造冲突模型。v0.9 与 `Chronicle_Prologue_Live_Schedule_v0.10_Draft.md` 是历史参考；Fan v0.2 与 Tier v1.0 专项权威优先于本文件残存旧描述。
 
 ## 0. 冻结决定与边界
 
@@ -14,7 +14,7 @@
 5. 2013-10 只有**小团路线（3–7人）**触发公司支持的第二次甄选／补员剧情，使用全新候选池；8–10 人中团和 11–18 人大团不自动补员。以当日 active 正式签约人数为准；不可悄悄复活被拒候选人。历史剧情中的莉奈毕业仍发生，动机/交接可受经营影响。
 6. 2013–14 的免费商场 Live **收入为零**；学校/企业封闭活动有合同出演费、默认无收费特典会，不作为公开拼盘曝光；普通售票拼盘按本文件分账。**封闭活动在目前经济回归测试中排除**，但类型保留供玩家可选剧情。
 7. Cheki **逐成员、逐场、逐价格档**统计。至少有 **¥1,000、¥2,000** 两档，默认成员分成是**销售总额的20%**。不要再按全团 Cheki 统一分摊或假设全为 ¥1,000。
-8. 粉丝转化、留存已在父系统设计：**Performance/有效团队曝光主要影响新客转化；成员特典会交流能力和持续互动对留存、Otaku→Core 更重要**。保留 Public/Otaku/Core 与成员推し归属，不新造“成员创收”属性或硬编码 5/9/15 人收入乘数。
+8. 粉丝采用 **Fan Market v0.2 的团队 P/O + 成员 A_i/W_i**：Performance/有效曝光主要影响获客；成员特典会交流和持续互动主要影响 affinity 留存、消费强度。**旧 persistent Core、C_i 和独立 BoxRate 已废弃**。不新造“成员创收”属性或硬编码 5/9/15 人收入乘数。
 9. 旧模拟表是敏感性实验，**不是 Runtime 真值**；¥210/张其他成本、¥2,000 档占比30%、成员正边际贡献都是校准假设，不得伪装为历史事实或给销量保底。
 
 ## 1. 玩家流程、页面与自动化
@@ -79,11 +79,11 @@ m_i = 本团入场目当人数；M = 所有参演团体入场目当总人数
 
 ## 5. Fan / Cheki / Finance 的复用接口（不要重写已有模型）
 
-### 5.1 Fan（父系统已有）
+### 5.1 Fan（按 Fan Market v0.2 实现于 Chronicle）
 
-- Public/Otaku/Core 分层、成员推し归属、转化 momentum、留存、实际曝光/Impression 均读取父系统；Live Performance + 有效团队曝光对**获客转化**作用较大；成员特典会交流、可接触性和持续互动对**Otaku→Core 与 Core 留存**作用更大。
-- 演出结算先产出实际观众/曝光/Impression，再按父系统既有规则累计转化；成员交流反馈影响既有留存通道。**不可额外按5/9/15人数乘系数发新粉丝**，不可把一次 Cheki 购买直接当新增 Core，也不可为剧情门槛硬补粉丝。
-- 2014-07 左右 `Otaku+Core >=300` 仅为标准路线**离线校准目标**，不是保证、剧情硬门槛或历史直接统计。核心粉丝人数、购票目当、现场到场、Cheki 买家数、Cheki 张数彼此不同。
+- 持久团队状态：`P=public_count`、`O=otaku_count`；成员级 `A_i=affinity_count`、`W_i=purchase_weight_kjpy`，多推重叠允许 `ΣA_i > O`；`BoxRate=ΣA_i/O` 是派生值。毕业后可有短期 `O_unassigned`，**不得持久存储 Core、C_i、独立 BoxRate**。
+- Live Performance + 有效曝光对**P→O、新增成员 affinity**作用较大；特典会交流、可接触性和持续互动对**A_i 留存/形成及 W_i 变化**作用更大。场次记录 momentum，周结算持久 fan state；不可按5/9/15人数另乘获客系数，也不可把 Cheki 一次购买当新增独立 Core。
+- 2014-07 左右**`O≈300`** 是将旧“Otaku+Core 300”迁移后的**待重新校准工作目标**，不能将旧 Core 再加到 O 上，亦非剧情硬门槛或历史实测值。团体 O、成员 affinity、购票目当、现场到场、Cheki 买家和销售张数不是同一个量。完整公式/缺口见 Simulation Model Extraction §3。
 
 ### 5.2 Cheki（父系统已有逐成员统计）
 
@@ -125,7 +125,7 @@ m_i = 本团入场目当人数；M = 所有参演团体入场目当总人数
 
 - 2014-03-05 至终章的**所有周三**创建一场正式定期（特殊取消/改期需真实合同与记录），不要遗漏或重复；其他外部 Live 可并行。One-man/TIF 使用通用 Live Engine。
 - 游戏活动的实际入场、目当、曝光、Cheki、收入与成本均按当场模拟，不给固定粉丝/现金奖励。成员不在出征名单时不享有舞台 Impression。
-- 2014年7月的 `Otaku+Core >300` 是参考目标，非演出/剧情解锁条件。
+- 2014年7月的 `O≈300` 是迁移后的**待重新校准**参考目标，非演出/剧情解锁条件，不得叠加旧 Core。
 
 ## 7. 剧情状态机与信息边界
 
@@ -138,13 +138,13 @@ m_i = 本团入场目当人数；M = 所有参演团体入场目当总人数
 ## 8. Report / Weekly Review / 可观察性
 
 - **Live Report**：JST日期/场馆、可观察到场/动员、**本团最终门票收入**、成员级 Cheki 明细（可展开双档、分成与队列）、实际其他收入/成本、定性现场反应、成员经验。**不展示内部 Performance/Impression 原始数值**，不显示他团票房与目当分账。
-- **Member Feedback**：只有成员真实可能观察的感受；不凭空报“X人因为某歌转Core”；不再二次结算粉丝。
+- **Member Feedback**：只有成员真实可能观察的感受；不凭空报“X人因为某歌形成 affinity”；不再二次结算粉丝。
 - **Weekly Review**：每周一份、由**当期在籍主持人**解读事实和建议，非固定月会；莉奈离队后新 Leader 接班，历史周评保持原作者。普通报告不阻塞连续推进。
 - 第一次重要 Live 可分阶段展示（集合/舞台/允许的特典会/结算），之后常规 Live 快速报告；四个里程碑回顾改为**2013-05出道、2014-03正式定期、2014-07 One-man、2014-08 TIF**，2014-01试验定期可作为额外首次教学，不虚构2013-12开幕。
 
 ## 9. Agent 实施顺序与验收
 
-**先做接口映射，不要先写一套新的 Fan/Cheki 引擎。** Agent 首先在当前 Runtime 定位既有 Performance、Fans（转化/留存）、成员级 Cheki、Finance、Staff/Calendar、Event Ledger 的入口、schema、调用顺序及测试；列出缺口并复用。若某模块只有设计没有实现，应标记 `NOT_IMPLEMENTED`，不能假装已经复用成功。
+**先做接口映射，再实现缺失 Kernel；不要凭旧文档重造模型。** Agent 在 Chronicle Runtime 定位已有 Performance、Fan、成员级 Cheki、Finance、Staff/Calendar、Event Ledger 的入口、schema、调用顺序及测试；缺失部分按 `Chronicle_Simulation_Model_Extraction_v0.1.md` 的当前权威来源实现。`idol-data-lab` 的研究脚本不等于可导入 Runtime；只有设计未实现的模块必须标记 `NOT_IMPLEMENTED`。
 
 | ID | 必须通过的测试 |
 |---|---|
@@ -156,7 +156,7 @@ m_i = 本团入场目当人数；M = 所有参演团体入场目当总人数
 | A06 | 普通拼盘：15%/N+25%目当分成，M=0安全处理；Report只展示本团最终门票收入；公司出道/免费商场收入0 |
 | A07 | 封闭学校/企业：固定出演费、默认无Cheki、无公开路人；经济回归测试可排除该类，不暗中补收入 |
 | A08 | 成员级Cheki：1000/2000双档、默认销售额20%分成、不同档slot/成本、未出征不得销售、总账无重复扣费 |
-| A09 | 复用既有Performance→Fan转化/留存→成员Cheki→Finance；不另设人数获客乘数或全团销量保底 |
+| A09 | Performance→Fan v0.2(P/O/A/W)转化/留存→成员Cheki→Finance；不引入旧 persistent Core、人数获客乘数或全团销量保底 |
 | A10 | 莉奈4/16发表、5/11毕业，旧周评作者不变，新Leader接班，Part重新安排 |
 | A11 | 1st One-man与TIF统一Live Engine，机会可达、结果不保底，8/2章末评级/快照可继承 |
 | A12 | Normal ¥3m，5/9/15人路线运行至8/2，逐月输出粉丝分层、各成员双档销量、票务、费用、最低现金、贷款及资产负债平衡；**不强制拟合旧v0.6现金数字** |
