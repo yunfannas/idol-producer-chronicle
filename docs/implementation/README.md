@@ -18,7 +18,9 @@
 
 **首次回归记录**：[Fan_Cheki_Regression_2026-10-24.md](Fan_Cheki_Regression_2026-10-24.md) 记录中性 fixture、12周×20 seeds 的初始基线、唯一调整的集中参数和校准后结果；它不是正式 Scenario 数据。
 
-**第二轮压力回归（待本地验证）**：[Fan_Cheki_Stress_Regression_2026-10-24.md](Fan_Cheki_Stress_Regression_2026-10-24.md) 定义热门成员容量、多推共享时间、Live/互动成长响应的确定性测试夹具；新增 `regression.stress.test.ts`，不修改原中性参数与持久 Fan 数据结构。
+**第二轮压力回归（已验证）**：[Fan_Cheki_Stress_Regression_2026-10-24.md](Fan_Cheki_Stress_Regression_2026-10-24.md) 覆盖热门成员容量、多推共享时间、Live/互动成长响应的确定性测试夹具；不修改原中性参数与持久 Fan 数据结构。
+
+**12周经营集成夹具**：[Chronicle_Operating_Simulation_v1.md](Chronicle_Operating_Simulation_v1.md) 将 Staff、Performance→Fan、成员级 Cheki 与 Finance 接到同一条确定性回归路径；它明确列出尚待迁移到持久 Calendar Runtime 的边界。
 
 **Chronicle 展示与数据裁剪规则（LOCKED）**：不提供 Idol World Tier 表、Overall 评分、行业 Top50、跨团排名、其他团或本团的行业地位评价 UI/API。其他团仅以有必要的活动参演者、剧本人物和竞争日程出现。内部可保留少量由 Scenario 提供的活动难度、资源/曝光权重，但不得因此要求建立完整行业 Tier 或全团评分库。第五份 Tier 文档是历史校准附录，**不属于必读实施规范**。
 

@@ -2,11 +2,12 @@ import { fanChekiBalanceV1, requestProductsForBudget, sampleFanAttendance, sampl
 import { createSeededRandom, sampleBinomial, sampleHypergeometric } from "./random";
 import type { FanState } from "./types";
 
-type MemberSales = {
+export type MemberSales = {
   requestedJPY: number;
   requestedUnits: number;
   grossJPY: number;
   completedUnits: number;
+  completedUnitsByTier: Record<"1000" | "2000", number>;
   variableCostJPY: number;
   buyerCount: number;
   affinityVisitors: number;
@@ -104,7 +105,9 @@ export function settleChekiQueue(input: {
   const assignedPopulation = population - unassigned;
   const eligibleExposedOWithoutAffinity: Record<string, number> = {};
   const sales: Record<string, MemberSales> = Object.fromEntries(input.memberIds.map((id) => [id, {
-    requestedJPY: 0, requestedUnits: 0, grossJPY: 0, completedUnits: 0, variableCostJPY: 0, buyerCount: 0, affinityVisitors: 0, queueLostJPY: 0, queueLostBuyers: 0, waitMinutes: [],
+    requestedJPY: 0, requestedUnits: 0, grossJPY: 0, completedUnits: 0,
+    completedUnitsByTier: { "1000": 0, "2000": 0 }, variableCostJPY: 0,
+    buyerCount: 0, affinityVisitors: 0, queueLostJPY: 0, queueLostBuyers: 0, waitMinutes: [],
   }]));
   for (const memberId of input.memberIds) {
     const profile = input.fan.members[memberId];
@@ -163,6 +166,7 @@ export function settleChekiQueue(input: {
     }
     sales[memberId].grossJPY += spend;
     sales[memberId].completedUnits += units.length;
+    for (const id of units) sales[memberId].completedUnitsByTier[id === "2000" ? "2000" : "1000"] += 1;
     sales[memberId].variableCostJPY += units.reduce<number>((sum, id) => sum + productVariableCost(id), 0);
     sales[memberId].buyerCount += 1;
     sales[memberId].waitMinutes.push(wait);
