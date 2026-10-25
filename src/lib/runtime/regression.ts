@@ -78,24 +78,46 @@ export type ChekiServiceRecord = { fanId: string; memberId: string; startSeconds
 export function settleChekiQueue(input: {
   fan: FanState; memberIds: string[]; attendeeOtaku: number; seed: string;
   onService?: (record: ChekiServiceRecord) => void;
+  onAudience?: (audience: { eligibleExposedOWithoutAffinity: Record<string, number>; stayedOtaku: number }) => void;
+  onAffinitySample?: (sample: { fanId: string; memberId: string; stayedForCheki: boolean }) => void;
 }) {
   const random = createSeededRandom(input.seed);
-  const visitors: TemporaryFan[] = Array.from({ length: input.attendeeOtaku }, (_, index) => ({
-    id: `o-${index}`, availableAt: random() * 720, orders: new Map(),
-  }));
+  // Draw each attendee's stay decision ONCE, shared across every member.
+  // U (temporarily unassigned Otaku) are present at the Live but cannot be
+  // treated as assigned O for existing-member affinity acquisition.
+  const population = Math.max(0, Math.round(input.fan.otakuCount));
+  const attendeeCount = Math.min(population, Math.max(0, Math.round(input.attendeeOtaku)));
+  const unassigned = Math.min(population, Math.max(0, Math.round(input.fan.temporarilyUnassignedOtaku)));
+  const unassignedAttending = sampleHypergeometric({
+    population, successes: unassigned, draws: attendeeCount, random,
+  });
+  const visitors: (TemporaryFan & { stayedForCheki: boolean; unassigned: boolean })[] =
+    Array.from({ length: attendeeCount }, (_, index) => ({
+      id: `o-${index}`, availableAt: random() * 720, orders: new Map(),
+      stayedForCheki: random() < fanChekiBalanceV1.pStayChekiOtaku,
+      unassigned: false,
+    }));
+  for (const visitor of shuffled(visitors, random).slice(0, unassignedAttending)) {
+    visitor.unassigned = true;
+  }
+  const assignedVisitors = visitors.filter((visitor) => !visitor.unassigned);
+  const assignedPopulation = population - unassigned;
+  const eligibleExposedOWithoutAffinity: Record<string, number> = {};
   const sales: Record<string, MemberSales> = Object.fromEntries(input.memberIds.map((id) => [id, {
     requestedJPY: 0, requestedUnits: 0, grossJPY: 0, completedUnits: 0, variableCostJPY: 0, buyerCount: 0, affinityVisitors: 0, queueLostJPY: 0, queueLostBuyers: 0, waitMinutes: [],
   }]));
   for (const memberId of input.memberIds) {
     const profile = input.fan.members[memberId];
     const affinityVisitors = sampleHypergeometric({
-      population: input.fan.otakuCount,
+      population: assignedPopulation,
       successes: profile.affinityCount,
-      draws: input.attendeeOtaku,
+      draws: assignedVisitors.length,
       random,
     });
-    for (const visitor of shuffled(visitors, random).slice(0, affinityVisitors)) {
-      if (random() >= fanChekiBalanceV1.pStayChekiOtaku) continue;
+    eligibleExposedOWithoutAffinity[memberId] = assignedVisitors.length - affinityVisitors;
+    for (const visitor of shuffled(assignedVisitors, random).slice(0, affinityVisitors)) {
+      input.onAffinitySample?.({ fanId: visitor.id, memberId, stayedForCheki: visitor.stayedForCheki });
+      if (!visitor.stayedForCheki) continue;
       sales[memberId].affinityVisitors += 1;
       const budget = samplePurchaseBudgetKJPY(profile.purchaseWeightKJPY, random);
       const request = requestProductsForBudget({
@@ -110,6 +132,10 @@ export function settleChekiQueue(input: {
       }
     }
   }
+  input.onAudience?.({
+    eligibleExposedOWithoutAffinity,
+    stayedOtaku: visitors.filter((visitor) => visitor.stayedForCheki).length,
+  });
   const nextAvailable = Object.fromEntries(input.memberIds.map((id) => [id, 0])) as Record<string, number>;
   let guard = 0;
   while (visitors.some((visitor) => visitor.orders.size > 0) && guard < 20_000) {
@@ -160,7 +186,12 @@ export type GrowthFixtureOptions = {
 
 function settleWeek(input: { fan: FanState; memberIds: string[]; seed: string; rosterSize: number; week: number; fixture?: GrowthFixtureOptions }) {
   const attendance = sampleFanAttendance({ fan: input.fan, kind: "taiban", seed: `${input.seed}:attendance`, externalWatchingAudience: input.fixture?.externalWatchingAudience ?? regressionFixtureV1.externalWatchingAudience });
-  const sales = settleChekiQueue({ fan: input.fan, memberIds: input.memberIds, attendeeOtaku: attendance.otaku, seed: `${input.seed}:queue` });
+  let eligibleExposedOWithoutAffinity: Record<string, number> = {};
+  const sales = settleChekiQueue({
+    fan: input.fan, memberIds: input.memberIds, attendeeOtaku: attendance.otaku,
+    seed: `${input.seed}:queue`,
+    onAudience: (audience) => { eligibleExposedOWithoutAffinity = audience.eligibleExposedOWithoutAffinity; },
+  });
   const random = createSeededRandom(`${input.seed}:fans`);
   const quality = Math.max(0, input.fixture?.liveQualityFactor ?? 1);
   const publicToOtaku = sampleBinomial(attendance.public, Math.min(1, fanChekiBalanceV1.pPublicToOtaku * quality), random);
@@ -173,7 +204,7 @@ function settleWeek(input: { fan: FanState; memberIds: string[]; seed: string; r
     const memberSales = sales[memberId];
     const exposureShare = 1 / input.memberIds.length;
     const newAffinity = (publicToOtaku + externalToOtaku) * exposureShare + sampleBinomial(
-      Math.max(0, Math.round(input.fan.otakuCount - current.affinityCount)),
+      eligibleExposedOWithoutAffinity[memberId] ?? 0,
       Math.min(1, fanChekiBalanceV1.pExistingOtakuToAffinity * exposureShare * quality),
       random,
     );
