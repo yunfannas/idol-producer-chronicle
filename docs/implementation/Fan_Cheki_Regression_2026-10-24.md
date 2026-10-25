@@ -3,6 +3,8 @@
 This is the first calibration record for the executable v1 baseline. It does
 not establish historical attendance, revenue, or a production Scenario seed.
 
+> **Historical pre-fix results:** the values below were measured before the subsequent correction to actual-attendee-only affinity acquisition and one-stay-decision-per-fan Cheki sampling. The .05 balance parameter remains unchanged, but the numeric results below are **not valid post-fix regression expectations**. See [Fan_Cheki_Stress_Regression_2026-10-24.md](Fan_Cheki_Stress_Regression_2026-10-24.md) for fixes and rerun requirements.
+
 ## Method
 
 - Routes: 5, 9, and 15 members; 12 weekly taiban Lives each; seeds 1–20 per
