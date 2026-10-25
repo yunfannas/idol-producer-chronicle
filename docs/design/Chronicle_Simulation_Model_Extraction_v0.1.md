@@ -6,6 +6,10 @@
 
 ## 已完成的专项公式提取（2026-10-24）
 
+> **更新**：`idol-data-lab/main@5499e7c5355b` 已补齐八色 Palette Execution；下方旧 `SOURCE_PENDING` 仅为前次提取的历史状态。以 [Eight-Color Palette · Performance Kernel v0.2](Chronicle_Eight_Color_Palette_Performance_Kernel_v0.2.md) 的八色规则为准。仍待完成的是 EnvPalette 与 PE 的单次结合、Part Fit 等参数回归，不是八色坐标或 Opp3 公式。
+
+- **[Eight-Color Palette · Performance Kernel v0.2](Chronicle_Eight_Color_Palette_Performance_Kernel_v0.2.md)**：八色语义轴/对向、BasePE、KeyPart Opp3、Familiarity、FinalPE→Impression倍率、八色容量/成长、L3截止过滤与14项测试；源 SHA `5499e7c5355b`。另记录 Performance Analyzer MVP 合并及数据证据边界。
+
 - **[Member · Training · Condition · Performance Kernel v0.1](Chronicle_Member_Training_Condition_Performance_Kernel_v0.1.md)**：17 Attr、EXP、Formation Familiarity、Condition、逐曲消耗/恢复、Part/Team/Member Impression、Staff AP 约束与 12 项测试。八色 Palette 的精确公式仍为 `SOURCE_PENDING`，不把旧十色算法当最终实现。
 - **[Fan Market · Cheki · Commercial Kernel v0.1](Chronicle_Fan_Cheki_Commercial_Kernel_v0.1.md)**：P/O/A_i/W_i、逐成员购买力与双档 Cheki、5 秒换粉 overhead、60 分钟基线、收入唯一性、周转化接口与 12 项测试。获客/留存概率和队列购买行为仍为 `TUNABLE`。
 - **后续待提取**：八色 Palette v2.0 最新冻结数据契约、World/Operations/Staff 的完整可执行参数、L3 导出 schema 与历史回归 fixtures。专项文件优先于本总索引中简化摘要；旧 03 v0.3 的十色/Core/旧 Overall 不得复活。
