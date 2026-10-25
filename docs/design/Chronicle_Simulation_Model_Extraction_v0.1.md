@@ -124,10 +124,11 @@ rep_next = floor(rep × 0.9875) + gains − penalties     [LOCKED]
 
 ## 5. Policy / Staff：行为与授权分离
 
-- Policy `R1 Routine Tuning`、`R2 Operational Rule`、`R3 Operating Model`、`R4 Group Policy`；`R4` **永远不 AUTO_EXECUTE**。
-- Automation Grade 由 `Group Tier + 内部 Operational Staff HC` 产生，**不**由 Archetype 直接决定。G0–G3 的矩阵使用 Policy Spec §3；玩家可在开档/接手时 review 并覆写各 domain Decision Boundary。
+- Policy 保留父系统 `R1 Routine Tuning`、`R2 Operational Rule`、`R3 Operating Model`、`R4 Group Policy` 的**分类语义**，但 Chronicle 覆盖其**修改权限**：R4 整个游戏固定、R2/R3 每章固定（仅剧本章节切换可变）、玩家日常仅可修改 R1。R4 不仅不自动执行，也不开放玩家编辑。
+- Automation Grade 仍由 `Group Tier + 内部 Operational Staff HC` 产生，不由 Archetype 直接决定；G0–G3 影响 Staff 对**现有固定规则**的执行、通知和 R1 提议。父系统允许开档覆写 Decision Boundary 的沙盒交互**不直接继承到 Chronicle**；R2/R3/R4 的决策边界由 Scenario 配置，非玩家自由编辑。
 - 背景团采用 `Standard`（少量高影响显式字段+默认填充）；玩家团采用 `Extended`（真实产品菜单、价格/时间/购买限制、具体训练/排期）。
-- Cheki/talk 已有商品的互动时长调整为 R1，购买/连续上限 R2，长期商品菜单和基础价 R3；**不能把每周定期公演的例行执行升级为每周 Blocking Producer 决议**。
+- Cheki/talk 已有商品的互动时长调整为可编辑 R1；购买/连续上限属于本章固定 R2，长期商品菜单和基础价属于本章固定 R3。**玩家不能把 R2/R3 伪装为一次性工作流绕过章节限制**；也不能把每周定期公演的例行执行升级为每周 Blocking Producer 决议。
+- Audition 完全由 Scenario Event 触发，Chronicle 不提供玩家自主发起入口；剧本规定的录取和签约选择在事件授权范围内执行。
 - 详细 AP、Calendar、成员 Condition 的完整公式在旧专项/portable spec 中存在多次版本变化；需抽取一份当前无冲突公式表后才编码，不能直接照搬 03 的旧 Physical/Vocal Fatigue。
 
 ## 6. Member / Performance / Palette：第二批公式抽取范围
