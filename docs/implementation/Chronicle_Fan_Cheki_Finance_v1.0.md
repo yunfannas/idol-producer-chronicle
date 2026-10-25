@@ -4,6 +4,7 @@
 
 ## Chronicle 专用规则
 
+- **不使用完整行业 Tier 或跨团排名**：原 `Team Tier` 仅作历史校准描述；新人初始粉丝量与市场响应由章节初始状态、出道曝光及实际演出决定，品牌/行业地位不作为玩家可见评分。
 - **仅**持久 P/O/A_i/W_i（以及毕业过渡的 O_unassigned），不持久 Core、C_i、独立 BoxRate；多推允许 ΣA_i>O。
 - 普通 Live 和 Cheki 由 Staff 根据**本章固定的 R2/R3**执行；玩家只调整 R1。商品菜单/基础价格/购买上限不可通过日常界面随意更改，除非 Scenario 明确给出一次性事件授权。
 - Cheki 的服务时长、真实成交、成员佣金与 Finance ledger 都按 `liveId+memberId+productId` 唯一化；不能把“预期需求”直接入账。
@@ -98,7 +99,7 @@ SNS/媒体/外务/直播的外部 reach → P
 - 各活动产生事件 momentum，周结算统一消费一次，避免 Live 当天和周末重复增长。Condition、收入与即时反馈仍按事件当日更新；旧 §29 中 `O→Core` 结算步骤必须改为 `O→A_i / W_i`。
 - **待定函数**：`P_acquisition(reach)`、`P_to_O(impression,repeatExposure)`、`A_gain(O,memberImpression,interaction)`、`A_churn(interaction,availability,turnover)`、`W_update(price,experience,repeats)`、`P/O_churn`、跨团注意力竞争。不得从旧 Core 模型借常数声称权威。
 - 若用统计 aggregate 而非个体级 fan edges 保存 `A_i`，毕业时“仍有其他推的 O 保留”**无法由 `Σ A_i` 精确推导**；须引入可重复的轻量 overlap 近似或显式 affinity cohort/edges，标记模型假设并做多推测试。
-- 新成员 seed 由当时 Team Tier、出道曝光决定且较小；毕业后的新人可吸收部分 `O_unassigned`，依据角色/形象/能力/互动 fit，不能瞬间全继承。
+- 新成员 seed 由章节规模/当前真实 P/O、出道曝光决定且较小；毕业后的新人可吸收部分 `O_unassigned`，依据角色/形象/能力/互动 fit，不能瞬间全继承。
 
 ## 5. Public / Otaku 市场与活动经济
 
@@ -138,12 +139,12 @@ ExpectedAttendance ≈ PublicContribution + OtakuContribution
 
 再由重要性、地区/旅行、星期/时间、票价、近期演出密度、竞争活动调整。实际可核到场优先于 Fan 推断；真实演出使用座席/票务/可达性约束，不能拿 fan O 直接当当场动员。
 
-## 6. 与 Brand / Tier 的边界
+## 6. Chronicle 不实现行业 Tier / Brand 评分
 
-- Fan 是**隐含市场状态**，不是第四个 Tier 维度。Live/Music/Brand 各自以真实结算和行业事件评分。
+- Fan 是**隐含市场状态**；Chronicle 只通过真实动员、收入、活动履历、粉丝和章节成果体现发展，不实现 Live/Music/Brand/Overall 0–10000 分段与跨团行业排名。
 - Brand 自然衰减 `rep_next=floor(0.9875×rep)+gains−penalties`；结构性维护由 O/P、Agency/Producer/运营支撑，**精确函数仍 TUNABLE**。
 - 成员毕业不直接扣固定 Brand；通过成员 affinity 流失、购买力/到场变化和后续表现间接影响 Brand。
-- `P/O` 比例随 Tier 改变：地下 D 往往 P/O<1，C− 以上 Public 重要性增强。不是强制门槛，也不能因为某团D就设P=0。
+- P/O 结构可随实际曝光、作品传播、活动规模改变；不使用 Tier 标签硬设比例，也不能因起点规模小而设 P=0。
 
 ## 7. 实施用确定性接口（本文件设计建议）
 
@@ -248,7 +249,7 @@ completedLive
   → per-member per-product actualChekiSales (Cheki owner)
   → financeLedger (single owner, idempotency key)
   → weekly fanMomentum resolution (exactly once)
-  → monthly rolling tier/brand / reports
+  → monthly observable progression / reports
 ```
 
 - `Cheki` 结算可以采用 gross+share+cost 或 net-retained 记账之一，禁止两套同时记；贷款入账是 financing，不是营业收入；制作/服装资产与费用不可重复。
