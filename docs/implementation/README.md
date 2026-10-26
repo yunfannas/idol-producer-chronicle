@@ -1,5 +1,8 @@
 # Chronicle Runtime Implementation Pack v1.0
 
+
+> **2026-10-26 最新覆盖规范：** [Fan Lifecycle × Cheki × Reputation Integrated Spec v1.0](Chronicle_Fan_Reputation_Integrated_Spec_v1.0.md)。本文件内「不实现 Tier / Reputation」以及所有新 O 必须立即建立 A、TIF 当天结局等历史禁令，**均已被新规范覆盖**。玩家仅显示综合 Reputation（出道后），内部 Live/Music/Brand 三分项；NPC 固定综合值。新规范为设计合同，**不代表 Runtime 已实现**。旧模块未冲突条款仍然有效。
+
 **实施唯一入口（2026-10-24）** · 状态：**文档已整理、公式已抽取；不是 Runtime 已完成或测试已通过的声明**。实现 Agent **不需要，也不应依赖读取 `idol-data-lab`**；游戏所需已提取公式、约束、优先级和待校准缺口全部保存在 Chronicle 本目录。外部研究仓库仅用于未来**显式批准的版本升级**，不能在实现中临时找旧公式填空。
 
 ## 1. 权威文件与读取顺序
