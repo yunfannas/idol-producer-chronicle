@@ -24,6 +24,7 @@ export const reputationIntegratedV1 = {
   weeklyBrandRetention: 0.995 ** (12 / 52),
   weeklyConvergence: 0.25,
   weeklyMaximumChange: 100,
+  musicProductionQualityPrior: 0.5,
 } as const;
 
 const TIER_BANDS: readonly [ReputationTier, number, number][] = [
@@ -48,6 +49,61 @@ export function createReputationState(): ReputationState {
     appliedBrandEventIds: [],
     pendingBrandGains: 0,
   };
+}
+
+function interpolate(value: number, anchors: readonly [number, number][]) {
+  if (value <= anchors[0][0]) return anchors[0][1];
+  for (let index = 1; index < anchors.length; index += 1) {
+    const [rightValue, rightScore] = anchors[index];
+    const [leftValue, leftScore] = anchors[index - 1];
+    if (value <= rightValue) {
+      const ratio = (value - leftValue) / Math.max(1, rightValue - leftValue);
+      return leftScore + (rightScore - leftScore) * ratio;
+    }
+  }
+  return anchors.at(-1)![1];
+}
+
+/**
+ * Provisional continuous Live mapping for actual rolling contract receipts.
+ * It keeps the v1 D− ¥1–3m anchor continuous (¥2m -> ~1100) and applies a
+ * conservative average-attendance cap, rather than using a tier midpoint.
+ */
+export function scoreLiveReputation(input: {
+  ticketGrossJPY: number;
+  averageActualAttendance: number;
+  attributableShowCount: number;
+}): number | null {
+  if (!Number.isFinite(input.ticketGrossJPY) || !Number.isFinite(input.averageActualAttendance) || input.attributableShowCount <= 0) return null;
+  const grossScore = interpolate(Math.max(0, input.ticketGrossJPY), [
+    [0, 0], [200_000, 300], [500_000, 600], [1_000_000, 800], [2_000_000, 1_100], [3_000_000, 1_199],
+    [5_000_000, 1_200], [10_000_000, 1_599], [25_000_000, 1_999], [60_000_000, 2_399], [150_000_000, 2_999], [250_000_000, 3_599],
+  ]);
+  const attendanceCap = input.averageActualAttendance < 10 ? 599
+    : input.averageActualAttendance < 30 ? 799
+      : input.averageActualAttendance < 80 ? 1_199
+        : input.averageActualAttendance < 150 ? 1_599
+          : 10_000;
+  return Math.round(Math.max(0, Math.min(attendanceCap, grossScore)));
+}
+
+/**
+ * Two player originals are public after debut. Before a direct production
+ * assessment is available, the neutral production prior is combined with
+ * measured Live reception; it is an explicit TUNABLE prior, never a zero.
+ */
+export function scoreMusicReputation(input: {
+  publishedOriginalCount: number;
+  meanReceptionQuality: number | null;
+  productionQualityPrior?: number;
+}): number | null {
+  const count = Math.max(0, Math.min(3, Math.floor(input.publishedOriginalCount)));
+  if (count === 0) return null;
+  const production = Math.max(0, Math.min(1, input.productionQualityPrior ?? reputationIntegratedV1.musicProductionQualityPrior));
+  const reception = Math.max(0, Math.min(1, input.meanReceptionQuality ?? production));
+  const quality = 0.7 * production + 0.3 * reception;
+  const repertoireBonus = count === 1 ? 150 : count === 2 ? 250 : 300;
+  return Math.round(Math.max(0, Math.min(10_000, 800 + repertoireBonus + 400 * (quality - 0.5))));
 }
 
 /** Applies an announced/completed Brand fact once, before that Sunday's smoothing. */

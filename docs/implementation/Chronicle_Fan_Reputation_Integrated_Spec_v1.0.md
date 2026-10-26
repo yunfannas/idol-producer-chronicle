@@ -89,8 +89,9 @@ Active 月保留系数 **0.995**（月衰减 0.5%），周系数 `0.995^(12/52)`
 `externalExposure` 与同周 SNS 的新接触合并，周日才写入 P；Team 来源的新增 O
 不再被强制创建 A。`ReputationState`、周日单次平滑、首次原创公开、首次 One-man
 和首次普通 TIF 的 Brand 分期，以及 TIF 后 2014-08-03 周日收尾已接入 seeded
-Staff adapter。Live/Music 连续评分和普通 SNS Brand 收益仍保持 `unavailable` /
-待校准，未用零分或虚构流水替代。
+Staff adapter。出道前 Live/Music 保持 `unavailable`；出道后 Staff adapter 使用实际滚动
+合同票务、实际动员与原创现场接受度的连续代理，保证内部评分有限且不把缺失当零分。
+普通 SNS Brand 收益仍待校准，未用无条件补贴替代。
 
 目前实际仓库 README、设计 v0.10 和 Fan v1.1 部分仍与此新决定冲突。**本文件为最新专项覆盖规范**；旧文件中和这里抵触的禁令/算法废止，但其他互不矛盾的 Scenario/Finance/Performance 约束仍有效。实施前应更新它们的交叉引用。
 

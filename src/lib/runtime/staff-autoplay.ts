@@ -12,7 +12,7 @@ import { arrangementFor, createArrangementVersion, recordArrangementExposure, se
 import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1 } from "./fan";
 import { resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
 import { resolveWeeklyOnlineAcquisition, staffExternalAudienceDemandV11, type WeeklyOnlineAcquisition } from "./fan-acquisition";
-import { applyBrandEvent, settleWeeklyReputation } from "./reputation";
+import { applyBrandEvent, scoreLiveReputation, scoreMusicReputation, settleWeeklyReputation } from "./reputation";
 import { calculateTaibanTicketRevenue, createMonthlyOperatingReport, postLedgerEntry } from "./finance";
 import {
   type CoreAttributes,
@@ -283,6 +283,19 @@ type WeeklyFanResolution = {
   opening: StaffAutoplayFanSnapshot;
   closing: StaffAutoplayFanSnapshot;
 };
+
+function trailingReputationEvidence(events: StaffAutoplayEventAudit[], asOf: string) {
+  const cutoff = `${Number(asOf.slice(0, 4)) - 1}${asOf.slice(4)}`;
+  const trailing = events.filter((event) => event.date >= cutoff);
+  return {
+    ticketGrossJPY: trailing.reduce((sum, event) => sum + event.ticketRevenueJPY, 0),
+    averageActualAttendance: trailing.reduce((sum, event) => sum + event.actualAttendance, 0) / Math.max(1, trailing.length),
+    attributableShowCount: trailing.length,
+    meanReceptionQuality: trailing.length > 0
+      ? trailing.reduce((sum, event) => sum + Math.max(0, Math.min(1, event.performanceInternal)), 0) / trailing.length
+      : null,
+  };
+}
 
 function snapshotFan(fan: FanState): StaffAutoplayFanSnapshot {
   return {
@@ -941,14 +954,22 @@ export function runStaffAutoplayPrologue(input: {
       }
       settledFan.resolution.closing = snapshotFan(state.fan);
       fanWeeklyResolutions.push(settledFan.resolution);
+      const reputationEvidence = trailingReputationEvidence(audits, date);
       state = {
         ...state,
         reputation: settleWeeklyReputation({
           state: state.reputation,
           weekEnd: date,
           debutDate: "2013-05-24",
-          live: null,
-          music: null,
+          live: scoreLiveReputation({
+            ticketGrossJPY: reputationEvidence.ticketGrossJPY,
+            averageActualAttendance: reputationEvidence.averageActualAttendance,
+            attributableShowCount: reputationEvidence.attributableShowCount,
+          }),
+          music: scoreMusicReputation({
+            publishedOriginalCount: date >= "2013-05-24" ? 2 : 0,
+            meanReceptionQuality: reputationEvidence.meanReceptionQuality,
+          }),
         }),
       };
       weeklyPerformanceTotal = 0;

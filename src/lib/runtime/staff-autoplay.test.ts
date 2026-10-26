@@ -238,6 +238,8 @@ describe("Staff autoplay prologue E2E", () => {
     const runs = Array.from({ length: 100 }, (_, index) => runStaffAutoplayPrologue({ route: "B", seed: index + 1, fanAcquisitionStage: "C3" }));
     expect(runs.every((result) => result.stageStatus !== "BLOCKED_BUG" && result.state.date === "2014-08-03")).toBe(true);
     expect(runs.every((result) => result.state.reputation.settledWeekIds.at(-1) === "2014-08-03")).toBe(true);
+    expect(runs.every((result) => result.state.reputation.live !== null && Number.isFinite(result.state.reputation.live)
+      && result.state.reputation.music !== null && Number.isFinite(result.state.reputation.music))).toBe(true);
     expect(runs.every((result) => result.events.every((event) => event.fanFlow.externalToPublic <= event.fanFlow.externalExposure))).toBe(true);
   });
 });
