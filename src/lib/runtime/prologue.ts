@@ -2,6 +2,7 @@ import { chekiLedgerEntries, settleChekiSales } from "./cheki";
 import { createFanState, graduateMemberFanAffinity } from "./fan";
 import { createFinanceState, postLedgerEntry } from "./finance";
 import { createPerformanceProgression } from "./arrangement-familiarity";
+import { createReputationState } from "./reputation";
 import type {
   ChekiSaleInput,
   Difficulty,
@@ -143,6 +144,7 @@ export function createPrologueState(input: { saveId: string; difficulty?: Diffic
     interviewedCandidateIds: [],
     members: founders,
     fan,
+    reputation: createReputationState(),
     performanceProgression: createPerformanceProgression({ songId: "prologue-staff-default-song", arrangementVersion: "v1", initialFamiliarity: 0 }),
     gates,
     events: createPrologueSchedule(),

@@ -96,6 +96,17 @@ export type RuntimeMember = {
   developedPalette?: DevelopedPalette;
 };
 
+export type ReputationState = {
+  current: number;
+  brand: number;
+  live: number | null;
+  music: number | null;
+  visibleToPlayer: boolean;
+  settledWeekIds: string[];
+  appliedBrandEventIds: string[];
+  pendingBrandGains: number;
+};
+
 /** Fan Market v0.2 / executable v1: Core and BoxRate are intentionally absent. */
 export type FanState = {
   publicCount: number;
@@ -206,6 +217,7 @@ export type PrologueState = {
   interviewedCandidateIds: string[];
   members: RuntimeMember[];
   fan: FanState;
+  reputation: ReputationState;
   performanceProgression: PerformanceProgressionState;
   gates: Record<PrologueGate, boolean>;
   events: RuntimeEvent[];

@@ -85,6 +85,13 @@ Active 月保留系数 **0.995**（月衰减 0.5%），周系数 `0.995^(12/52)`
 
 ## 6. 实现与测试缺口
 
+**Runtime status（2026-10-26）：** Staff C3 现已将未转 O 的外部观看者作为
+`externalExposure` 与同周 SNS 的新接触合并，周日才写入 P；Team 来源的新增 O
+不再被强制创建 A。`ReputationState`、周日单次平滑、首次原创公开、首次 One-man
+和首次普通 TIF 的 Brand 分期，以及 TIF 后 2014-08-03 周日收尾已接入 seeded
+Staff adapter。Live/Music 连续评分和普通 SNS Brand 收益仍保持 `unavailable` /
+待校准，未用零分或虚构流水替代。
+
 目前实际仓库 README、设计 v0.10 和 Fan v1.1 部分仍与此新决定冲突。**本文件为最新专项覆盖规范**；旧文件中和这里抵触的禁令/算法废止，但其他互不矛盾的 Scenario/Finance/Performance 约束仍有效。实施前应更新它们的交叉引用。
 
 必须校准：Live 的重叠票房锚连续映射、年化先验与低样本折算；Music Potential→市场分值映射；普通 SNS Brand 实际收益；Non-active Brand 衰减；One-man 逐周 Public 购票；Cheki 拥堵时多推消费预算/FIFO；Retention 基础流失和调整系数。要求固定 seed、幂等、人口及票房守恒、同一笔 Brand 事件分期只能领一次、TIF 周日关闭、正式 Staff 100-seed 报告。**本文是规范落地，不等于完成代码实施或测试。**

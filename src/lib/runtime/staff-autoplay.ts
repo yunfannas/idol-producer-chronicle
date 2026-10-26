@@ -12,6 +12,7 @@ import { arrangementFor, createArrangementVersion, recordArrangementExposure, se
 import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1 } from "./fan";
 import { resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
 import { resolveWeeklyOnlineAcquisition, staffExternalAudienceDemandV11, type WeeklyOnlineAcquisition } from "./fan-acquisition";
+import { applyBrandEvent, settleWeeklyReputation } from "./reputation";
 import { calculateTaibanTicketRevenue, createMonthlyOperatingReport, postLedgerEntry } from "./finance";
 import {
   type CoreAttributes,
@@ -182,6 +183,8 @@ export type StaffAutoplayEventAudit = {
     otakuAttendance: number;
     publicAttendance: number;
     externalAudience: number;
+    /** Non-O external reach pending the combined Sunday P settlement. */
+    externalExposure: number;
     publicToOtaku: number;
     externalToOtaku: number;
     externalToPublic: number;
@@ -208,6 +211,7 @@ export type StaffAutoplayFanMonth = {
     otakuAttendance: number;
     publicAttendance: number;
     externalAudience: number;
+    externalExposure: number;
     publicToOtaku: number;
     externalToOtaku: number;
     externalToPublic: number;
@@ -260,6 +264,8 @@ type PendingFanMomentum = {
   publicToOtakuSampled: number;
   externalToOtaku: number;
   externalToPublic: number;
+  externalExposure: number;
+  assignInitialAffinityToNewOtaku: boolean;
   newAffinityByMember: Record<string, number>;
   initialAffinityByMember: Record<string, number>;
   logWByMember: Record<string, number>;
@@ -272,6 +278,7 @@ type WeeklyFanResolution = {
   publicToOtaku: number;
   externalToOtaku: number;
   externalToPublic: number;
+  externalExposure: number;
   onlineNewPublic: number;
   opening: StaffAutoplayFanSnapshot;
   closing: StaffAutoplayFanSnapshot;
@@ -361,6 +368,7 @@ function updateFanFromEvent(input: {
   quality: number; exposure: Record<string, { exposureProbability: number; quality: number }>; seed: string;
   newcomerVoucher?: NewcomerVoucherTrialConfig;
   audienceAttribution?: EventAudienceAttribution;
+  integratedLifecycle?: boolean;
 }) {
   // Legacy mode derives temporary X from a contract attendance total. In
   // C2/C3 mode all audience populations come from demand attribution, so no
@@ -419,8 +427,11 @@ function updateFanFromEvent(input: {
     : sampleBinomial(externalDirectPool, Math.min(0.1, fanChekiBalanceV1.pExternalToOtaku * q), random);
   const externalToP = input.audienceAttribution?.externalToPublic
     ?? sampleBinomial(externalDirectPool - externalDirectToO, Math.min(0.3, fanChekiBalanceV1.pExternalToPublic * q), random);
+  const externalExposure = input.integratedLifecycle && input.audienceAttribution
+    ? input.audienceAttribution.externalExposure
+    : 0;
   const newByMember = Object.fromEntries(input.participants.map((member) => [member.id, 0])) as Record<string, number>;
-  for (let index = 0; index < externalDirectToO; index += 1) {
+  for (let index = 0; index < (input.integratedLifecycle ? 0 : externalDirectToO); index += 1) {
     let point = random() * denominator;
     for (let position = 0; position < input.participants.length; position += 1) {
       point -= weights[position];
@@ -457,6 +468,7 @@ function updateFanFromEvent(input: {
       otakuAttendance: attendance,
       publicAttendance: publicAttend,
       externalAudience,
+      externalExposure,
       publicToOtaku: 0,
       externalToOtaku: externalToO,
       externalToPublic: externalToP,
@@ -471,6 +483,8 @@ function updateFanFromEvent(input: {
       publicToOtakuSampled: publicToO,
       externalToOtaku: externalToO,
       externalToPublic: externalToP,
+      externalExposure,
+      assignInitialAffinityToNewOtaku: !input.integratedLifecycle,
       newAffinityByMember,
       initialAffinityByMember: newByMember,
       logWByMember,
@@ -487,6 +501,7 @@ function resolveWeeklyFanMomentum(input: {
   seed: string;
   applyDecay?: boolean;
   onlineNewPublic?: number;
+  externalExposurePublic?: number;
 }): { fan: FanState; resolution: WeeklyFanResolution } {
   const opening = snapshotFan(input.fan);
   const decayed = input.applyDecay === false ? input.fan : applyWeeklyFanDecay(input.fan);
@@ -495,7 +510,8 @@ function resolveWeeklyFanMomentum(input: {
   const publicToOtaku = Math.min(Math.floor(decayed.publicCount), input.momenta.reduce((sum, momentum) => sum + momentum.publicToOtakuSampled, 0));
   const random = createSeededRandom(`${input.seed}:fan-week:${input.weekEnd}`);
   const externalToOtaku = input.momenta.reduce((sum, momentum) => sum + momentum.externalToOtaku, 0);
-  const externalToPublic = input.momenta.reduce((sum, momentum) => sum + momentum.externalToPublic, 0);
+  const externalToPublic = input.momenta.reduce((sum, momentum) => sum + momentum.externalToPublic, 0)
+    + (input.externalExposurePublic ?? 0);
   const additionalAffinity: Record<string, number> = Object.fromEntries(Object.keys(decayed.members).map((memberId) => [memberId, 0]));
   const logW: Record<string, number> = Object.fromEntries(Object.keys(decayed.members).map((memberId) => [memberId, 0]));
   for (const momentum of input.momenta) {
@@ -518,13 +534,30 @@ function resolveWeeklyFanMomentum(input: {
     const committed = Math.min(remainingPublicConversions, momentum.publicToOtakuSampled);
     remainingPublicConversions -= committed;
     input.audits[momentum.auditIndex].fanFlow.publicToOtaku += committed;
-    for (let index = 0; index < committed; index += 1) {
+    for (let index = 0; index < committed && momentum.assignInitialAffinityToNewOtaku; index += 1) {
       const memberId = choose(Object.keys(momentum.memberWeights), (id) => momentum.memberWeights[id]);
         if (memberId) {
           additionalAffinity[memberId] = (additionalAffinity[memberId] ?? 0) + 1;
           input.audits[momentum.auditIndex].fanFlow.initialAffinityByMember[memberId] = (input.audits[momentum.auditIndex].fanFlow.initialAffinityByMember[memberId] ?? 0) + 1;
         }
     }
+  }
+  // Event-derived external new P is created only here, after the online
+  // resolver has deduplicated it against same-week SNS exposure. Attribute
+  // the aggregate result back to source events for audit without inventing
+  // persistent viewer identities.
+  let remainingExternalPublic = input.externalExposurePublic ?? 0;
+  for (const momentum of input.momenta) {
+    if (remainingExternalPublic <= 0 || momentum.externalExposure <= 0) continue;
+    const totalExposure = input.momenta.reduce((sum, candidate) => sum + candidate.externalExposure, 0);
+    const eventShare = totalExposure > 0 ? momentum.externalExposure / totalExposure : 0;
+    const attributed = Math.min(remainingExternalPublic, Math.round((input.externalExposurePublic ?? 0) * eventShare));
+    remainingExternalPublic -= attributed;
+    input.audits[momentum.auditIndex].fanFlow.externalToPublic += attributed;
+  }
+  if (remainingExternalPublic > 0) {
+    const target = [...input.momenta].reverse().find((momentum) => momentum.externalExposure > 0);
+    if (target) input.audits[target.auditIndex].fanFlow.externalToPublic += remainingExternalPublic;
   }
   const otakuCount = decayed.otakuCount + publicToOtaku + externalToOtaku;
   const assignedOtaku = Math.max(0, otakuCount - decayed.temporarilyUnassignedOtaku);
@@ -552,6 +585,7 @@ function resolveWeeklyFanMomentum(input: {
       publicToOtaku,
       externalToOtaku,
       externalToPublic,
+      externalExposure: input.momenta.reduce((sum, momentum) => sum + momentum.externalExposure, 0),
       onlineNewPublic: input.onlineNewPublic ?? 0,
       opening,
       closing: snapshotFan(fan),
@@ -617,7 +651,7 @@ function finalizeMonths(state: PrologueState, eventAudits: StaffAutoplayEventAud
   });
 }
 
-/** Runs the Calendar from the mandatory interview through the real TIF event. */
+/** Runs the Calendar through TIF and the mandatory following Sunday close. */
 export function runStaffAutoplayPrologue(input: {
   route: StaffAutoplayRoute;
   seed: number;
@@ -658,14 +692,14 @@ export function runStaffAutoplayPrologue(input: {
   let weeklyPerformanceTotal = 0;
   let weeklyPerformanceCount = 0;
 
-  while (date <= "2014-08-02") {
+  while (date <= "2014-08-03") {
     const month = date.slice(0, 7);
     if (!fanMonths.has(month)) {
       fanMonths.set(month, {
         month,
         opening: snapshotFan(state.fan),
         closing: snapshotFan(state.fan),
-        eventFlow: { otakuAttendance: 0, publicAttendance: 0, externalAudience: 0, publicToOtaku: 0, externalToOtaku: 0, externalToPublic: 0 },
+        eventFlow: { otakuAttendance: 0, publicAttendance: 0, externalAudience: 0, externalExposure: 0, publicToOtaku: 0, externalToOtaku: 0, externalToPublic: 0 },
         weeklyChurn: { publicCount: 0, otakuCount: 0, affinityTotal: 0 },
       });
     }
@@ -676,6 +710,15 @@ export function runStaffAutoplayPrologue(input: {
     operating = operating.map((member) => member.active
       ? { ...member, fitnessCondition: Math.min(100, member.fitnessCondition + staffAutoplayScenarioV1.performanceGrowth.dailyConditionRecovery) }
       : member);
+    // The first ordinary TIF announcement is a distinct, idempotent Brand
+    // fact. It happens inside the permitted three-month window and is not an
+    // artificial audience or ticket-revenue grant.
+    if (date === "2014-05-02") {
+      state = { ...state, reputation: applyBrandEvent({ state: state.reputation, eventId: "brand:tif-2014-08-02:announcement", gain: 126 }) };
+    }
+    if (date === "2014-06-27") {
+      state = { ...state, reputation: applyBrandEvent({ state: state.reputation, eventId: "brand:one-man-2014-07-27:announcement", gain: 20 }) };
+    }
     if (input.route === "C" && !augmented && date === "2013-10-01") {
       // Scenario-only October audition: a fresh pool, not rejected January IDs.
       state = { ...state, members: [...state.members, ...C_NEWCOMERS], fan: {
@@ -781,7 +824,7 @@ export function runStaffAutoplayPrologue(input: {
         })
         : undefined;
       const actualAttendance = audienceAttribution?.actualUniqueAudience ?? contract.attendees;
-      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution });
+      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution, integratedLifecycle: fanAcquisitionStage === "C3" });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
         { memberId, tierId: "1000" as const, units: sale.completedUnitsByTier["1000"] },
         { memberId, tierId: "2000" as const, units: sale.completedUnitsByTier["2000"] },
@@ -789,6 +832,15 @@ export function runStaffAutoplayPrologue(input: {
       // resolveLive owns event lifecycle, idempotency key and Cheki gross/share/cost ledger rows.
       const offered = { ...state, events: state.events.map((item) => item.id === event.id ? { ...item, status: "OFFERED" as const } : item) };
       state = resolveLive({ state: offered, eventId: event.id, participantIds: participants.map((member) => member.id), chekiSales });
+      if (event.id === "debut-2013-05-24") {
+        state = { ...state, reputation: applyBrandEvent({ state: state.reputation, eventId: "brand:originals:first-public-live", gain: 5 }) };
+      }
+      if (event.id === "tif-2014-08-02") {
+        state = { ...state, reputation: applyBrandEvent({ state: state.reputation, eventId: "brand:tif-2014-08-02:completed", gain: 54 }) };
+      }
+      if (event.id === "one-man-2014-07-27") {
+        state = { ...state, reputation: applyBrandEvent({ state: state.reputation, eventId: "brand:one-man-2014-07-27:completed", gain: 30 }) };
+      }
       for (const [memberId, sale] of Object.entries(fanOutcome.sales)) {
         if (sale.freeTrialVariableCostJPY > 0) {
           state = post(state, {
@@ -813,6 +865,7 @@ export function runStaffAutoplayPrologue(input: {
       fanMonth.eventFlow.otakuAttendance += fanOutcome.flow.otakuAttendance;
       fanMonth.eventFlow.publicAttendance += fanOutcome.flow.publicAttendance;
       fanMonth.eventFlow.externalAudience += fanOutcome.flow.externalAudience;
+      fanMonth.eventFlow.externalExposure += fanOutcome.flow.externalExposure;
       audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, audienceCapacity: contract.capacity, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow }, audienceAttribution, ticketSettlementSource: "scenario-contract" });
       pendingFanMomenta.push({ eventId: event.id, auditIndex: audits.length - 1, ...fanOutcome.momentum });
       if (event.id === "graduation-2014-05-11") {
@@ -854,13 +907,24 @@ export function runStaffAutoplayPrologue(input: {
           activeMembers: state.members.filter((member) => member.active).length,
           performanceQuality: weeklyPerformanceCount > 0 ? weeklyPerformanceTotal / weeklyPerformanceCount : 1,
           previousPromotionSignal: promotionSignal,
+          externalNewUnknownReach: fanAcquisitionStage === "C3"
+            ? pendingFanMomenta.reduce((sum, momentum) => sum + momentum.externalExposure, 0)
+            : 0,
           seed: `${input.seed}:${input.route}`,
         });
       if (online) {
         onlineWeeks.push(online);
         promotionSignal = online.promotionSignal;
       }
-      const settledFan = resolveWeeklyFanMomentum({ fan: beforeDecay, momenta: pendingFanMomenta, audits, weekEnd: date, seed: `${input.seed}:${input.route}`, onlineNewPublic: online?.newPublic });
+      const settledFan = resolveWeeklyFanMomentum({
+        fan: beforeDecay,
+        momenta: pendingFanMomenta,
+        audits,
+        weekEnd: date,
+        seed: `${input.seed}:${input.route}`,
+        onlineNewPublic: online ? online.newPublic - online.externalNewPublic : undefined,
+        externalExposurePublic: online?.externalNewPublic,
+      });
       const afterDecay = applyWeeklyFanDecay(beforeDecay);
       const fanMonth = fanMonths.get(month)!;
       fanMonth.weeklyChurn.publicCount += beforeDecay.publicCount - afterDecay.publicCount;
@@ -877,6 +941,16 @@ export function runStaffAutoplayPrologue(input: {
       }
       settledFan.resolution.closing = snapshotFan(state.fan);
       fanWeeklyResolutions.push(settledFan.resolution);
+      state = {
+        ...state,
+        reputation: settleWeeklyReputation({
+          state: state.reputation,
+          weekEnd: date,
+          debutDate: "2013-05-24",
+          live: null,
+          music: null,
+        }),
+      };
       weeklyPerformanceTotal = 0;
       weeklyPerformanceCount = 0;
     }
@@ -890,36 +964,6 @@ export function runStaffAutoplayPrologue(input: {
     fanMonths.get(month)!.closing = snapshotFan(state.fan);
     state = { ...state, date };
     date = nextDate(date);
-  }
-  // TIF is a Saturday. Commit its event momentum at chapter close without
-  // inventing a second weekly churn pass before the next Sunday.
-  if (pendingFanMomenta.length > 0) {
-    const settledFan = resolveWeeklyFanMomentum({ fan: state.fan, momenta: pendingFanMomenta, audits, weekEnd: "2014-08-02:chapter-close", seed: `${input.seed}:${input.route}`, applyDecay: false });
-    const fanMonth = fanMonths.get("2014-08")!;
-    fanMonth.eventFlow.publicToOtaku += settledFan.resolution.publicToOtaku;
-    fanMonth.eventFlow.externalToOtaku += settledFan.resolution.externalToOtaku;
-    fanMonth.eventFlow.externalToPublic += settledFan.resolution.externalToPublic;
-    state = { ...state, fan: settledFan.fan };
-    fanWeeklyResolutions.push(settledFan.resolution);
-    fanMonth.closing = snapshotFan(state.fan);
-    monthSnapshots.set("2014-08", { publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, activeRoster: state.members.filter((member) => member.active).length });
-    pendingFanMomenta = [];
-  }
-  // TIF falls on Saturday. Close the partial final week so its actual stage
-  // time is not silently discarded merely because the chapter ends before
-  // the normal Sunday settlement.
-  if (s3Variant !== "S3-A") {
-    const hasUnsettledExposure = Object.values(state.performanceProgression.arrangements)
-      .some((arrangement) => arrangement.rehearsalHoursThisWeek > 0 || arrangement.stageHoursThisWeek > 0);
-    if (hasUnsettledExposure) {
-      const settled = settleArrangementFamiliarityWeek({
-        state: state.performanceProgression,
-        teamCoreAttributeAverage: teamCoreAttributeAverage(operating.filter((member) => member.active)),
-        weekId: "2014-08-02:chapter-close",
-      });
-      state = { ...state, performanceProgression: settled.state };
-      familiaritySettlements.push(...settled.settlements.map((settlement) => ({ weekEnd: "2014-08-02", ...settlement })));
-    }
   }
   const performanceMean = audits.reduce((sum, event) => sum + event.performanceInternal, 0) / Math.max(1, audits.length);
   const grades = {

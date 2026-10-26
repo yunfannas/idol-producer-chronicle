@@ -57,6 +57,9 @@ export type EventAudienceAttribution = {
   publicToOtaku: number;
   externalIdolToOtaku: number;
   externalGeneralToOtaku: number;
+  /** Remaining external viewers to be deduplicated with SNS on Sunday. */
+  externalExposure: number;
+  /** Deprecated event-local value; v1 integrated lifecycle resolves this Sunday. */
   externalToPublic: number;
 };
 
@@ -109,8 +112,7 @@ export function resolveDiagnosticAudienceChannels(input: {
   const publicToOtaku = activePublicToOtaku + referredPublicToOtaku;
   const externalIdolToOtaku = sampleBinomial(externalIdolWatching, Math.min(1, config.externalIdolToOtakuRate * q), random);
   const externalGeneralToOtaku = sampleBinomial(externalGeneralWatching, Math.min(1, config.externalGeneralToOtakuRate * q), random);
-  const remainingExternal = ticketedExternal - externalIdolToOtaku - externalGeneralToOtaku;
-  const externalToPublic = sampleBinomial(remainingExternal, Math.min(1, config.externalToPublicRate * q), random);
+  const externalExposure = ticketedExternal - externalIdolToOtaku - externalGeneralToOtaku;
   return {
     ownedOtakuWatching,
     ownedPublicWatching: ticketedPublic,
@@ -129,6 +131,7 @@ export function resolveDiagnosticAudienceChannels(input: {
     publicToOtaku,
     externalIdolToOtaku,
     externalGeneralToOtaku,
-    externalToPublic,
+    externalExposure,
+    externalToPublic: 0,
   };
 }

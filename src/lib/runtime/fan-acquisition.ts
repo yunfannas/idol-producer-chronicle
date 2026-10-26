@@ -39,6 +39,8 @@ export type WeeklyOnlineAcquisition = {
   channels: OnlineChannelAudit[];
   uniqueNewUnknownReach: number;
   newPublic: number;
+  /** New P attributed to event-local external exposure after weekly dedup. */
+  externalNewPublic: number;
   existingPublicReach: number;
   promotionSignal: number;
 };
@@ -50,6 +52,8 @@ export function resolveWeeklyOnlineAcquisition(input: {
   activeMembers: number;
   performanceQuality: number;
   previousPromotionSignal: number;
+  /** Non-O external viewers accumulated from this week's public Lives. */
+  externalNewUnknownReach?: number;
   seed: string;
 }): WeeklyOnlineAcquisition {
   const config = staffOnlineAcquisitionV11;
@@ -66,16 +70,26 @@ export function resolveWeeklyOnlineAcquisition(input: {
     const existingPublicReachEstimated = Math.min(Math.floor(input.publicCount), Math.round(input.publicCount * tuning.existingPublicReachRate));
     return { channel, contentCount, impressions, uniqueReachEstimated, newToTeamReachEstimated, existingPublicReachEstimated, repeatReachEstimated: Math.max(0, impressions - uniqueReachEstimated), engagementQuality: tuning.engagementQuality };
   });
-  const rawNewReach = preChannels.reduce((total, channel) => total + channel.newToTeamReachEstimated, 0);
+  const rawChannelReach = preChannels.reduce((total, channel) => total + channel.newToTeamReachEstimated, 0);
+  const rawExternalReach = Math.max(0, Math.floor(input.externalNewUnknownReach ?? 0));
+  const rawNewReach = rawChannelReach + rawExternalReach;
   const uniqueNewUnknownReach = Math.round(rawNewReach * config.crossChannelUniqueRetention);
-  const qualityWeighted = preChannels.reduce((total, channel) => total + channel.engagementQuality * channel.newToTeamReachEstimated, 0) / Math.max(1, rawNewReach);
+  const qualityWeighted = (
+    preChannels.reduce((total, channel) => total + channel.engagementQuality * channel.newToTeamReachEstimated, 0)
+    + rawExternalReach * quality
+  ) / Math.max(1, rawNewReach);
   const recognitionRate = Math.max(0, Math.min(1, config.recognitionBaseRate + config.recognitionQualityWeight * (qualityWeighted * quality - 1)));
   const newPublic = sampleBinomial(uniqueNewUnknownReach, recognitionRate, random);
-  let remainingNewPublic = newPublic;
+  // This is a weekly source attribution only. It does not persist a fan ID
+  // and is deliberately assigned after cross-source deduplication.
+  const externalNewPublic = rawNewReach > 0
+    ? sampleBinomial(newPublic, rawExternalReach / rawNewReach, random)
+    : 0;
+  let remainingNewPublic = newPublic - externalNewPublic;
   const channels = preChannels.map((channel, index) => {
     const isLast = index === preChannels.length - 1;
-    const share = rawNewReach > 0 ? channel.newToTeamReachEstimated / rawNewReach : 0;
-    const attributed = isLast ? remainingNewPublic : Math.min(remainingNewPublic, Math.round(newPublic * share));
+    const share = rawChannelReach > 0 ? channel.newToTeamReachEstimated / rawChannelReach : 0;
+    const attributed = isLast ? remainingNewPublic : Math.min(remainingNewPublic, Math.round((newPublic - externalNewPublic) * share));
     remainingNewPublic -= attributed;
     return { ...channel, newPublicAttributed: attributed };
   });
@@ -83,7 +97,7 @@ export function resolveWeeklyOnlineAcquisition(input: {
   const promotionSignal = Math.max(0, Math.min(0.4,
     input.previousPromotionSignal * config.promotionSignalDecay + existingPublicReach / Math.max(config.promotionSignalReachDivisor, input.publicCount * 3),
   ));
-  return { weekEnd: input.weekEnd, channels, uniqueNewUnknownReach, newPublic, existingPublicReach, promotionSignal };
+  return { weekEnd: input.weekEnd, channels, uniqueNewUnknownReach, newPublic, externalNewPublic, existingPublicReach, promotionSignal };
 }
 
 /** Explicit provisional demand fixtures. They are never capacity residuals. */

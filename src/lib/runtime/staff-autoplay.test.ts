@@ -6,7 +6,8 @@ describe("Staff autoplay prologue E2E", () => {
     const result = runStaffAutoplayPrologue({ route: "B", seed: 1 });
     expect(result.stageStatus).not.toBe("BLOCKED_BUG");
     expect(result.events.at(-1)?.liveId).toBe("tif-2014-08-02");
-    expect(result.fanWeeklyResolutions.some((week) => week.weekEnd === "2014-08-02:chapter-close" && week.eventIds.includes("tif-2014-08-02"))).toBe(true);
+    expect(result.fanWeeklyResolutions.some((week) => week.weekEnd === "2014-08-03" && week.eventIds.includes("tif-2014-08-02"))).toBe(true);
+    expect(result.state.date).toBe("2014-08-03");
     expect(result.fanMonths.at(-1)?.closing.otakuCount).toBe(result.state.fan.otakuCount);
     expect(result.events.every((event) => Number.isFinite(event.performanceInternal))).toBe(true);
     expect(result.events.find((event) => event.liveId === "debut-2013-05-24")?.ticketRevenueJPY).toBe(0);
@@ -33,7 +34,7 @@ describe("Staff autoplay prologue E2E", () => {
     const resolved = result.fanWeeklyResolutions.reduce((sum, week) => sum + week.publicToOtaku, 0);
     expect(attributed).toBe(resolved);
     expect(result.events.at(-1)?.liveId).toBe("tif-2014-08-02");
-    expect(result.fanWeeklyResolutions.at(-1)?.weekEnd).toBe("2014-08-02:chapter-close");
+    expect(result.fanWeeklyResolutions.at(-1)?.weekEnd).toBe("2014-08-03");
   });
 
   it("has deterministic B 20-seed completion and no nine-member routine rotation", () => {
@@ -212,7 +213,31 @@ describe("Staff autoplay prologue E2E", () => {
       && event.fanFlow.otakuAttendance + event.fanFlow.publicAttendance + event.fanFlow.externalAudience === event.actualAttendance)).toBe(true);
     expect(c3.events.every((event) => event.audienceAttribution!.publicToOtaku <= event.audienceAttribution!.ownedPublicWatching
       && event.audienceAttribution!.externalIdolWatching + event.audienceAttribution!.externalGeneralWatching === event.fanFlow.externalAudience)).toBe(true);
+    expect(c3.events.every((event) => event.audienceAttribution!.externalToPublic === 0
+      && event.fanFlow.externalExposure === event.audienceAttribution!.externalExposure)).toBe(true);
+    expect(c3.events.every((event) => Object.values(event.fanFlow.initialAffinityByMember).reduce((sum, value) => sum + value, 0) === 0)).toBe(true);
+    expect(c3.onlineWeeks.some((week) => week.externalNewPublic > 0)).toBe(true);
     expect(c2.events.some((event) => event.audienceAttribution!.configuredExternalDemand > 0)).toBe(true);
     expect(runStaffAutoplayPrologue({ route: "B", seed: 23, fanAcquisitionStage: "C3" })).toEqual(c3);
+  });
+
+  it("settles TIF Brand and Reputation once on the following Sunday", () => {
+    const result = runStaffAutoplayPrologue({ route: "B", seed: 31, fanAcquisitionStage: "C3" });
+    expect(result.state.reputation.visibleToPlayer).toBe(true);
+    expect(result.state.reputation.settledWeekIds.at(-1)).toBe("2014-08-03");
+    expect(result.state.reputation.appliedBrandEventIds).toEqual(expect.arrayContaining([
+      "brand:originals:first-public-live",
+      "brand:tif-2014-08-02:announcement",
+      "brand:tif-2014-08-02:completed",
+    ]));
+    expect(result.state.reputation.pendingBrandGains).toBe(0);
+    expect(runStaffAutoplayPrologue({ route: "B", seed: 31, fanAcquisitionStage: "C3" }).state.reputation).toEqual(result.state.reputation);
+  });
+
+  it("completes the integrated C3 lifecycle across the required 100 seeded runs", () => {
+    const runs = Array.from({ length: 100 }, (_, index) => runStaffAutoplayPrologue({ route: "B", seed: index + 1, fanAcquisitionStage: "C3" }));
+    expect(runs.every((result) => result.stageStatus !== "BLOCKED_BUG" && result.state.date === "2014-08-03")).toBe(true);
+    expect(runs.every((result) => result.state.reputation.settledWeekIds.at(-1) === "2014-08-03")).toBe(true);
+    expect(runs.every((result) => result.events.every((event) => event.fanFlow.externalToPublic <= event.fanFlow.externalExposure))).toBe(true);
   });
 });
