@@ -1,5 +1,8 @@
 # Chronicle｜Historical Tier / Brand Calibration — Archived Reference
 
+
+> **2026-10-26 状态更新：** 原文保留为历史数值参考，**不再代表目前的禁止实现政策**。最新实施合同见 [Chronicle_Fan_Reputation_Integrated_Spec_v1.0.md](Chronicle_Fan_Reputation_Integrated_Spec_v1.0.md)：恢复玩家内部 Live/Music/Brand、综合 Reputation；NPC 只保留固定综合值；Tier 分段以新合同为准，Brand 活跃衰减改为月 0.5%。下面的 ARCHIVED/NON-RUNTIME 段落仅记录 2026-10-24 旧决定，不可据此拒绝实现新规范。
+
 > **ARCHIVED / NON-RUNTIME (Chronicle 2026-10-24 decision)**：此文件保留作为开发者内部历史校准资料，**不是 Chronicle 实现要求或玩家界面设计**。Chronicle 不实现完整 E−…S / 0–10000 Tier 分段、Live/Music/Brand/Overall 评分流水线、跨团排行榜，也不评价本团或其他团在偶像界的地位。任何下文出现的“authoritative runtime calibration”仅指**原研究模型历史原文**，在 Chronicle 中已被本覆盖声明废止。需要事件规模/演出预期/Staff 能力时使用章节 Scenario 隐藏参数；只展示实际动员、粉丝、收入、作品和章节成果。请勿为这些输入恢复完整 Tier 系统。
 
 **Historical local reference copy (2026-10-24)**. 下文包含完整的连续 0–10000 分段、12m Live/Music/Brand、场馆/活动与历史回归锚；实现无需读取外部研究仓库。下方英文原规范内容保留其完整数值语义。**历史校准锚不是剧情结果保底**；插值缺口必须明确 TUNABLE，不得用 tier 中点假装观测分数。
