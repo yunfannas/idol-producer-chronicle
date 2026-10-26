@@ -195,4 +195,24 @@ describe("Staff autoplay prologue E2E", () => {
       },
     })).toEqual(withExternalDemand);
   });
+
+  it("rolls C0 through C3 in isolated, deterministic v1.1 stages", () => {
+    const c0 = runStaffAutoplayPrologue({ route: "B", seed: 23, fanAcquisitionStage: "C0" });
+    const c1 = runStaffAutoplayPrologue({ route: "B", seed: 23, fanAcquisitionStage: "C1" });
+    const c2 = runStaffAutoplayPrologue({ route: "B", seed: 23, fanAcquisitionStage: "C2" });
+    const c3 = runStaffAutoplayPrologue({ route: "B", seed: 23, fanAcquisitionStage: "C3" });
+
+    expect(c0.onlineWeeks).toEqual([]);
+    expect(c1.onlineWeeks.length).toBeGreaterThan(0);
+    expect(c1.onlineWeeks.reduce((sum, week) => sum + week.newPublic, 0)).toBeGreaterThan(0);
+    expect(c1.events.every((event) => event.audienceAttribution === undefined)).toBe(true);
+    expect(c2.events.every((event) => event.audienceAttribution !== undefined)).toBe(true);
+    expect(c3.events.every((event) => event.audienceAttribution !== undefined)).toBe(true);
+    expect(c2.events.every((event) => event.actualAttendance <= event.audienceCapacity
+      && event.fanFlow.otakuAttendance + event.fanFlow.publicAttendance + event.fanFlow.externalAudience === event.actualAttendance)).toBe(true);
+    expect(c3.events.every((event) => event.audienceAttribution!.publicToOtaku <= event.audienceAttribution!.ownedPublicWatching
+      && event.audienceAttribution!.externalIdolWatching + event.audienceAttribution!.externalGeneralWatching === event.fanFlow.externalAudience)).toBe(true);
+    expect(c2.events.some((event) => event.audienceAttribution!.configuredExternalDemand > 0)).toBe(true);
+    expect(runStaffAutoplayPrologue({ route: "B", seed: 23, fanAcquisitionStage: "C3" })).toEqual(c3);
+  });
 });

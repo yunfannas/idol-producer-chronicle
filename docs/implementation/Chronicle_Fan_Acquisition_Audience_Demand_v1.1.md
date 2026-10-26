@@ -1,6 +1,6 @@
 # Chronicle｜SNS Acquisition × Audience Demand × Conversion v1.1
 
-**Status: AUTHORITATIVE DESIGN CONTRACT / 2026-10-25.** 本文件是序章及后续章节 Fan 获客机制的正式实施规格，**优先于** `Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md` 关于 Public 到场、外部观众生成、SNS 获客、Live 转粉、赠券转粉的旧算法/旧默认解释；v1.0 在本文件没有替代的 Cheki 购买、队列、Finance、churn 和毕业基础约束仍有效。**本次仅批准设计，未批准任何模拟概率为现实定值；Runtime 尚须实装和正式100-seed复测。**
+**Status: AUTHORITATIVE DESIGN CONTRACT / 2026-10-25.** 本文件是序章及后续章节 Fan 获客机制的正式实施规格，**优先于** `Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md` 关于 Public 到场、外部观众生成、SNS 获客、Live 转粉、赠券转粉的旧算法/旧默认解释；v1.0 在本文件没有替代的 Cheki 购买、队列、Finance、churn 和毕业基础约束仍有效。**本文件不把任何模拟概率宣称为现实定值；C0–C3 已接入 Runtime 并完成正式 paired 100-seed 复测，C4/C5 仍待场次授权与路线扩展。**
 
 ## 1. 已确定的设计原则（LOCKED）
 
@@ -102,4 +102,4 @@ Pattend = Pticketed
 
 ## 9. 实施交付
 
-在独立 PR/commit 中提交 Runtime、测试、完整每周/逐场报告和更新过的 `fanChekiBalance` 参数登记；没有实现的字段不得伪造数据。提交本规格**仅更改设计契约**，不是声称 Runtime 已迁移、测试已通过。
+在独立 PR/commit 中提交 Runtime、测试、完整每周/逐场报告和更新过的 `fanChekiBalance` 参数登记；没有实现的字段不得伪造数据。当前 C0–C3 实施与 100-seed 证据位于 `reports/staff-baseline/fan-acquisition-audience-demand-v1.1/`；C4/C5 仍不能因本文存在而视作已实现。

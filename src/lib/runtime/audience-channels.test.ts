@@ -18,6 +18,7 @@ describe("C1–C3 diagnostic audience channels", () => {
     expect(audienceChannelDiagnosticV1.publicBuyGivenAwareRate).toBe(0.2);
     expect(result.activeIntentPublicWatching).toBeGreaterThanOrEqual(0);
     expect(result.ticketedPublic).toBeLessThanOrEqual(result.publicDemand);
+    expect(result.publicToOtaku).toBeLessThanOrEqual(result.ownedPublicWatching);
     expect(result.actualUniqueAudience).toBeLessThanOrEqual(input.capacity);
     const noDemand = resolveDiagnosticAudienceChannels({ ...input, capacity: 1_000, publicCount: 0, otakuCount: 0, externalWatchingDemand: 0, seed: "empty" });
     expect(noDemand.actualUniqueAudience).toBe(0);
@@ -25,7 +26,7 @@ describe("C1–C3 diagnostic audience channels", () => {
 
   it("deduplicates referred P from ordinary P demand and keeps the two external subtypes disjoint", () => {
     const result = resolveDiagnosticAudienceChannels({ ...input, otakuAttendanceRate: 1, seed: "friends-and-external" });
-    expect(result.referredPublicWatching + result.activeIntentPublicWatching).toBe(result.publicDemand);
+    expect(result.referredPublicWatching + result.activeIntentPublicWatching).toBeLessThanOrEqual(result.publicDemand);
     expect(result.ownedPublicWatching).toBeLessThanOrEqual(input.publicCount);
     expect(result.externalIdolWatching + result.externalGeneralWatching).toBeLessThanOrEqual(input.capacity);
     expect(result.externalIdolToOtaku).toBeLessThanOrEqual(result.externalIdolWatching);

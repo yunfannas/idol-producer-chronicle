@@ -14,7 +14,7 @@
 | Appendix | [Tier / Brand Calibration — archive only](Chronicle_Tier_Brand_Calibration_v1.0.md) | **非 Chronicle Runtime 必需**；仅供开发者历史标定查阅，不实现完整 0–10000 Tier、跨团排行或行业地位评价 |
 | 6 | [Chronicle Game Design v0.10](../design/Chronicle_Game_Design_v0.10.md) | 序章人物、具体日期、剧情里程碑、合同和验收；**若旧 UI/Policy 描述冲突，以本目录 1–5 优先** |
 
-**正式 Fan 获客 / SNS / Audience Demand 设计 v1.1（新权威覆盖）**：[Chronicle_Fan_Acquisition_Audience_Demand_v1.1.md](Chronicle_Fan_Acquisition_Audience_Demand_v1.1.md) 明确 Twitter/YouTube/Blog 每周 X→P、Public 活动知晓与购票、独立外部 X 需求、按意向和 Impression 转 O、新规券转化合并。**覆盖旧 Fan v1.0 中 Public 固定到场率、空位补 X 与统一转粉率的旧规则；概率仍 TUNABLE。设计已提交、Runtime 迁移未完成。**
+**正式 Fan 获客 / SNS / Audience Demand 设计 v1.1（新权威覆盖）**：[Chronicle_Fan_Acquisition_Audience_Demand_v1.1.md](Chronicle_Fan_Acquisition_Audience_Demand_v1.1.md) 明确 Twitter/YouTube/Blog 每周 X→P、Public 活动知晓与购票、独立外部 X 需求、按意向和 Impression 转 O、新规券转化合并。**覆盖旧 Fan v1.0 中 Public 固定到场率、空位补 X 与统一转粉率的旧规则；概率仍 TUNABLE。C0–C3 Runtime 已接入并以同 seed 100-run 审计，C4/C5 尚未启用。**
 
 **Fan × Cheki 可运行数值基线（TUNABLE）**：[Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md](Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md) 已给出到场、单场多推重建、Gamma 购买预算、双档选购、共享排队、Fan 转化/流失、毕业与剧本新人 seed 的**完整第一版算法**。实现时必须读取；具体概率为初始校准值，不是历史事实。原 Fan 文档缺口由此文件填充，后续通过 seeded 5/9/15 人回归调参。
 

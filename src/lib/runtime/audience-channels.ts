@@ -45,8 +45,12 @@ export type EventAudienceAttribution = {
   activeIntentPublicWatching: number;
   referredPublicWatching: number;
   referredExternalWatching: number;
+  /** Existing P who were aware of this event before the ticket decision. */
+  awarePublic: number;
   publicDemand: number;
   ticketedPublic: number;
+  /** Explicit third-party/footfall demand before capacity allocation. */
+  configuredExternalDemand: number;
   actualUniqueAudience: number;
   activePublicToOtaku: number;
   referredPublicToOtaku: number;
@@ -81,10 +85,17 @@ export function resolveDiagnosticAudienceChannels(input: {
   const referredExternalWatching = friendTotal - referredPublicWatching;
   const remainingPublic = publicCount - referredPublicWatching;
   const awarePublic = sampleBinomial(remainingPublic, config.publicAwarenessRate, random);
-  const activeIntentPublicWatching = sampleBinomial(awarePublic, config.publicBuyGivenAwareRate, random);
-  const publicDemand = referredPublicWatching + activeIntentPublicWatching;
-  const ticketedPublic = Math.min(publicDemand, Math.max(0, capacity - ownedOtakuWatching));
-  const externalDemand = Math.max(0, Math.floor(input.externalWatchingDemand)) + referredExternalWatching;
+  const activePublicDemand = sampleBinomial(awarePublic, config.publicBuyGivenAwareRate, random);
+  // Active ticket buyers have priority over a referred/P-other attendee.  The
+  // split is recorded after capacity allocation so a conversion is never
+  // sampled from somebody who could not attend.
+  const publicCapacity = Math.max(0, capacity - ownedOtakuWatching);
+  const activeIntentPublicWatching = Math.min(activePublicDemand, publicCapacity);
+  const referredPublicTicketed = Math.min(referredPublicWatching, publicCapacity - activeIntentPublicWatching);
+  const ticketedPublic = activeIntentPublicWatching + referredPublicTicketed;
+  const publicDemand = referredPublicWatching + activePublicDemand;
+  const configuredExternalDemand = Math.max(0, Math.floor(input.externalWatchingDemand));
+  const externalDemand = configuredExternalDemand + referredExternalWatching;
   const ticketedExternal = Math.min(externalDemand, Math.max(0, capacity - ownedOtakuWatching - ticketedPublic));
   const externalIdolWatching = sampleBinomial(ticketedExternal, config.externalIdolShare, random);
   const externalGeneralWatching = ticketedExternal - externalIdolWatching;
@@ -94,7 +105,7 @@ export function resolveDiagnosticAudienceChannels(input: {
   // diagnostic default intentionally leaves it at zero instead of treating
   // every P viewer as an active buyer.
   const activePublicToOtaku = sampleBinomial(activeIntentPublicWatching, Math.min(1, config.activePublicToOtakuRate * q), random);
-  const referredPublicToOtaku = sampleBinomial(referredPublicWatching, Math.min(1, config.passivePublicToOtakuRate * q), random);
+  const referredPublicToOtaku = sampleBinomial(referredPublicTicketed, Math.min(1, config.passivePublicToOtakuRate * q), random);
   const publicToOtaku = activePublicToOtaku + referredPublicToOtaku;
   const externalIdolToOtaku = sampleBinomial(externalIdolWatching, Math.min(1, config.externalIdolToOtakuRate * q), random);
   const externalGeneralToOtaku = sampleBinomial(externalGeneralWatching, Math.min(1, config.externalGeneralToOtakuRate * q), random);
@@ -106,10 +117,12 @@ export function resolveDiagnosticAudienceChannels(input: {
     externalIdolWatching,
     externalGeneralWatching,
     activeIntentPublicWatching,
-    referredPublicWatching,
+    referredPublicWatching: referredPublicTicketed,
     referredExternalWatching,
+    awarePublic,
     publicDemand,
     ticketedPublic,
+    configuredExternalDemand,
     actualUniqueAudience: ownedOtakuWatching + ticketedPublic + ticketedExternal,
     activePublicToOtaku,
     referredPublicToOtaku,

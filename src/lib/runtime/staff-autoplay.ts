@@ -11,6 +11,7 @@ import { settleChekiSales } from "./cheki";
 import { arrangementFor, createArrangementVersion, recordArrangementExposure, settleArrangementFamiliarityWeek, type FamiliaritySettlement } from "./arrangement-familiarity";
 import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1 } from "./fan";
 import { resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
+import { resolveWeeklyOnlineAcquisition, staffExternalAudienceDemandV11, type WeeklyOnlineAcquisition } from "./fan-acquisition";
 import { calculateTaibanTicketRevenue, createMonthlyOperatingReport, postLedgerEntry } from "./finance";
 import {
   type CoreAttributes,
@@ -34,6 +35,8 @@ import type { ChekiSettlementLine, Color8, FanState, KeyPartType, PriorityAssign
 
 export type StaffAutoplayRoute = "A" | "B" | "C";
 export type StaffAutoplayS3Variant = "S3-A" | "S3-B" | "S3-C";
+/** v1.1 rollout stages. C0 remains the historical Runtime control. */
+export type FanAcquisitionStage = "C0" | "C1" | "C2" | "C3";
 export type StageStatus = "COMPLETED_TIF" | "BANKRUPT_OR_DEBT_DISTRESS" | "BLOCKED_BUG";
 
 export const staffAutoplayScenarioV1 = {
@@ -107,6 +110,19 @@ export const staffAutoplayAudienceDemandV11: StaffAutoplayAudienceDemandConfig =
   externalWatchingDemandByEventId: {},
 };
 
+const audienceStageV11 = {
+  // C2 keeps v1.0 conversion probabilities as an isolated demand-only
+  // comparison. C3 switches to the explicit active-P / X-idol / X-general
+  // candidates in audience-channels.ts.
+  c2LegacyConversion: {
+    activePublicToOtakuRate: fanChekiBalanceV1.pPublicToOtaku,
+    passivePublicToOtakuRate: fanChekiBalanceV1.pPublicToOtaku,
+    externalIdolToOtakuRate: fanChekiBalanceV1.pExternalToOtaku,
+    externalGeneralToOtakuRate: fanChekiBalanceV1.pExternalToOtaku,
+    externalToPublicRate: fanChekiBalanceV1.pExternalToPublic,
+  },
+} as const;
+
 const DEFAULT_SONG_DIRECTION: Record<Color8, number> = {
   red: 0.25, pink: 0.1, orange: 0.1, aqua: 0.1, yellow: 0.1, green: 0.1, blue: 0.1, purple: 0.15,
 };
@@ -123,6 +139,8 @@ export type StaffAutoplayEventAudit = {
   liveId: string;
   kind: RuntimeEvent["kind"];
   contractId: string;
+  /** Venue/contract capacity, distinct from legacy contract sell-through. */
+  audienceCapacity: number;
   participantIds: string[];
   expectedAttendance: number;
   actualAttendance: number;
@@ -220,11 +238,13 @@ export type StaffAutoplayResult = {
   scenarioVersion: string;
   s3Variant: StaffAutoplayS3Variant;
   tuningVersion: string;
+  fanAcquisitionStage: FanAcquisitionStage;
   stageStatus: StageStatus;
   state: PrologueState;
   events: StaffAutoplayEventAudit[];
   fanMonths: StaffAutoplayFanMonth[];
   fanWeeklyResolutions: WeeklyFanResolution[];
+  onlineWeeks: WeeklyOnlineAcquisition[];
   familiaritySettlements: ({ weekEnd: string } & FamiliaritySettlement)[];
   months: StaffAutoplayMonth[];
   minCash: number;
@@ -252,6 +272,7 @@ type WeeklyFanResolution = {
   publicToOtaku: number;
   externalToOtaku: number;
   externalToPublic: number;
+  onlineNewPublic: number;
   opening: StaffAutoplayFanSnapshot;
   closing: StaffAutoplayFanSnapshot;
 };
@@ -325,6 +346,14 @@ function contractFor(event: RuntimeEvent, seed: string) {
   if (event.kind === "one-man") return sampled(staffAutoplayScenarioV1.oneMan);
   if (event.kind === "festival") return sampled(staffAutoplayScenarioV1.festival);
   return sampled(staffAutoplayScenarioV1.taiban);
+}
+
+function externalDemandForEvent(event: RuntimeEvent) {
+  const fixture = event.kind === "free-mall" ? staffExternalAudienceDemandV11.byKind.freeMall
+    : event.kind === "experimental-regular" ? staffExternalAudienceDemandV11.byKind.experimentalRegular
+      : event.kind === "one-man" ? staffExternalAudienceDemandV11.byKind.oneMan
+        : staffExternalAudienceDemandV11.byKind[event.kind as "debut" | "taiban" | "regular" | "graduation" | "festival"];
+  return fixture ?? { watchers: 0, idolShare: 0.5 };
 }
 
 function updateFanFromEvent(input: {
@@ -457,6 +486,7 @@ function resolveWeeklyFanMomentum(input: {
   weekEnd: string;
   seed: string;
   applyDecay?: boolean;
+  onlineNewPublic?: number;
 }): { fan: FanState; resolution: WeeklyFanResolution } {
   const opening = snapshotFan(input.fan);
   const decayed = input.applyDecay === false ? input.fan : applyWeeklyFanDecay(input.fan);
@@ -509,7 +539,7 @@ function resolveWeeklyFanMomentum(input: {
     }];
   }));
   const fan = {
-      publicCount: Math.max(0, decayed.publicCount - publicToOtaku + externalToPublic),
+      publicCount: Math.max(0, decayed.publicCount - publicToOtaku + externalToPublic + (input.onlineNewPublic ?? 0)),
       otakuCount,
       temporarilyUnassignedOtaku: decayed.temporarilyUnassignedOtaku,
       members,
@@ -522,6 +552,7 @@ function resolveWeeklyFanMomentum(input: {
       publicToOtaku,
       externalToOtaku,
       externalToPublic,
+      onlineNewPublic: input.onlineNewPublic ?? 0,
       opening,
       closing: snapshotFan(fan),
     },
@@ -591,12 +622,15 @@ export function runStaffAutoplayPrologue(input: {
   route: StaffAutoplayRoute;
   seed: number;
   s3Variant?: StaffAutoplayS3Variant;
+  /** C0 is the legacy control; C1–C3 are the v1.1 paired rollout. */
+  fanAcquisitionStage?: FanAcquisitionStage;
   /** Explicit Scenario test contract; default remains disabled. */
   newcomerVoucher?: Partial<NewcomerVoucherTrialConfig>;
   /** Explicit C2/C3 fixture; no external viewer is inferred when an id is absent. */
   audienceDemand?: Partial<StaffAutoplayAudienceDemandConfig>;
 }): StaffAutoplayResult {
   const s3Variant = input.s3Variant ?? "S3-C";
+  const fanAcquisitionStage = input.fanAcquisitionStage ?? (input.audienceDemand?.enabled ? "C3" : "C0");
   const newcomerVoucher = { ...newcomerVoucherTrialV1, ...input.newcomerVoucher };
   const audienceDemand: StaffAutoplayAudienceDemandConfig = {
     ...staffAutoplayAudienceDemandV11,
@@ -611,6 +645,7 @@ export function runStaffAutoplayPrologue(input: {
   const audits: StaffAutoplayEventAudit[] = [];
   const familiaritySettlements: ({ weekEnd: string } & FamiliaritySettlement)[] = [];
   const fanWeeklyResolutions: WeeklyFanResolution[] = [];
+  const onlineWeeks: WeeklyOnlineAcquisition[] = [];
   let pendingFanMomenta: PendingFanMomentum[] = [];
   const fanMonths = new Map<string, StaffAutoplayFanMonth>();
   const minCashByMonth = new Map<string, number>();
@@ -619,6 +654,9 @@ export function runStaffAutoplayPrologue(input: {
   let minCash = state.finance.cash;
   let augmented = false;
   let pendingGraduationFanTransition = false;
+  let promotionSignal = 0;
+  let weeklyPerformanceTotal = 0;
+  let weeklyPerformanceCount = 0;
 
   while (date <= "2014-08-02") {
     const month = date.slice(0, 7);
@@ -699,6 +737,8 @@ export function runStaffAutoplayPrologue(input: {
         return member ? [{ maxBonus: keyPartMaximum(duty.partType), dutyPalette: member.palette, familiarity: duty.familiarityAtResolution }] : [];
       });
       const resolved = resolveOperatingPerformance(rehearsed, `${state.saveId}:${event.id}`, {}, paletteKeyParts);
+      weeklyPerformanceTotal += resolved.quality;
+      weeklyPerformanceCount += 1;
       if (s3Variant !== "S3-A") {
         state = {
           ...state,
@@ -714,16 +754,30 @@ export function runStaffAutoplayPrologue(input: {
       operating = operating.map((member) => resolved.members.find((updated) => updated.id === member.id) ?? member);
       const fanOpening = snapshotFan(state.fan);
       const oneMan = eventClass(event.kind);
-      const audienceAttribution = audienceDemand.enabled
+      const demandEnabled = fanAcquisitionStage === "C2" || fanAcquisitionStage === "C3" || audienceDemand.enabled;
+      // The legacy opt-in diagnostic keeps its explicit-map-only behavior.
+      // Scenario fixtures are used only by an explicitly selected v1.1 stage.
+      const formalDemand = input.fanAcquisitionStage === "C2" || input.fanAcquisitionStage === "C3";
+      const externalFixture = formalDemand ? externalDemandForEvent(event) : undefined;
+      const explicitExternalDemand = audienceDemand.externalWatchingDemandByEventId[event.id];
+      const awarenessRate = Math.max(0, Math.min(1,
+        (audienceDemand.channelConfig?.publicAwarenessRate ?? 0.5) + (formalDemand ? promotionSignal : 0),
+      ));
+      const audienceAttribution = demandEnabled
         ? resolveDiagnosticAudienceChannels({
           publicCount: state.fan.publicCount,
           otakuCount: state.fan.otakuCount,
           capacity: contract.capacity,
-          externalWatchingDemand: audienceDemand.externalWatchingDemandByEventId[event.id] ?? 0,
+          externalWatchingDemand: explicitExternalDemand ?? externalFixture?.watchers ?? 0,
           otakuAttendanceRate: oneMan ? fanChekiBalanceV1.pOtakuAttendBase.oneMan : fanChekiBalanceV1.pOtakuAttendBase.taiban,
           quality: resolved.quality,
           seed: `${input.seed}:${event.id}`,
-          config: audienceDemand.channelConfig,
+          config: {
+            ...audienceDemand.channelConfig,
+            publicAwarenessRate: awarenessRate,
+            externalIdolShare: externalFixture?.idolShare ?? audienceDemand.channelConfig?.externalIdolShare ?? 0.5,
+            ...(fanAcquisitionStage === "C2" ? audienceStageV11.c2LegacyConversion : {}),
+          },
         })
         : undefined;
       const actualAttendance = audienceAttribution?.actualUniqueAudience ?? contract.attendees;
@@ -759,7 +813,7 @@ export function runStaffAutoplayPrologue(input: {
       fanMonth.eventFlow.otakuAttendance += fanOutcome.flow.otakuAttendance;
       fanMonth.eventFlow.publicAttendance += fanOutcome.flow.publicAttendance;
       fanMonth.eventFlow.externalAudience += fanOutcome.flow.externalAudience;
-      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow }, audienceAttribution, ticketSettlementSource: "scenario-contract" });
+      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, audienceCapacity: contract.capacity, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow }, audienceAttribution, ticketSettlementSource: "scenario-contract" });
       pendingFanMomenta.push({ eventId: event.id, auditIndex: audits.length - 1, ...fanOutcome.momentum });
       if (event.id === "graduation-2014-05-11") {
         // The completed graduation Live participates in this week's momentum;
@@ -791,7 +845,22 @@ export function runStaffAutoplayPrologue(input: {
         familiaritySettlements.push(...settled.settlements.map((settlement) => ({ weekEnd: date, ...settlement })));
       }
       const beforeDecay = state.fan;
-      const settledFan = resolveWeeklyFanMomentum({ fan: beforeDecay, momenta: pendingFanMomenta, audits, weekEnd: date, seed: `${input.seed}:${input.route}` });
+      const online = fanAcquisitionStage === "C0"
+        ? undefined
+        : resolveWeeklyOnlineAcquisition({
+          weekEnd: date,
+          publicCount: beforeDecay.publicCount,
+          otakuCount: beforeDecay.otakuCount,
+          activeMembers: state.members.filter((member) => member.active).length,
+          performanceQuality: weeklyPerformanceCount > 0 ? weeklyPerformanceTotal / weeklyPerformanceCount : 1,
+          previousPromotionSignal: promotionSignal,
+          seed: `${input.seed}:${input.route}`,
+        });
+      if (online) {
+        onlineWeeks.push(online);
+        promotionSignal = online.promotionSignal;
+      }
+      const settledFan = resolveWeeklyFanMomentum({ fan: beforeDecay, momenta: pendingFanMomenta, audits, weekEnd: date, seed: `${input.seed}:${input.route}`, onlineNewPublic: online?.newPublic });
       const afterDecay = applyWeeklyFanDecay(beforeDecay);
       const fanMonth = fanMonths.get(month)!;
       fanMonth.weeklyChurn.publicCount += beforeDecay.publicCount - afterDecay.publicCount;
@@ -808,6 +877,8 @@ export function runStaffAutoplayPrologue(input: {
       }
       settledFan.resolution.closing = snapshotFan(state.fan);
       fanWeeklyResolutions.push(settledFan.resolution);
+      weeklyPerformanceTotal = 0;
+      weeklyPerformanceCount = 0;
     }
     minCash = Math.min(minCash, state.finance.cash);
     minCashByMonth.set(month, Math.min(minCashByMonth.get(month) ?? Number.POSITIVE_INFINITY, state.finance.cash));
@@ -870,5 +941,5 @@ export function runStaffAutoplayPrologue(input: {
     paletteMean: Object.values(member.palette).reduce((sum, value) => sum + value, 0) / 8,
     palette: member.palette,
   }]));
-  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: `${staffAutoplayScenarioV1.version}:${s3Variant}`, s3Variant, tuningVersion: staffAutoplayScenarioV1.tuningVersion, stageStatus, state: { ...state, monthlyReports: months }, events: audits, fanMonths: [...fanMonths.values()], fanWeeklyResolutions, familiaritySettlements, months, minCash, grades, memberDevelopment };
+  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: `${staffAutoplayScenarioV1.version}:${s3Variant}`, s3Variant, tuningVersion: staffAutoplayScenarioV1.tuningVersion, fanAcquisitionStage, stageStatus, state: { ...state, monthlyReports: months }, events: audits, fanMonths: [...fanMonths.values()], fanWeeklyResolutions, onlineWeeks, familiaritySettlements, months, minCash, grades, memberDevelopment };
 }
