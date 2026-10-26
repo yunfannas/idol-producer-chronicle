@@ -28,7 +28,9 @@ const FOUNDER_IDS = ["IPC1-001", "IPC1-002", "IPC1-003"] as const;
 export const prologueFounderFanSeedV1 = {
   version: "prologue-founder-fan-seed-v1",
   source: "Chronicle v0.9 §17.1 founder-history reference; v0.10 contains no conflicting opening fan seed",
-  publicCount: 0,
+  // Approved B-route opening baseline: 240 recognized Public, 30 existing Otaku.
+  // Public is a team-level deduplicated count, not the sum of founder reach estimates.
+  publicCount: 240,
   otakuCount: 30,
   initialPurchaseWeightKJPY: 1.8,
   affinityByFounder: {
