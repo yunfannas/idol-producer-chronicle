@@ -14,7 +14,8 @@
     "report:s3c": "node scripts/generate-s3c-report.cjs",
     "report:fan-acquisition": "node scripts/generate-fan-acquisition-report.cjs",
     "report:prologue-fan-e2e": "node scripts/generate-prologue-fan-e2e-report.cjs",
-    "report:fan-acquisition-audience-demand": "node scripts/generate-fan-acquisition-audience-demand-report.cjs"
+    "report:fan-acquisition-audience-demand": "node scripts/generate-fan-acquisition-audience-demand-report.cjs",
+    "report:c3-active-public-calibration": "node scripts/calibrate-c3-active-public-conversion.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
