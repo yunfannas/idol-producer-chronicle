@@ -171,7 +171,7 @@ type MonthSnapshot = { publicCount: number; otakuCount: number; activeRoster: nu
 type PendingFanMomentum = {
   eventId: string;
   auditIndex: number;
-  publicToOtakuHazard: number;
+  publicToOtakuSampled: number;
   externalToOtaku: number;
   externalToPublic: number;
   newAffinityByMember: Record<string, number>;
@@ -279,7 +279,9 @@ function updateFanFromEvent(input: {
   });
   const random = createSeededRandom(`${input.seed}:fan`);
   const q = Math.max(0.5, Math.min(1.5, input.quality));
-  const publicToOtakuHazard = Math.min(0.2, pPAttend * fanChekiBalanceV1.pPublicToOtaku * q);
+  // Only people actually recorded as attending may convert at this event.
+  // This is conditional-on-viewing conversion; never multiply attendance twice.
+  const publicToO = sampleBinomial(publicAttend, Math.min(0.2, fanChekiBalanceV1.pPublicToOtaku * q), createSeededRandom(`${input.seed}:public-conversion`));
   const externalToO = sampleBinomial(externalAudience, Math.min(0.1, fanChekiBalanceV1.pExternalToOtaku * q), random);
   const externalToP = sampleBinomial(externalAudience - externalToO, Math.min(0.3, fanChekiBalanceV1.pExternalToPublic * q), random);
   const weights = input.participants.map((member) => Math.max(0, input.exposure[member.id]?.quality ?? 0));
@@ -308,7 +310,7 @@ function updateFanFromEvent(input: {
     sales,
     flow: { otakuAttendance: attendance, publicAttendance: publicAttend, externalAudience, publicToOtaku: 0, externalToOtaku: externalToO, externalToPublic: externalToP },
     momentum: {
-      publicToOtakuHazard,
+      publicToOtakuSampled: publicToO,
       externalToOtaku: externalToO,
       externalToPublic: externalToP,
       newAffinityByMember,
@@ -327,9 +329,10 @@ function resolveWeeklyFanMomentum(input: {
   applyDecay?: boolean;
 }): { fan: FanState; resolution: WeeklyFanResolution } {
   const decayed = input.applyDecay === false ? input.fan : applyWeeklyFanDecay(input.fan);
-  const publicHazard = 1 - input.momenta.reduce((survival, momentum) => survival * (1 - momentum.publicToOtakuHazard), 1);
+  // Commit only observed event conversions. Cap by the surviving P pool;
+  // per-event awards are attributed in chronological order without phantom viewers.
+  const publicToOtaku = Math.min(Math.floor(decayed.publicCount), input.momenta.reduce((sum, momentum) => sum + momentum.publicToOtakuSampled, 0));
   const random = createSeededRandom(`${input.seed}:fan-week:${input.weekEnd}`);
-  const publicToOtaku = sampleBinomial(decayed.publicCount, publicHazard, random);
   const externalToOtaku = input.momenta.reduce((sum, momentum) => sum + momentum.externalToOtaku, 0);
   const externalToPublic = input.momenta.reduce((sum, momentum) => sum + momentum.externalToPublic, 0);
   const additionalAffinity: Record<string, number> = Object.fromEntries(Object.keys(decayed.members).map((memberId) => [memberId, 0]));
@@ -348,12 +351,15 @@ function resolveWeeklyFanMomentum(input: {
     }
     return items.at(-1)!;
   };
-  for (let index = 0; index < publicToOtaku; index += 1) {
-    const momentum = choose(input.momenta, (item) => item.publicToOtakuHazard);
-    if (!momentum) break;
-    input.audits[momentum.auditIndex].fanFlow.publicToOtaku += 1;
-    const memberId = choose(Object.keys(momentum.memberWeights), (id) => momentum.memberWeights[id]);
-    if (memberId) additionalAffinity[memberId] = (additionalAffinity[memberId] ?? 0) + 1;
+  let remainingPublicConversions = publicToOtaku;
+  for (const momentum of input.momenta) {
+    const committed = Math.min(remainingPublicConversions, momentum.publicToOtakuSampled);
+    remainingPublicConversions -= committed;
+    input.audits[momentum.auditIndex].fanFlow.publicToOtaku += committed;
+    for (let index = 0; index < committed; index += 1) {
+      const memberId = choose(Object.keys(momentum.memberWeights), (id) => momentum.memberWeights[id]);
+      if (memberId) additionalAffinity[memberId] = (additionalAffinity[memberId] ?? 0) + 1;
+    }
   }
   const otakuCount = decayed.otakuCount + publicToOtaku + externalToOtaku;
   const assignedOtaku = Math.max(0, otakuCount - decayed.temporarilyUnassignedOtaku);
