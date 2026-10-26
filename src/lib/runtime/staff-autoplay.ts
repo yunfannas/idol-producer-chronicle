@@ -70,6 +70,25 @@ export const staffAutoplayScenarioV1 = {
   },
 } as const;
 
+/**
+ * TUNABLE C4 contract. It is disabled by default so existing B-route audit
+ * baselines remain reproducible until its full scenario rollout is approved.
+ */
+export type NewcomerVoucherTrialConfig = {
+  enabled: boolean;
+  externalUptakeProbability: number;
+  conversionProbability: number;
+  serviceSeconds: number;
+  variableCostJPY: number;
+};
+export const newcomerVoucherTrialV1: NewcomerVoucherTrialConfig = {
+  enabled: false,
+  externalUptakeProbability: 0.25,
+  conversionProbability: 0.18,
+  serviceSeconds: 20,
+  variableCostJPY: 180,
+};
+
 const DEFAULT_SONG_DIRECTION: Record<Color8, number> = {
   red: 0.25, pink: 0.1, orange: 0.1, aqua: 0.1, yellow: 0.1, green: 0.1, blue: 0.1, purple: 0.15,
 };
@@ -116,6 +135,10 @@ export type StaffAutoplayEventAudit = {
       buyerCount: number;
       queueLostBuyers: number;
       queueLostJPY: number;
+      freeTrialRequested: number;
+      freeTrialServed: number;
+      freeTrialLost: number;
+      freeTrialVariableCostJPY: number;
     }>;
   };
   fanFlow: {
@@ -130,6 +153,11 @@ export type StaffAutoplayEventAudit = {
     initialAffinityByMember: Record<string, number>;
     /** Existing assigned O gaining an additional member affinity at this Live. */
     existingOtakuAffinityByMember: Record<string, number>;
+    freeTrialRequested: number;
+    freeTrialServed: number;
+    freeTrialLost: number;
+    /** A subset of external→O: only completed free newcomer services may enter here. */
+    freeTrialConversionsByMember: Record<string, number>;
   };
 };
 
@@ -281,6 +309,7 @@ function contractFor(event: RuntimeEvent, seed: string) {
 function updateFanFromEvent(input: {
   fan: FanState; participants: OperatingMember[]; event: RuntimeEvent; totalAudience: number;
   quality: number; exposure: Record<string, { exposureProbability: number; quality: number }>; seed: string;
+  newcomerVoucher?: NewcomerVoucherTrialConfig;
 }) {
   // Contract attendance is the actual total audience.  O/P attendance consumes
   // that capacity first; only the residual is the temporary external X pool.
@@ -291,11 +320,34 @@ function updateFanFromEvent(input: {
   const attendance = Math.min(capacity, Math.round(input.fan.otakuCount), sampleBinomial(input.fan.otakuCount, pOAttend, createSeededRandom(`${input.seed}:otaku-attendance`)));
   const publicAttend = Math.min(Math.max(0, capacity - attendance), sampleBinomial(input.fan.publicCount, pPAttend, createSeededRandom(`${input.seed}:public-attendance`)));
   const externalAudience = Math.max(0, capacity - attendance - publicAttend);
+  const weights = input.participants.map((member) => Math.max(0, input.exposure[member.id]?.quality ?? 0));
+  const denominator = weights.reduce((total, value) => total + value, 0);
+  const voucherRandom = createSeededRandom(`${input.seed}:newcomer-voucher`);
+  const voucherEnabled = input.newcomerVoucher?.enabled === true && input.event.chekiAllowed;
+  const voucherRequests = voucherEnabled
+    ? Array.from({ length: sampleBinomial(externalAudience, input.newcomerVoucher!.externalUptakeProbability, voucherRandom) }, (_, index) => {
+        let point = voucherRandom() * denominator;
+        const memberIndex = input.participants.findIndex((_, position) => {
+          point -= weights[position];
+          return point <= 0;
+        });
+        return { id: `${input.event.id}:external:${index + 1}`, memberId: input.participants[Math.max(0, memberIndex)].id, source: "external" as const };
+      })
+    : [];
+  const servedVoucherIds = new Set<string>();
   let eligible: Record<string, number> = {};
   const sales = settleChekiQueue({
     fan: input.fan, memberIds: input.participants.map((member) => member.id), attendeeOtaku: attendance,
     seed: `${input.seed}:queue`, allowSales: input.event.chekiAllowed,
     exposureProbabilityByMember: Object.fromEntries(input.participants.map((member) => [member.id, input.exposure[member.id]?.exposureProbability ?? 0])),
+    freeNewcomerTrials: voucherEnabled ? {
+      requests: voucherRequests,
+      serviceSeconds: input.newcomerVoucher!.serviceSeconds,
+      variableCostJPY: input.newcomerVoucher!.variableCostJPY,
+    } : undefined,
+    onService: (record) => {
+      if (record.kind === "free-trial") servedVoucherIds.add(record.fanId.replace(/^trial:/, ""));
+    },
     onAudience: (audience) => { eligible = audience.eligibleExposedOWithoutAffinity; },
   });
   const random = createSeededRandom(`${input.seed}:fan`);
@@ -303,18 +355,31 @@ function updateFanFromEvent(input: {
   // Only people actually recorded as attending may convert at this event.
   // This is conditional-on-viewing conversion; never multiply attendance twice.
   const publicToO = sampleBinomial(publicAttend, Math.min(0.2, fanChekiBalanceV1.pPublicToOtaku * q), createSeededRandom(`${input.seed}:public-conversion`));
-  const externalToO = sampleBinomial(externalAudience, Math.min(0.1, fanChekiBalanceV1.pExternalToOtaku * q), random);
-  const externalToP = sampleBinomial(externalAudience - externalToO, Math.min(0.3, fanChekiBalanceV1.pExternalToPublic * q), random);
-  const weights = input.participants.map((member) => Math.max(0, input.exposure[member.id]?.quality ?? 0));
-  const denominator = weights.reduce((total, value) => total + value, 0);
+  // Requesters are reserved from normal X conversion: a free-trial requester
+  // becomes O only after a completed service, never twice in this Live.
+  const externalDirectPool = Math.max(0, externalAudience - voucherRequests.length);
+  const externalDirectToO = sampleBinomial(externalDirectPool, Math.min(0.1, fanChekiBalanceV1.pExternalToOtaku * q), random);
+  const externalToP = sampleBinomial(externalDirectPool - externalDirectToO, Math.min(0.3, fanChekiBalanceV1.pExternalToPublic * q), random);
   const newByMember = Object.fromEntries(input.participants.map((member) => [member.id, 0])) as Record<string, number>;
-  for (let index = 0; index < externalToO; index += 1) {
+  for (let index = 0; index < externalDirectToO; index += 1) {
     let point = random() * denominator;
     for (let position = 0; position < input.participants.length; position += 1) {
       point -= weights[position];
       if (point <= 0 || position === input.participants.length - 1) { newByMember[input.participants[position].id] += 1; break; }
     }
   }
+  const freeTrialConversionsByMember = Object.fromEntries(input.participants.map((member) => [member.id, 0])) as Record<string, number>;
+  for (const request of voucherRequests) {
+    if (servedVoucherIds.has(request.id) && random() < Math.min(1, input.newcomerVoucher!.conversionProbability * q)) {
+      freeTrialConversionsByMember[request.memberId] += 1;
+      newByMember[request.memberId] += 1;
+    }
+  }
+  const freeTrialRequested = Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialRequested, 0);
+  const freeTrialServed = Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialServed, 0);
+  const freeTrialLost = Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialLost, 0);
+  const voucherConversions = Object.values(freeTrialConversionsByMember).reduce((sum, value) => sum + value, 0);
+  const externalToO = externalDirectToO + voucherConversions;
   const newAffinityByMember = Object.fromEntries(Object.entries(input.fan.members).map(([id]) => {
     if (!input.participants.some((member) => member.id === id)) return [id, 0];
     const share = denominator > 0 ? Math.max(0, input.exposure[id]?.quality ?? 0) / denominator : 0;
@@ -338,6 +403,10 @@ function updateFanFromEvent(input: {
       externalToPublic: externalToP,
       initialAffinityByMember: newByMember,
       existingOtakuAffinityByMember: newAffinityByMember,
+      freeTrialRequested,
+      freeTrialServed,
+      freeTrialLost,
+      freeTrialConversionsByMember,
     },
     momentum: {
       publicToOtakuSampled: publicToO,
@@ -488,8 +557,15 @@ function finalizeMonths(state: PrologueState, eventAudits: StaffAutoplayEventAud
 }
 
 /** Runs the Calendar from the mandatory interview through the real TIF event. */
-export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; seed: number; s3Variant?: StaffAutoplayS3Variant }): StaffAutoplayResult {
+export function runStaffAutoplayPrologue(input: {
+  route: StaffAutoplayRoute;
+  seed: number;
+  s3Variant?: StaffAutoplayS3Variant;
+  /** Explicit Scenario test contract; default remains disabled. */
+  newcomerVoucher?: Partial<NewcomerVoucherTrialConfig>;
+}): StaffAutoplayResult {
   const s3Variant = input.s3Variant ?? "S3-C";
+  const newcomerVoucher = { ...newcomerVoucherTrialV1, ...input.newcomerVoucher };
   let state = createPrologueState({ saveId: `staff-autoplay:${input.route}:${input.seed}` });
   state = signRoster(completeMandatoryInterview(state), rosterForRoute(input.route));
   state = completeStrategyAndOriginals(state);
@@ -599,7 +675,7 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       }
       operating = operating.map((member) => resolved.members.find((updated) => updated.id === member.id) ?? member);
       const fanOpening = snapshotFan(state.fan);
-      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: contract.attendees, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}` });
+      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: contract.attendees, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
         { memberId, tierId: "1000" as const, units: sale.completedUnitsByTier["1000"] },
         { memberId, tierId: "2000" as const, units: sale.completedUnitsByTier["2000"] },
@@ -607,6 +683,20 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       // resolveLive owns event lifecycle, idempotency key and Cheki gross/share/cost ledger rows.
       const offered = { ...state, events: state.events.map((item) => item.id === event.id ? { ...item, status: "OFFERED" as const } : item) };
       state = resolveLive({ state: offered, eventId: event.id, participantIds: participants.map((member) => member.id), chekiSales });
+      for (const [memberId, sale] of Object.entries(fanOutcome.sales)) {
+        if (sale.freeTrialVariableCostJPY > 0) {
+          state = post(state, {
+            id: `${event.id}:newcomer-voucher:${memberId}`,
+            date,
+            kind: "operating_cost",
+            amount: sale.freeTrialVariableCostJPY,
+            category: "newcomer_voucher_cost",
+            eventId: event.id,
+            memberId,
+            note: "Completed free newcomer voucher service cost",
+          });
+        }
+      }
       const ticketRevenue = event.kind === "taiban"
         ? calculateTaibanTicketRevenue({ totalReceipts: contract.receipts, participatingGroupCount: staffAutoplayScenarioV1.taiban.groups, groupNominatedAdmissions: contract.attendees, allNominatedAdmissions: contract.attendees * staffAutoplayScenarioV1.taiban.groups })
         : event.kind === "experimental-regular" || event.kind === "regular" || event.kind === "graduation" || event.kind === "one-man" ? contract.receipts : 0;
@@ -617,7 +707,7 @@ export function runStaffAutoplayPrologue(input: { route: StaffAutoplayRoute; see
       fanMonth.eventFlow.otakuAttendance += fanOutcome.flow.otakuAttendance;
       fanMonth.eventFlow.publicAttendance += fanOutcome.flow.publicAttendance;
       fanMonth.eventFlow.externalAudience += fanOutcome.flow.externalAudience;
-      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow } });
+      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow } });
       pendingFanMomenta.push({ eventId: event.id, auditIndex: audits.length - 1, ...fanOutcome.momentum });
       if (event.id === "graduation-2014-05-11") {
         // The completed graduation Live participates in this week's momentum;

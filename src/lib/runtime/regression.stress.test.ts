@@ -12,6 +12,30 @@ function state(otaku: number, profiles: Record<string, { affinityCount: number; 
 
 
 describe("Fan/Cheki event sampling fixes", () => {
+  it("records free newcomer service separately while sharing the real member queue", () => {
+    const fan = state(0, { star: { affinityCount: 0, purchaseWeightKJPY: 0 } });
+    const records: ChekiServiceRecord[] = [];
+    const sales = settleChekiQueue({
+      fan, memberIds: ["star"], attendeeOtaku: 0, seed: "free-trial:shared-queue:1", allowSales: false,
+      freeNewcomerTrials: {
+        requests: [
+          { id: "p-1", memberId: "star", source: "public" },
+          { id: "x-1", memberId: "star", source: "external" },
+          { id: "x-2", memberId: "star", source: "external" },
+        ],
+        serviceSeconds: 20,
+        variableCostJPY: 180,
+      },
+      onService: (record) => records.push(record),
+    });
+    expect(sales.star).toMatchObject({
+      grossJPY: 0, buyerCount: 0, freeTrialRequested: 3, freeTrialServed: 3,
+      freeTrialLost: 0, freeTrialVariableCostJPY: 540,
+    });
+    expect(records).toHaveLength(3);
+    expect(records.every((record) => record.kind === "free-trial" && record.grossJPY === 0 && record.endSeconds <= 3600)).toBe(true);
+  });
+
   it("does not create member affinity from Otaku who did not attend the Live", () => {
     const route = runTwelveWeekRoute(5, 11, {
       attendanceImportance: 0,

@@ -127,4 +127,27 @@ describe("Staff autoplay prologue E2E", () => {
     expect(result.fanWeeklyResolutions.filter((week) => week.weekEnd >= "2014-05-11")
       .every((week) => week.closing.members["IPC1-001"].affinityCount === 0)).toBe(true);
   });
+
+  it("runs the explicit newcomer-voucher contract through the shared queue, fan momentum and cost ledger", () => {
+    const input = {
+      route: "B" as const,
+      seed: 11,
+      newcomerVoucher: { enabled: true, externalUptakeProbability: 1, conversionProbability: 1 },
+    };
+    const result = runStaffAutoplayPrologue(input);
+    const trials = result.events.flatMap((event) => Object.values(event.cheki.queues));
+    const requested = trials.reduce((sum, queue) => sum + queue.freeTrialRequested, 0);
+    const served = trials.reduce((sum, queue) => sum + queue.freeTrialServed, 0);
+    const variableCost = trials.reduce((sum, queue) => sum + queue.freeTrialVariableCostJPY, 0);
+    const converted = result.events.reduce((sum, event) => sum + Object.values(event.fanFlow.freeTrialConversionsByMember).reduce((inner, value) => inner + value, 0), 0);
+    expect(requested).toBeGreaterThan(0);
+    expect(served).toBeGreaterThan(0);
+    expect(converted).toBeGreaterThan(0);
+    expect(converted).toBeLessThanOrEqual(served);
+    expect(variableCost).toBe(served * 180);
+    expect(result.state.finance.entries.filter((entry) => entry.category === "newcomer_voucher_cost").reduce((sum, entry) => sum + entry.amount, 0)).toBe(variableCost);
+    const mall = result.events.find((event) => event.kind === "free-mall")!;
+    expect(Object.values(mall.cheki.queues).every((queue) => queue.freeTrialRequested === 0 && queue.freeTrialServed === 0)).toBe(true);
+    expect(runStaffAutoplayPrologue(input)).toEqual(result);
+  });
 });

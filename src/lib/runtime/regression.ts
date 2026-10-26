@@ -14,6 +14,11 @@ export type MemberSales = {
   queueLostJPY: number;
   queueLostBuyers: number;
   waitMinutes: number[];
+  /** Completed newcomer vouchers are free services, never paid Cheki sales. */
+  freeTrialRequested: number;
+  freeTrialServed: number;
+  freeTrialLost: number;
+  freeTrialVariableCostJPY: number;
 };
 
 export type WeeklyRouteReport = {
@@ -59,7 +64,7 @@ function initialFan(memberIds: string[]): FanState {
   };
 }
 
-type TemporaryFan = { id: string; availableAt: number; orders: Map<string, Record<string, number>> };
+type TemporaryFan = { id: string; availableAt: number; orders: Map<string, Record<string, number>>; trial?: boolean };
 
 function productPrice(id: string) { return id === "2000" ? 2000 : 1000; }
 function productSeconds(id: string) { return id === "2000" ? fanChekiBalanceV1.cheki2000Seconds : fanChekiBalanceV1.cheki1000Seconds; }
@@ -75,10 +80,21 @@ function shuffled<T>(items: T[], random: () => number): T[] {
 }
 
 /** Shared-time FIFO approximation required by the v1 queue contract. */
-export type ChekiServiceRecord = { fanId: string; memberId: string; startSeconds: number; endSeconds: number; grossJPY: number };
+export type ChekiServiceRecord = {
+  fanId: string; memberId: string; startSeconds: number; endSeconds: number; grossJPY: number;
+  kind: "paid" | "free-trial";
+};
+export type FreeNewcomerTrialRequest = { id: string; memberId: string; source: "public" | "external" };
+export type FreeNewcomerTrialConfig = {
+  requests: FreeNewcomerTrialRequest[];
+  serviceSeconds: number;
+  variableCostJPY: number;
+};
 export function settleChekiQueue(input: {
   fan: FanState; memberIds: string[]; attendeeOtaku: number; seed: string;
   allowSales?: boolean;
+  /** Contract-authorized free newcomer services share every member's real queue. */
+  freeNewcomerTrials?: FreeNewcomerTrialConfig;
   /** Event-local actual contact probability; absent means every attendee saw the member. */
   exposureProbabilityByMember?: Record<string, number>;
   onService?: (record: ChekiServiceRecord) => void;
@@ -95,23 +111,36 @@ export function settleChekiQueue(input: {
   const unassignedAttending = sampleHypergeometric({
     population, successes: unassigned, draws: attendeeCount, random,
   });
-  const visitors: (TemporaryFan & { stayedForCheki: boolean; unassigned: boolean })[] =
+  const paidVisitors: (TemporaryFan & { stayedForCheki: boolean; unassigned: boolean })[] =
     Array.from({ length: attendeeCount }, (_, index) => ({
       id: `o-${index}`, availableAt: random() * 720, orders: new Map(),
       stayedForCheki: random() < fanChekiBalanceV1.pStayChekiOtaku,
       unassigned: false,
     }));
-  for (const visitor of shuffled(visitors, random).slice(0, unassignedAttending)) {
+  for (const visitor of shuffled(paidVisitors, random).slice(0, unassignedAttending)) {
     visitor.unassigned = true;
   }
-  const assignedVisitors = visitors.filter((visitor) => !visitor.unassigned);
+  const assignedVisitors = paidVisitors.filter((visitor) => !visitor.unassigned);
+  const trialVisitors: TemporaryFan[] = (input.freeNewcomerTrials?.requests ?? [])
+    .filter((request) => input.memberIds.includes(request.memberId))
+    .map((request) => ({
+      id: `trial:${request.id}`,
+      availableAt: random() * 720,
+      orders: new Map([[request.memberId, { trial: 1 }]]),
+      trial: true,
+    }));
+  const visitors: TemporaryFan[] = [...paidVisitors, ...trialVisitors];
   const assignedPopulation = population - unassigned;
   const eligibleExposedOWithoutAffinity: Record<string, number> = {};
   const sales: Record<string, MemberSales> = Object.fromEntries(input.memberIds.map((id) => [id, {
     requestedJPY: 0, requestedUnits: 0, grossJPY: 0, completedUnits: 0,
     completedUnitsByTier: { "1000": 0, "2000": 0 }, variableCostJPY: 0,
     buyerCount: 0, affinityVisitors: 0, queueLostJPY: 0, queueLostBuyers: 0, waitMinutes: [],
+    freeTrialRequested: 0, freeTrialServed: 0, freeTrialLost: 0, freeTrialVariableCostJPY: 0,
   }]));
+  for (const request of input.freeNewcomerTrials?.requests ?? []) {
+    if (sales[request.memberId]) sales[request.memberId].freeTrialRequested += 1;
+  }
   for (const memberId of input.memberIds) {
     const profile = input.fan.members[memberId];
     const affinityVisitors = sampleHypergeometric({
@@ -147,7 +176,7 @@ export function settleChekiQueue(input: {
   }
   input.onAudience?.({
     eligibleExposedOWithoutAffinity,
-    stayedOtaku: visitors.filter((visitor) => visitor.stayedForCheki).length,
+    stayedOtaku: paidVisitors.filter((visitor) => visitor.stayedForCheki).length,
   });
   const nextAvailable = Object.fromEntries(input.memberIds.map((id) => [id, 0])) as Record<string, number>;
   let guard = 0;
@@ -163,25 +192,34 @@ export function settleChekiQueue(input: {
     })[0];
     const requested = visitor.orders.get(memberId)!;
     const units = Object.entries(requested).flatMap(([id, count]) => Array.from({ length: count }, () => id)).slice(0, fanChekiBalanceV1.maxConsecutive);
-    const spend = units.reduce((sum, id) => sum + productPrice(id), 0);
+    const freeTrial = visitor.trial && units.includes("trial");
+    const spend = units.reduce((sum, id) => sum + (id === "trial" ? 0 : productPrice(id)), 0);
     const start = Math.max(visitor.availableAt, nextAvailable[memberId]);
     const wait = (start - visitor.availableAt) / 60;
     const tolerance = Math.min(90, Math.max(10, 10 + 12 * Math.log(1 + spend / 1000)));
-    const serviceSeconds = units.reduce<number>((sum, id) => sum + productSeconds(id), fanChekiBalanceV1.fanChangeOverheadSeconds);
+    const serviceSeconds = units.reduce<number>((sum, id) => sum + (id === "trial" ? (input.freeNewcomerTrials?.serviceSeconds ?? 0) : productSeconds(id)), fanChekiBalanceV1.fanChangeOverheadSeconds);
     if (start + serviceSeconds > fanChekiBalanceV1.chekiMinutes * 60 || (wait > tolerance && random() < 1 - Math.exp(-(wait - tolerance) / fanChekiBalanceV1.queueExtraAbandonScaleMinutes))) {
-      sales[memberId].queueLostJPY += Object.entries(requested).reduce((sum, [id, count]) => sum + productPrice(id) * count, 0);
-      sales[memberId].queueLostBuyers += 1;
+      if (freeTrial) sales[memberId].freeTrialLost += 1;
+      else {
+        sales[memberId].queueLostJPY += Object.entries(requested).reduce((sum, [id, count]) => sum + (id === "trial" ? 0 : productPrice(id)) * count, 0);
+        sales[memberId].queueLostBuyers += 1;
+      }
       visitor.orders.delete(memberId);
       continue;
     }
-    sales[memberId].grossJPY += spend;
-    sales[memberId].completedUnits += units.length;
-    for (const id of units) sales[memberId].completedUnitsByTier[id === "2000" ? "2000" : "1000"] += 1;
-    sales[memberId].variableCostJPY += units.reduce<number>((sum, id) => sum + productVariableCost(id), 0);
-    sales[memberId].buyerCount += 1;
+    if (freeTrial) {
+      sales[memberId].freeTrialServed += 1;
+      sales[memberId].freeTrialVariableCostJPY += input.freeNewcomerTrials?.variableCostJPY ?? 0;
+    } else {
+      sales[memberId].grossJPY += spend;
+      sales[memberId].completedUnits += units.length;
+      for (const id of units) sales[memberId].completedUnitsByTier[id === "2000" ? "2000" : "1000"] += 1;
+      sales[memberId].variableCostJPY += units.reduce<number>((sum, id) => sum + productVariableCost(id), 0);
+      sales[memberId].buyerCount += 1;
+    }
     sales[memberId].waitMinutes.push(wait);
     nextAvailable[memberId] = start + serviceSeconds;
-    input.onService?.({ fanId: visitor.id, memberId, startSeconds: start, endSeconds: nextAvailable[memberId], grossJPY: spend });
+    input.onService?.({ fanId: visitor.id, memberId, startSeconds: start, endSeconds: nextAvailable[memberId], grossJPY: spend, kind: freeTrial ? "free-trial" : "paid" });
     visitor.availableAt = nextAvailable[memberId];
     for (const id of units) {
       requested[id] -= 1;
