@@ -69,7 +69,7 @@ describe("Staff autoplay prologue E2E", () => {
       Array.from({ length: 20 }, (_, index) => runStaffAutoplayPrologue({ route, seed: index + 1 })),
     );
     expect(routes).toHaveLength(60);
-    expect(routes.every((result) => result.scenarioVersion === "staff-autoplay-scenario-v6-fan-acquisition-weekly-resolution:S3-C")).toBe(true);
+    expect(routes.every((result) => result.scenarioVersion === "staff-autoplay-scenario-v7-fan-audit-contracts:S3-C")).toBe(true);
     expect(routes.every((result) => result.stageStatus !== "BLOCKED_BUG")).toBe(true);
   });
 
@@ -105,8 +105,26 @@ describe("Staff autoplay prologue E2E", () => {
       externalToPublic: total.externalToPublic + week.externalToPublic,
     }), { publicToOtaku: 0, externalToOtaku: 0, externalToPublic: 0 });
 
-    expect(result.events.every((event) => event.fanFlow.otakuAttendance + event.fanFlow.publicAttendance + event.fanFlow.externalAudience <= event.actualAttendance)).toBe(true);
+    expect(result.events.every((event) => event.fanFlow.otakuAttendance + event.fanFlow.publicAttendance + event.fanFlow.externalAudience === event.actualAttendance)).toBe(true);
+    expect(result.events.every((event) => event.fanFlow.publicToOtaku <= event.fanFlow.publicAttendance
+      && event.fanFlow.externalToOtaku + event.fanFlow.externalToPublic <= event.fanFlow.externalAudience)).toBe(true);
+    expect(result.events.every((event) => Object.values(event.fanFlow.initialAffinityByMember).reduce((sum, value) => sum + value, 0)
+      === event.fanFlow.publicToOtaku + event.fanFlow.externalToOtaku)).toBe(true);
     expect(eventFlow).toEqual(weeklyFlow);
     expect(result.fanWeeklyResolutions.flatMap((week) => week.eventIds).sort()).toEqual(result.events.map((event) => event.liveId).sort());
+  });
+
+  it("keeps paid Cheki queue-backed, free events revenue-free, and Rina closed after graduation", () => {
+    const result = runStaffAutoplayPrologue({ route: "B", seed: 1, s3Variant: "S3-C" });
+    const mall = result.events.find((event) => event.kind === "free-mall")!;
+    expect(mall.ticketRevenueJPY + mall.chekiGrossJPY + mall.chekiCommissionJPY).toBe(0);
+    expect(result.events.every((event) => Object.values(event.cheki.queues).every((queue) => queue.completedUnits <= queue.requestedUnits
+      && queue.completedUnitsByTier["1000"] + queue.completedUnitsByTier["2000"] === queue.completedUnits))).toBe(true);
+    expect(result.events.filter((event) => event.date > "2014-05-11").every((event) => !event.participantIds.includes("IPC1-001")
+      && !event.cheki.queues["IPC1-001"]
+      && !event.fanFlow.initialAffinityByMember["IPC1-001"]
+      && !event.fanFlow.existingOtakuAffinityByMember["IPC1-001"])).toBe(true);
+    expect(result.fanWeeklyResolutions.filter((week) => week.weekEnd >= "2014-05-11")
+      .every((week) => week.closing.members["IPC1-001"].affinityCount === 0)).toBe(true);
   });
 });

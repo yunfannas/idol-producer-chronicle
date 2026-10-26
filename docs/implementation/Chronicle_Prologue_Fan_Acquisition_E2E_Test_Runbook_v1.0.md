@@ -2,6 +2,8 @@
 
 **Status: EXECUTION RUNBOOK / 2026-10-25 / NOT YET EXECUTED.**
 
+**执行记录（2026-10-25）**：B / S3-C 的结构验收已由 `reports/prologue-fan-e2e/b-s3c-100-seeds-v1/` 输出。该记录只声明其中的 Runtime 已实现边界；新规免费券、P 认知/朋友渠道、X 子类型与 U 专用 lifecycle 仍按报告标记为 `NOT_IMPLEMENTED`。
+
 目标：在 **Chronicle 仓库的真实 Runtime** 内检验“固定序章日程 → SNS/朋友/Taiban 认知 → Public 购票 → Impression → 新规赠券与付费 Cheki → P/O/A_i/W_i/U → Finance”的完整闭环。**不可用新建的独立 Python 世界模拟替代 Runtime E2E**。本指南是测试任务，不宣称源码已经实现这些接口或测试通过。
 
 ## 0. 阅读顺序、权威与硬边界

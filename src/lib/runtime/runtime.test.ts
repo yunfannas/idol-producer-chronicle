@@ -184,7 +184,7 @@ describe("schedule integrity", () => {
 describe("prologue founder fan seed", () => {
   it("maps the historical founder asset once into O and member affinity", () => {
     const state = createPrologueState({ saveId: "founder-fan-seed" });
-    expect(state.fan.publicCount).toBe(0);
+    expect(state.fan.publicCount).toBe(240);
     expect(state.fan.otakuCount).toBe(30);
     expect(state.fan.temporarilyUnassignedOtaku).toBe(0);
     expect(state.fan.members["IPC1-001"]).toEqual({ affinityCount: 20, purchaseWeightKJPY: 1.8 });
