@@ -13,7 +13,10 @@ export const audienceChannelDiagnosticV1 = {
   friendBringRate: 0.1,
   referredPublicShare: 0.5,
   externalIdolShare: 0.5,
-  activePublicToOtakuRate: 0.35,
+  // Calibrated C3 default. Keep this independent from retention, SNS, and
+  // Cheki pathways so the active-ticket-holder conversion can be audited on
+  // its own.
+  activePublicToOtakuRate: 0.1,
   // The v1.1 contract requires a lower P_other pathway but does not yet
   // supply its candidate rate.  Keep it explicitly at zero in this fixture
   // rather than quietly reusing the active-ticket-holder rate.

@@ -245,7 +245,7 @@ describe("Staff autoplay prologue E2E", () => {
 
   it("exports a conserving weekly C3 fan-flow ledger with its effective conversion settings", () => {
     const result = runStaffAutoplayPrologue({ route: "B", seed: 37, fanAcquisitionStage: "C3" });
-    expect(result.effectiveFanFlowConfig.audienceChannel.activePublicToOtakuRate).toBe(0.35);
+    expect(result.effectiveFanFlowConfig.audienceChannel.activePublicToOtakuRate).toBe(0.1);
     for (const week of result.fanWeeklyResolutions) {
       expect(week.closing.publicCount).toBeCloseTo(
         week.opening.publicCount + week.newPublic - week.publicToOtaku - week.publicChurn,
@@ -262,16 +262,16 @@ describe("Staff autoplay prologue E2E", () => {
 
   it("keeps diagnostic ablations isolated from baseline settings and X exposure", () => {
     const baseline = runStaffAutoplayPrologue({ route: "B", seed: 41, fanAcquisitionStage: "C3" });
-    const activeTenPercent = runStaffAutoplayPrologue({
+    const activeThirtyFivePercent = runStaffAutoplayPrologue({
       route: "B", seed: 41, fanAcquisitionStage: "C3",
-      fanFlowDiagnosticOverrides: { activePublicToOtakuRate: 0.1 },
+      fanFlowDiagnosticOverrides: { activePublicToOtakuRate: 0.35 },
     });
     const noExternalDirect = runStaffAutoplayPrologue({
       route: "B", seed: 41, fanAcquisitionStage: "C3",
       fanFlowDiagnosticOverrides: { disableExternalDirectOtaku: true },
     });
-    expect(activeTenPercent.effectiveFanFlowConfig.audienceChannel.activePublicToOtakuRate).toBe(0.1);
-    expect(activeTenPercent.state.fan.otakuCount).toBeLessThan(baseline.state.fan.otakuCount);
+    expect(activeThirtyFivePercent.effectiveFanFlowConfig.audienceChannel.activePublicToOtakuRate).toBe(0.35);
+    expect(activeThirtyFivePercent.state.fan.otakuCount).toBeGreaterThan(baseline.state.fan.otakuCount);
     expect(noExternalDirect.events.every((event) => event.audienceAttribution
       && event.audienceAttribution.externalIdolToOtaku === 0
       && event.audienceAttribution.externalGeneralToOtaku === 0

@@ -15,8 +15,10 @@ Runtime balance.
 
 - Public awareness: 50%; aware Public purchase: 20%.
 - Existing Otaku bringing a companion: 10%.
-- Active/intentional Public confirmation after the Live: 35% × clamped Live
-  quality. Referred/other P has an explicit 0% fixture default because v1.1
+- Active/intentional Public confirmation after the Live: 10% × clamped Live.
+  This is the calibrated C3 runtime default and is intentionally isolated from
+  retention, SNS, Cheki, and external-exposure tuning. Referred/other P has
+  an explicit 0% fixture default because v1.1
   requires a lower separate rate but supplies no numerical candidate; it must
   not silently inherit the active buyer rate.
 - External idol viewer conversion: 1% × quality (the middle of the documented
