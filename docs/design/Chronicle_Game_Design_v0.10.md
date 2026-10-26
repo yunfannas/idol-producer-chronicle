@@ -1,5 +1,7 @@
 # Idol Producer: Chronicle｜Game Design v0.10（正式实施规范）
 
+> **2026-10-26 专项规范覆盖：** 当前 Reputation、Fan、TIF 周日结局见 [集成规范](../implementation/Chronicle_Fan_Reputation_Integrated_Spec_v1.0.md)。本文件关于「不展示/不计算团体 Tier/Overall」以及 TIF 当日结束的旧限制已被覆盖，其他剧情、固定日程和政策继续有效。更新正式 Runtime 时须显式改写旧限制。
+
 **日期**：2026-10-24  
 **状态**：**序章设计基线 / Agent implementation handoff**。设计冻结不等于已实现、已测试或数值已校准。  
 **范围**：Chronicle 序章 2013-01-07 → 2014-08-02；共用的移动端、Staff、Live、Fans、Cheki、Finance 接口；其余章节延续 v0.9 中**不冲突**的长期剧情设计。  
