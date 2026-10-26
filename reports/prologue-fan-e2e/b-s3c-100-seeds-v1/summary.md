@@ -1,6 +1,6 @@
 # B Route Fan E2E — 100 real Runtime seeds
 
-- Runtime commit: `09e0f63207d033ad853bc6508420c9ea2babd964`
+- Runtime commit: `845310f7a74e2400acdf8b870feaf832deea4759`
 - Scenario: `staff-autoplay-scenario-v7-fan-audit-contracts:S3-C`
 - Balance: `fanChekiBalanceV1-fan-acquisition-v2`
 - Seed set: 1..100; all source rows are emitted by the actual Staff Runtime.
