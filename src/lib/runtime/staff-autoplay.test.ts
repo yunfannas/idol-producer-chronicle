@@ -25,6 +25,17 @@ describe("Staff autoplay prologue E2E", () => {
     expect(runStaffAutoplayPrologue({ route: "B", seed: 1 })).toEqual(result);
   });
 
+  it("attributes Public conversions to actual event viewers including TIF chapter close", () => {
+    const result = runStaffAutoplayPrologue({ route: "B", seed: 1 });
+    expect(result.events.every((event) => event.fanFlow.publicToOtaku >= 0
+      && event.fanFlow.publicToOtaku <= event.fanFlow.publicAttendance)).toBe(true);
+    const attributed = result.events.reduce((sum, event) => sum + event.fanFlow.publicToOtaku, 0);
+    const resolved = result.fanWeeklyResolutions.reduce((sum, week) => sum + week.publicToOtaku, 0);
+    expect(attributed).toBe(resolved);
+    expect(result.events.at(-1)?.liveId).toBe("tif-2014-08-02");
+    expect(result.fanWeeklyResolutions.at(-1)?.weekEnd).toBe("2014-08-02:chapter-close");
+  });
+
   it("has deterministic B 20-seed completion and no nine-member routine rotation", () => {
     const results = Array.from({ length: 20 }, (_, index) => runStaffAutoplayPrologue({ route: "B", seed: index + 1 }));
     expect(results.every((result) => result.stageStatus !== "BLOCKED_BUG")).toBe(true);
