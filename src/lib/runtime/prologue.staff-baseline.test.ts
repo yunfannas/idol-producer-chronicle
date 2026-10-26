@@ -22,6 +22,18 @@ describe("Chronicle B Staff-only deterministic entry checks", () => {
     }
   });
 
+  it("keeps the approved founder Fan seed through the B recruitment decision", () => {
+    const opening = createPrologueState({ saveId: "founder-seed-240" });
+    const signed = signRoster(completeMandatoryInterview(opening), firstSix);
+    for (const fan of [opening.fan, signed.fan]) {
+      expect(fan.publicCount).toBe(240);
+      expect(fan.otakuCount).toBe(30);
+      expect(fan.members["IPC1-001"].affinityCount).toBe(20);
+      expect(fan.members["IPC1-002"].affinityCount).toBe(10);
+    }
+    expect(firstSix.every((id) => signed.fan.members[id].affinityCount === 0)).toBe(true);
+  });
+
   it("starts with 9 members, 3 skilled founders and 6 zero-palette newcomers", () => {
     const state = routeB();
     expect(state.members).toHaveLength(9);
