@@ -1,5 +1,8 @@
 # Chronicle｜SNS Acquisition × Audience Demand × Conversion v1.1
 
+
+> **2026-10-26 覆盖：** [Chronicle_Fan_Reputation_Integrated_Spec_v1.0.md](Chronicle_Fan_Reputation_Integrated_Spec_v1.0.md) 优先于本文的冲突部分。Team Live Trigger 新 O 可以不分配 A；X 未当场成为 O 的新观众进入每周 P 曝光池而非现场直接 X→P；Taiban 和 Free Live 用新 Reputation 入口；普通/赠券 Cheki 采用分源参与、真实服务和 A/W 外溢规则。本文旧 8、5 节相冲突语句作为历史候选，不再是 LOCKED。
+
 **Status: AUTHORITATIVE DESIGN CONTRACT / 2026-10-25.** 本文件是序章及后续章节 Fan 获客机制的正式实施规格，**优先于** `Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md` 关于 Public 到场、外部观众生成、SNS 获客、Live 转粉、赠券转粉的旧算法/旧默认解释；v1.0 在本文件没有替代的 Cheki 购买、队列、Finance、churn 和毕业基础约束仍有效。**本文件不把任何模拟概率宣称为现实定值；C0–C3 已接入 Runtime 并完成正式 paired 100-seed 复测，C4/C5 仍待场次授权与路线扩展。**
 
 ## 1. 已确定的设计原则（LOCKED）
