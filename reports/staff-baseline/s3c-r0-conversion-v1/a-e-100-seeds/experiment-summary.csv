@@ -1,0 +1,91 @@
+experiment,name,metric,mean,p10,p50,p90
+A,Legacy C3 baseline,finalP,598.616484,570.403719,599.994309,628.010384
+A,Legacy C3 baseline,finalO,273.806671,259.17152,274.036585,286.889828
+A,Legacy C3 baseline,population,872.423155,844.695628,872.077461,899.83815
+A,Legacy C3 baseline,team,253.12,237,254,266
+A,Legacy C3 baseline,member,0,0,0,0
+A,Legacy C3 baseline,paid,0,0,0,0
+A,Legacy C3 baseline,voucher,0,0,0,0
+A,Legacy C3 baseline,x,1.6,0,1,3
+A,Legacy C3 baseline,sns,770.1,739,771,802
+A,Legacy C3 baseline,eventP,6.93,3,7,10
+A,Legacy C3 baseline,pChurn,165.293516,159.68362,165.093314,171.214769
+A,Legacy C3 baseline,oChurn,10.913329,10.098414,10.939018,11.629788
+A,Legacy C3 baseline,affinity,48.936585,39.832933,48.518494,57.016286
+A,Legacy C3 baseline,oneManAttendance,200.97,187,201,218
+A,Legacy C3 baseline,oneManTicket,307710,282000,312000,336000
+A,Legacy C3 baseline,chekiServices,149.84,121,148,178
+A,Legacy C3 baseline,chekiGross,165280,135000,163000,198000
+A,Legacy C3 baseline,cash,448611.5,395450,443800,513000
+B,R0 dynamic Team/Member Live,finalP,628.845528,603.245742,629.621785,655.864417
+B,R0 dynamic Team/Member Live,finalO,240.930226,223.748174,240.931862,255.54622
+B,R0 dynamic Team/Member Live,population,869.775755,841.35557,869.709561,897.647371
+B,R0 dynamic Team/Member Live,team,102.26,91,102,116
+B,R0 dynamic Team/Member Live,member,118.74,105,120,131
+B,R0 dynamic Team/Member Live,paid,0,0,0,0
+B,R0 dynamic Team/Member Live,voucher,0,0,0,0
+B,R0 dynamic Team/Member Live,x,0,0,0,0
+B,R0 dynamic Team/Member Live,sns,769.9,737,771,802
+B,R0 dynamic Team/Member Live,eventP,7.18,3,7,11
+B,R0 dynamic Team/Member Live,pChurn,167.234472,162.520625,167.743681,172.55266
+B,R0 dynamic Team/Member Live,oChurn,10.069774,9.399754,10.086939,10.764913
+B,R0 dynamic Team/Member Live,affinity,147.578239,131.268083,149.687515,158.619345
+B,R0 dynamic Team/Member Live,oneManAttendance,196.36,182,197,211
+B,R0 dynamic Team/Member Live,oneManTicket,307710,282000,312000,336000
+B,R0 dynamic Team/Member Live,chekiServices,382.77,327,383,441
+B,R0 dynamic Team/Member Live,chekiGross,422830,356000,422000,479000
+B,R0 dynamic Team/Member Live,cash,654651.5,587600,663150,727550
+C,B + completed paid Cheki,finalP,598.331496,566.264218,599.085927,621.447484
+C,B + completed paid Cheki,finalO,273.058278,255.275233,273.550277,291.743084
+C,B + completed paid Cheki,population,871.389774,843.318955,871.013553,899.819454
+C,B + completed paid Cheki,team,99.63,89,99,112
+C,B + completed paid Cheki,member,115.96,101,117,130
+C,B + completed paid Cheki,paid,38.54,30,38,47
+C,B + completed paid Cheki,voucher,0,0,0,0
+C,B + completed paid Cheki,x,0,0,0,0
+C,B + completed paid Cheki,sns,769.98,738,770,803
+C,B + completed paid Cheki,eventP,7.16,3,7,11
+C,B + completed paid Cheki,pChurn,164.678504,159.879113,164.969444,170.4579
+C,B + completed paid Cheki,oChurn,11.071722,10.339627,11.110011,11.789863
+C,B + completed paid Cheki,affinity,183.273494,164.111086,183.352431,201.216566
+C,B + completed paid Cheki,oneManAttendance,201.21,186,201,218
+C,B + completed paid Cheki,oneManTicket,307710,282000,312000,336000
+C,B + completed paid Cheki,chekiServices,1123.36,1074,1120,1178
+C,B + completed paid Cheki,chekiGross,1151300,1095000,1149000,1209000
+C,B + completed paid Cheki,cash,1237427.5,1170200,1245950,1301250
+D,C + completed newcomer vouchers,finalP,562.888659,534.93916,562.306282,587.66679
+D,C + completed newcomer vouchers,finalO,310.62475,291.742695,311.856201,329.289044
+D,C + completed newcomer vouchers,population,873.513409,844.95563,873.68882,901.370617
+D,C + completed newcomer vouchers,team,95.43,83,96,109
+D,C + completed newcomer vouchers,member,111.28,99,112,123
+D,C + completed newcomer vouchers,paid,37.49,30,38,45
+D,C + completed newcomer vouchers,voucher,48.85,39,48,58
+D,C + completed newcomer vouchers,x,0,0,0,0
+D,C + completed newcomer vouchers,sns,769.84,738,770,802
+D,C + completed newcomer vouchers,eventP,7.33,4,7,12
+D,C + completed newcomer vouchers,pChurn,161.231341,156.222808,161.532377,165.973153
+D,C + completed newcomer vouchers,oChurn,12.42525,11.669867,12.40125,13.235315
+D,C + completed newcomer vouchers,affinity,227.43335,209.112962,228.188127,247.54141
+D,C + completed newcomer vouchers,oneManAttendance,207.03,194,206,225
+D,C + completed newcomer vouchers,oneManTicket,307710,282000,312000,336000
+D,C + completed newcomer vouchers,chekiServices,1182.9,1127,1179,1243
+D,C + completed newcomer vouchers,chekiGross,1217660,1154000,1215000,1282000
+D,C + completed newcomer vouchers,cash,1112335.3,1034510,1116840,1193180
+E,D + X Team/Member Live and weekly exposure,finalP,562.946842,532.668332,562.22046,589.891562
+E,D + X Team/Member Live and weekly exposure,finalO,321.378109,303.617749,323.574855,338.224748
+E,D + X Team/Member Live and weekly exposure,population,884.324951,856.934454,885.259738,911.984443
+E,D + X Team/Member Live and weekly exposure,team,101.95,89,103,114
+E,D + X Team/Member Live and weekly exposure,member,113.23,101,115,125
+E,D + X Team/Member Live and weekly exposure,paid,37.77,30,37,47
+E,D + X Team/Member Live and weekly exposure,voucher,51.54,43,50,62
+E,D + X Team/Member Live and weekly exposure,x,12.06,8,12,17
+E,D + X Team/Member Live and weekly exposure,sns,769.67,737,770,802
+E,D + X Team/Member Live and weekly exposure,eventP,6.81,3,7,11
+E,D + X Team/Member Live and weekly exposure,pChurn,161.103158,156.48803,160.949049,167.079616
+E,D + X Team/Member Live and weekly exposure,oChurn,13.111891,12.448429,13.122872,13.835647
+E,D + X Team/Member Live and weekly exposure,affinity,233.288008,213.710693,232.71877,253.993927
+E,D + X Team/Member Live and weekly exposure,oneManAttendance,210.46,197,209,227
+E,D + X Team/Member Live and weekly exposure,oneManTicket,307710,282000,312000,336000
+E,D + X Team/Member Live and weekly exposure,chekiServices,1239.31,1179,1243,1294
+E,D + X Team/Member Live and weekly exposure,chekiGross,1273880,1208000,1280000,1328000
+E,D + X Team/Member Live and weekly exposure,cash,1145013.7,1063440,1153990,1213630

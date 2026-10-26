@@ -78,6 +78,8 @@ export function resolveDiagnosticAudienceChannels(input: {
   config?: Partial<AudienceChannelDiagnosticConfig>;
   /** Diagnostic-only ablation: retain the viewers as Sunday X→P exposure. */
   disableExternalDirectOtaku?: boolean;
+  /** R0 owns C3 conversion after Team/Member performance is available. */
+  skipLegacyConversion?: boolean;
 }): EventAudienceAttribution {
   const config = { ...audienceChannelDiagnosticV1, ...input.config };
   const random = createSeededRandom(`audience-channels:${input.seed}`);
@@ -112,13 +114,17 @@ export function resolveDiagnosticAudienceChannels(input: {
   // populations.  The latter has no approved candidate rate yet, so the
   // diagnostic default intentionally leaves it at zero instead of treating
   // every P viewer as an active buyer.
-  const activePublicToOtaku = sampleBinomial(activeIntentPublicWatching, Math.min(1, config.activePublicToOtakuRate * q), random);
-  const referredPublicToOtaku = sampleBinomial(referredPublicTicketed, Math.min(1, config.passivePublicToOtakuRate * q), random);
+  const activePublicToOtaku = input.skipLegacyConversion
+    ? 0
+    : sampleBinomial(activeIntentPublicWatching, Math.min(1, config.activePublicToOtakuRate * q), random);
+  const referredPublicToOtaku = input.skipLegacyConversion
+    ? 0
+    : sampleBinomial(referredPublicTicketed, Math.min(1, config.passivePublicToOtakuRate * q), random);
   const publicToOtaku = activePublicToOtaku + referredPublicToOtaku;
-  const externalIdolToOtaku = input.disableExternalDirectOtaku
+  const externalIdolToOtaku = input.skipLegacyConversion || input.disableExternalDirectOtaku
     ? 0
     : sampleBinomial(externalIdolWatching, Math.min(1, config.externalIdolToOtakuRate * q), random);
-  const externalGeneralToOtaku = input.disableExternalDirectOtaku
+  const externalGeneralToOtaku = input.skipLegacyConversion || input.disableExternalDirectOtaku
     ? 0
     : sampleBinomial(externalGeneralWatching, Math.min(1, config.externalGeneralToOtakuRate * q), random);
   const externalExposure = ticketedExternal - externalIdolToOtaku - externalGeneralToOtaku;

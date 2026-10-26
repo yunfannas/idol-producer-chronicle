@@ -1,0 +1,124 @@
+{
+  "sourceCommit": "174593ccd945676dd399cab389d1b4d5599b62ff",
+  "r0Default": {
+    "enabled": true,
+    "enablePaidCheki": true,
+    "enableVoucherCheki": true,
+    "enableExternalLive": true
+  },
+  "r0Tunables": {
+    "version": "r0-dynamic-conversion-v1",
+    "memberSourceShareOfActivePublic": 0.45,
+    "memberSourceShareOfExternal": 0.25,
+    "referredPublicTeamMultiplier": 0.65,
+    "externalIdolMultiplier": 0.55,
+    "externalGeneralMultiplier": 0.35,
+    "live": {
+      "team": {
+        "base": 0.065,
+        "satisfactionSlope": 0.05,
+        "minimum": 0.025,
+        "maximum": 0.14
+      },
+      "member": {
+        "base": 0.09,
+        "satisfactionSlope": 0.06,
+        "minimum": 0.035,
+        "maximum": 0.18
+      }
+    },
+    "cheki": {
+      "team": {
+        "base": 0.045,
+        "satisfactionSlope": 0.04,
+        "minimum": 0.015,
+        "maximum": 0.12
+      },
+      "member": {
+        "base": 0.065,
+        "satisfactionSlope": 0.05,
+        "minimum": 0.02,
+        "maximum": 0.15
+      },
+      "paidParticipation": {
+        "team": 0.2,
+        "member": 0.3,
+        "satisfactionSlope": 0.08
+      },
+      "voucherParticipation": {
+        "team": 0.3,
+        "member": 0.5
+      }
+    }
+  },
+  "legacyFixedParameters": {
+    "pPublicToOtaku": 0.025,
+    "pExternalToOtaku": 0.004
+  },
+  "experiments": [
+    {
+      "id": "A",
+      "name": "Legacy C3 baseline",
+      "input": {
+        "r0Conversion": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "id": "B",
+      "name": "R0 dynamic Team/Member Live",
+      "input": {
+        "r0Conversion": {
+          "enabled": true,
+          "enablePaidCheki": false,
+          "enableVoucherCheki": false,
+          "enableExternalLive": false
+        }
+      }
+    },
+    {
+      "id": "C",
+      "name": "B + completed paid Cheki",
+      "input": {
+        "r0Conversion": {
+          "enabled": true,
+          "enablePaidCheki": true,
+          "enableVoucherCheki": false,
+          "enableExternalLive": false
+        }
+      }
+    },
+    {
+      "id": "D",
+      "name": "C + completed newcomer vouchers",
+      "input": {
+        "r0Conversion": {
+          "enabled": true,
+          "enablePaidCheki": true,
+          "enableVoucherCheki": true,
+          "enableExternalLive": false
+        },
+        "newcomerVoucher": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "id": "E",
+      "name": "D + X Team/Member Live and weekly exposure",
+      "input": {
+        "r0Conversion": {
+          "enabled": true,
+          "enablePaidCheki": true,
+          "enableVoucherCheki": true,
+          "enableExternalLive": true
+        },
+        "newcomerVoucher": {
+          "enabled": true
+        }
+      }
+    }
+  ],
+  "command": "npm run report:s3c-r0-conversion"
+}

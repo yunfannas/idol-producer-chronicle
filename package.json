@@ -16,7 +16,8 @@
     "report:prologue-fan-e2e": "node scripts/generate-prologue-fan-e2e-report.cjs",
     "report:fan-acquisition-audience-demand": "node scripts/generate-fan-acquisition-audience-demand-report.cjs",
     "report:c3-active-public-calibration": "node scripts/calibrate-c3-active-public-conversion.cjs",
-    "report:s3c-fan-po-diagnostic": "node scripts/generate-s3c-fan-po-diagnostic-report.cjs"
+    "report:s3c-fan-po-diagnostic": "node scripts/generate-s3c-fan-po-diagnostic-report.cjs",
+    "report:s3c-r0-conversion": "node scripts/generate-s3c-r0-conversion-report.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

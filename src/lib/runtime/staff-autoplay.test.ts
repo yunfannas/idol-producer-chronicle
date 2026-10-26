@@ -214,8 +214,8 @@ describe("Staff autoplay prologue E2E", () => {
     expect(c3.events.every((event) => event.audienceAttribution!.publicToOtaku <= event.audienceAttribution!.ownedPublicWatching
       && event.audienceAttribution!.externalIdolWatching + event.audienceAttribution!.externalGeneralWatching === event.fanFlow.externalAudience)).toBe(true);
     expect(c3.events.every((event) => event.audienceAttribution!.externalToPublic === 0
-      && event.fanFlow.externalExposure === event.audienceAttribution!.externalExposure)).toBe(true);
-    expect(c3.events.every((event) => Object.values(event.fanFlow.initialAffinityByMember).reduce((sum, value) => sum + value, 0) === 0)).toBe(true);
+      && event.fanFlow.externalExposure + event.fanFlow.externalToOtaku === event.fanFlow.externalAudience)).toBe(true);
+    expect(c3.events.some((event) => Object.values(event.fanFlow.initialAffinityByMember).reduce((sum, value) => sum + value, 0) > 0)).toBe(true);
     expect(c3.onlineWeeks.some((week) => week.externalNewPublic > 0)).toBe(true);
     expect(c2.events.some((event) => event.audienceAttribution!.configuredExternalDemand > 0)).toBe(true);
     expect(runStaffAutoplayPrologue({ route: "B", seed: 23, fanAcquisitionStage: "C3" })).toEqual(c3);
@@ -255,20 +255,42 @@ describe("Staff autoplay prologue E2E", () => {
         week.opening.otakuCount + week.publicToOtaku + week.externalToOtaku - week.otakuChurn - week.graduationLoss,
         10,
       );
-      expect(week.publicToOtaku).toBe(week.teamLiveToOtaku + week.memberLiveToOtaku + week.paidChekiToOtaku);
-      expect(week.externalToOtaku).toBe(week.externalIdolToOtaku + week.externalGeneralToOtaku + week.voucherChekiToOtaku);
+      expect(week.publicToOtaku + week.externalToOtaku).toBe(week.teamLiveToOtaku + week.memberLiveToOtaku + week.paidChekiToOtaku + week.voucherChekiToOtaku);
+      expect(week.externalToOtaku).toBe(week.externalIdolToOtaku + week.externalGeneralToOtaku);
     }
   });
 
+  it("uses R0 Team/Member/real-service conversion in C3 without invoking the legacy audience conversion", () => {
+    const result = runStaffAutoplayPrologue({ route: "B", seed: 1, fanAcquisitionStage: "C3" });
+    const total = result.fanWeeklyResolutions.reduce((value, week) => ({
+      team: value.team + week.teamLiveToOtaku,
+      member: value.member + week.memberLiveToOtaku,
+      paid: value.paid + week.paidChekiToOtaku,
+    }), { team: 0, member: 0, paid: 0 });
+    expect(result.effectiveFanFlowConfig.r0Conversion.enabled).toBe(true);
+    expect(result.events.every((event) => event.audienceAttribution?.publicToOtaku === 0
+      && event.audienceAttribution?.externalIdolToOtaku === 0
+      && event.audienceAttribution?.externalGeneralToOtaku === 0)).toBe(true);
+    expect(total.team).toBeGreaterThan(0);
+    expect(total.member).toBeGreaterThan(0);
+    expect(total.paid).toBeGreaterThan(0);
+    expect(result.events.some((event) => event.fanFlow.paidNewcomerServed > 0)).toBe(true);
+    expect(result.events.every((event) => event.fanFlow.teamSourcePublicAttendance + event.fanFlow.memberSourcePublicAttendance === event.fanFlow.publicAttendance
+      && event.fanFlow.teamSourceExternalAttendance + event.fanFlow.memberSourceExternalAttendance === event.fanFlow.externalAudience)).toBe(true);
+    expect(result.events.every((event) => event.fanFlow.freeTrialConversionsByMember && Object.values(event.fanFlow.freeTrialConversionsByMember).reduce((sum, count) => sum + count, 0) <= event.fanFlow.freeTrialServed)).toBe(true);
+  });
+
   it("keeps diagnostic ablations isolated from baseline settings and X exposure", () => {
-    const baseline = runStaffAutoplayPrologue({ route: "B", seed: 41, fanAcquisitionStage: "C3" });
+    const baseline = runStaffAutoplayPrologue({ route: "B", seed: 41, fanAcquisitionStage: "C3", r0Conversion: { enabled: false } });
     const activeThirtyFivePercent = runStaffAutoplayPrologue({
       route: "B", seed: 41, fanAcquisitionStage: "C3",
       fanFlowDiagnosticOverrides: { activePublicToOtakuRate: 0.35 },
+      r0Conversion: { enabled: false },
     });
     const noExternalDirect = runStaffAutoplayPrologue({
       route: "B", seed: 41, fanAcquisitionStage: "C3",
       fanFlowDiagnosticOverrides: { disableExternalDirectOtaku: true },
+      r0Conversion: { enabled: false },
     });
     expect(activeThirtyFivePercent.effectiveFanFlowConfig.audienceChannel.activePublicToOtakuRate).toBe(0.35);
     expect(activeThirtyFivePercent.state.fan.otakuCount).toBeGreaterThan(baseline.state.fan.otakuCount);

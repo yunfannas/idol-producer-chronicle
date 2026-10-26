@@ -12,6 +12,17 @@ import { arrangementFor, createArrangementVersion, recordArrangementExposure, se
 import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1 } from "./fan";
 import { audienceChannelDiagnosticV1, resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
 import { resolveWeeklyOnlineAcquisition, staffExternalAudienceDemandV11, type WeeklyOnlineAcquisition } from "./fan-acquisition";
+import {
+  chekiConversionProbability,
+  chekiInteractionSatisfaction,
+  memberLiveConversionProbability,
+  newcomerPaidChekiParticipationProbability,
+  newcomerVoucherParticipationProbability,
+  r0DynamicConversionV1,
+  satisfactionFromPerformance,
+  teamLiveConversionProbability,
+  type R0SourceContext,
+} from "./fan-conversion";
 import { applyBrandEvent, scoreLiveReputation, scoreMusicReputation, settleWeeklyReputation } from "./reputation";
 import { calculateTaibanTicketRevenue, createMonthlyOperatingReport, postLedgerEntry } from "./finance";
 import {
@@ -122,6 +133,20 @@ export type FanFlowDiagnosticOverrides = {
   disableVoucherChekiToOtaku?: boolean;
 };
 
+/** Staged R0 rollout for paired regressions; production C3 defaults to all non-voucher paths enabled. */
+export type R0ConversionConfig = {
+  enabled: boolean;
+  enablePaidCheki: boolean;
+  enableVoucherCheki: boolean;
+  enableExternalLive: boolean;
+};
+export const r0ConversionDefaultV1: R0ConversionConfig = {
+  enabled: true,
+  enablePaidCheki: true,
+  enableVoucherCheki: true,
+  enableExternalLive: true,
+};
+
 const audienceStageV11 = {
   // C2 keeps v1.0 conversion probabilities as an isolated demand-only
   // comparison. C3 switches to the explicit active-P / X-idol / X-general
@@ -187,6 +212,9 @@ export type StaffAutoplayEventAudit = {
       freeTrialServed: number;
       freeTrialLost: number;
       freeTrialVariableCostJPY: number;
+      paidNewcomerRequested: number;
+      paidNewcomerServed: number;
+      paidNewcomerLost: number;
     }>;
   };
   fanFlow: {
@@ -194,6 +222,10 @@ export type StaffAutoplayEventAudit = {
     otakuAttendance: number;
     publicAttendance: number;
     externalAudience: number;
+    teamSourcePublicAttendance: number;
+    memberSourcePublicAttendance: number;
+    teamSourceExternalAttendance: number;
+    memberSourceExternalAttendance: number;
     /** Non-O external reach pending the combined Sunday P settlement. */
     externalExposure: number;
     publicToOtaku: number;
@@ -215,6 +247,9 @@ export type StaffAutoplayEventAudit = {
     freeTrialLost: number;
     /** A subset of external→O: only completed free newcomer services may enter here. */
     freeTrialConversionsByMember: Record<string, number>;
+    paidNewcomerRequested: number;
+    paidNewcomerServed: number;
+    paidNewcomerLost: number;
   };
   audienceAttribution?: EventAudienceAttribution;
   /** C2/C3 demand does not alter the pre-existing Scenario ticket contract. */
@@ -271,6 +306,7 @@ export type StaffAutoplayResult = {
     audienceChannel: AudienceChannelDiagnosticConfig;
     newcomerVoucher: NewcomerVoucherTrialConfig;
     diagnosticOverrides: Required<Omit<FanFlowDiagnosticOverrides, "activePublicToOtakuRate">> & { activePublicToOtakuRate?: number };
+    r0Conversion: R0ConversionConfig;
   };
   familiaritySettlements: ({ weekEnd: string } & FamiliaritySettlement)[];
   months: StaffAutoplayMonth[];
@@ -285,6 +321,7 @@ type PendingFanMomentum = {
   eventId: string;
   auditIndex: number;
   publicToOtakuSampled: number;
+  publicConversions?: { path: R0ConversionPath; memberId?: string }[];
   externalToOtaku: number;
   externalToPublic: number;
   externalExposure: number;
@@ -417,14 +454,198 @@ function externalDemandForEvent(event: RuntimeEvent) {
   return fixture ?? { watchers: 0, idolShare: 0.5 };
 }
 
-function updateFanFromEvent(input: {
+type R0ConversionPath = "team-live" | "member-live" | "paid-cheki" | "voucher-cheki";
+type R0EventCandidate = {
+  id: string;
+  ownership: "public" | "external";
+  context: R0SourceContext;
+  source: "team" | "member";
+  sourceMemberId?: string;
+  liveConverted: boolean;
+};
+
+function r0FlowField(path: R0ConversionPath) {
+  if (path === "team-live") return "teamLiveToOtaku" as const;
+  if (path === "member-live") return "memberLiveToOtaku" as const;
+  if (path === "paid-cheki") return "paidChekiToOtaku" as const;
+  return "voucherChekiToOtaku" as const;
+}
+
+function updateFanFromR0Event(input: FanEventUpdateInput) {
+  const attribution = input.audienceAttribution!;
+  const r0 = input.r0Conversion!;
+  const random = createSeededRandom(`${input.seed}:r0-conversion`);
+  const participantIds = input.participants.map((member) => member.id);
+  const teamSatisfaction = satisfactionFromPerformance(input.quality);
+  const weights = Object.fromEntries(input.participants.map((member) => [member.id, Math.max(0, input.exposure[member.id]?.quality ?? 0)]));
+  // R0 receives no approved persistent Member-Appeal acquisition surface.
+  // Keep the event-local source member neutral; actual Member Performance is
+  // consumed only by its conversion/satisfaction curve, not twice here.
+  const chooseSourceMember = () => participantIds[Math.min(participantIds.length - 1, Math.floor(random() * participantIds.length))];
+  const memberSatisfaction = (memberId: string) => satisfactionFromPerformance(input.exposure[memberId]?.quality ?? input.quality);
+  const candidates: R0EventCandidate[] = [];
+  const addCandidates = (count: number, ownership: "public" | "external", context: R0SourceContext, memberShare: number) => {
+    const total = Math.max(0, Math.floor(count));
+    const memberCount = sampleBinomial(total, memberShare, random);
+    for (let index = 0; index < total; index += 1) {
+      const memberSource = index < memberCount;
+      candidates.push({
+        id: `${input.event.id}:${ownership}:${context}:${index + 1}`,
+        ownership,
+        context,
+        source: memberSource ? "member" : "team",
+        sourceMemberId: memberSource ? chooseSourceMember() : undefined,
+        liveConverted: false,
+      });
+    }
+  };
+  addCandidates(attribution.activeIntentPublicWatching, "public", "active-public", r0DynamicConversionV1.memberSourceShareOfActivePublic);
+  addCandidates(attribution.referredPublicWatching, "public", "referred-public", 0);
+  if (r0.enableExternalLive) {
+    addCandidates(attribution.externalIdolWatching, "external", "external-idol", r0DynamicConversionV1.memberSourceShareOfExternal);
+    addCandidates(attribution.externalGeneralWatching, "external", "external-general", r0DynamicConversionV1.memberSourceShareOfExternal);
+  }
+
+  const publicConversions: { path: R0ConversionPath; memberId?: string }[] = [];
+  const externalByContext: Record<"external-idol" | "external-general", number> = { "external-idol": 0, "external-general": 0 };
+  const externalByPath: Record<R0ConversionPath, number> = { "team-live": 0, "member-live": 0, "paid-cheki": 0, "voucher-cheki": 0 };
+  const externalInitialAffinityByMember = Object.fromEntries(Object.keys(input.fan.members).map((id) => [id, 0])) as Record<string, number>;
+  const voucherConversionsByMember = Object.fromEntries(Object.keys(input.fan.members).map((id) => [id, 0])) as Record<string, number>;
+  const recordConversion = (candidate: R0EventCandidate, path: R0ConversionPath, memberId?: string) => {
+    if (candidate.ownership === "public") {
+      publicConversions.push({ path, memberId });
+    } else {
+      externalByContext[candidate.context as "external-idol" | "external-general"] += 1;
+      externalByPath[path] += 1;
+      if (memberId) externalInitialAffinityByMember[memberId] = (externalInitialAffinityByMember[memberId] ?? 0) + 1;
+    }
+    if (path === "voucher-cheki" && memberId) voucherConversionsByMember[memberId] = (voucherConversionsByMember[memberId] ?? 0) + 1;
+  };
+  for (const candidate of candidates) {
+    const probability = candidate.source === "team"
+      ? teamLiveConversionProbability(teamSatisfaction, candidate.context)
+      : memberLiveConversionProbability(memberSatisfaction(candidate.sourceMemberId!), candidate.context);
+    if (random() < probability) {
+      candidate.liveConverted = true;
+      recordConversion(candidate, candidate.source === "team" ? "team-live" : "member-live", candidate.sourceMemberId);
+    }
+  }
+
+  const paidRequests: { id: string; memberId: string; source: "public" | "external" }[] = [];
+  const voucherRequests: { id: string; memberId: string; source: "public" | "external" }[] = [];
+  if (input.event.chekiAllowed) {
+    for (const candidate of candidates) {
+      const sourceSatisfaction = candidate.source === "team" ? teamSatisfaction : memberSatisfaction(candidate.sourceMemberId!);
+      const targetMemberId = candidate.sourceMemberId ?? chooseSourceMember();
+      const paid = r0.enablePaidCheki && random() < newcomerPaidChekiParticipationProbability(sourceSatisfaction, candidate.source);
+      if (paid) {
+        paidRequests.push({ id: candidate.id, memberId: targetMemberId, source: candidate.ownership });
+      } else if (r0.enableVoucherCheki && input.newcomerVoucher?.enabled && !input.disableVoucherChekiToOtaku
+        && random() < newcomerVoucherParticipationProbability(candidate.source)) {
+        voucherRequests.push({ id: candidate.id, memberId: targetMemberId, source: candidate.ownership });
+      }
+    }
+  }
+  const completedNewcomerServices = new Map<string, { memberId: string; kind: "paid-cheki" | "voucher-cheki"; waitMinutes: number }>();
+  let eligible: Record<string, number> = {};
+  const sales = settleChekiQueue({
+    fan: input.fan,
+    memberIds: participantIds,
+    attendeeOtaku: attribution.ownedOtakuWatching,
+    seed: `${input.seed}:queue`,
+    allowSales: input.event.chekiAllowed,
+    exposureProbabilityByMember: Object.fromEntries(participantIds.map((id) => [id, input.exposure[id]?.exposureProbability ?? 0])),
+    paidNewcomerRequests: { requests: paidRequests },
+    freeNewcomerTrials: input.newcomerVoucher?.enabled ? {
+      requests: voucherRequests,
+      serviceSeconds: input.newcomerVoucher.serviceSeconds,
+      variableCostJPY: input.newcomerVoucher.variableCostJPY,
+    } : undefined,
+    onService: (record) => {
+      if (record.kind === "paid-newcomer") completedNewcomerServices.set(record.fanId.replace(/^newcomer:/, ""), { memberId: record.memberId, kind: "paid-cheki", waitMinutes: record.waitMinutes });
+      if (record.kind === "free-trial") completedNewcomerServices.set(record.fanId.replace(/^trial:/, ""), { memberId: record.memberId, kind: "voucher-cheki", waitMinutes: record.waitMinutes });
+    },
+    onAudience: (audience) => { eligible = audience.eligibleExposedOWithoutAffinity; },
+  });
+  for (const candidate of candidates) {
+    if (candidate.liveConverted) continue;
+    const service = completedNewcomerServices.get(candidate.id);
+    if (!service) continue;
+    const satisfaction = chekiInteractionSatisfaction(memberSatisfaction(service.memberId), service.waitMinutes);
+    if (random() < chekiConversionProbability(satisfaction, candidate.source, candidate.context)) {
+      recordConversion(candidate, service.kind, service.memberId);
+    }
+  }
+  const externalToOtaku = externalByContext["external-idol"] + externalByContext["external-general"];
+  const externalAudience = attribution.externalIdolWatching + attribution.externalGeneralWatching;
+  const newAffinityByMember = Object.fromEntries(Object.entries(input.fan.members).map(([id]) => {
+    if (!participantIds.includes(id)) return [id, 0];
+    const share = participantIds.length > 0 ? (weights[id] ?? 0) / Math.max(1, participantIds.reduce((sum, memberId) => sum + (weights[memberId] ?? 0), 0)) : 0;
+    return [id, sampleBinomial(eligible[id] ?? 0, Math.min(0.12, 0.10 * share * (input.exposure[id]?.quality ?? 1)), random)];
+  }));
+  const logWByMember = Object.fromEntries(participantIds.map((memberId) => {
+    const queue = sales[memberId];
+    const served = queue.buyerCount / Math.max(1, queue.affinityVisitors);
+    const lost = queue.queueLostBuyers / Math.max(1, queue.affinityVisitors);
+    return [memberId, Math.max(-0.05, Math.min(0.05, 0.015 * served * (input.quality - 1) - 0.01 * lost))];
+  }));
+  return {
+    sales,
+    flow: {
+      otakuAttendance: attribution.ownedOtakuWatching,
+      publicAttendance: attribution.ownedPublicWatching,
+      externalAudience,
+      teamSourcePublicAttendance: candidates.filter((candidate) => candidate.ownership === "public" && candidate.source === "team").length,
+      memberSourcePublicAttendance: candidates.filter((candidate) => candidate.ownership === "public" && candidate.source === "member").length,
+      teamSourceExternalAttendance: candidates.filter((candidate) => candidate.ownership === "external" && candidate.source === "team").length,
+      memberSourceExternalAttendance: candidates.filter((candidate) => candidate.ownership === "external" && candidate.source === "member").length,
+      externalExposure: Math.max(0, externalAudience - externalToOtaku),
+      publicToOtaku: 0,
+      teamLiveToOtaku: externalByPath["team-live"],
+      memberLiveToOtaku: externalByPath["member-live"],
+      paidChekiToOtaku: externalByPath["paid-cheki"],
+      voucherChekiToOtaku: externalByPath["voucher-cheki"],
+      externalIdolToOtaku: externalByContext["external-idol"],
+      externalGeneralToOtaku: externalByContext["external-general"],
+      externalToOtaku,
+      externalToPublic: 0,
+      initialAffinityByMember: externalInitialAffinityByMember,
+      existingOtakuAffinityByMember: newAffinityByMember,
+      freeTrialRequested: Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialRequested, 0),
+      freeTrialServed: Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialServed, 0),
+      freeTrialLost: Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialLost, 0),
+      freeTrialConversionsByMember: voucherConversionsByMember,
+      paidNewcomerRequested: Object.values(sales).reduce((sum, sale) => sum + sale.paidNewcomerRequested, 0),
+      paidNewcomerServed: Object.values(sales).reduce((sum, sale) => sum + sale.paidNewcomerServed, 0),
+      paidNewcomerLost: Object.values(sales).reduce((sum, sale) => sum + sale.paidNewcomerLost, 0),
+    },
+    momentum: {
+      publicToOtakuSampled: publicConversions.length,
+      publicConversions,
+      externalToOtaku,
+      externalToPublic: 0,
+      externalExposure: Math.max(0, externalAudience - externalToOtaku),
+      assignInitialAffinityToNewOtaku: false,
+      newAffinityByMember,
+      initialAffinityByMember: externalInitialAffinityByMember,
+      logWByMember,
+      memberWeights: weights,
+    },
+  };
+}
+
+type FanEventUpdateInput = {
   fan: FanState; participants: OperatingMember[]; event: RuntimeEvent; totalAudience: number;
   quality: number; exposure: Record<string, { exposureProbability: number; quality: number }>; seed: string;
   newcomerVoucher?: NewcomerVoucherTrialConfig;
   audienceAttribution?: EventAudienceAttribution;
   integratedLifecycle?: boolean;
   disableVoucherChekiToOtaku?: boolean;
-}) {
+  r0Conversion?: R0ConversionConfig;
+};
+
+function updateFanFromEvent(input: FanEventUpdateInput) {
+  if (input.r0Conversion?.enabled && input.audienceAttribution) return updateFanFromR0Event(input);
   // Legacy mode derives temporary X from a contract attendance total. In
   // C2/C3 mode all audience populations come from demand attribution, so no
   // residual-capacity X is created here.
@@ -523,6 +744,10 @@ function updateFanFromEvent(input: {
       otakuAttendance: attendance,
       publicAttendance: publicAttend,
       externalAudience,
+      teamSourcePublicAttendance: 0,
+      memberSourcePublicAttendance: 0,
+      teamSourceExternalAttendance: 0,
+      memberSourceExternalAttendance: 0,
       externalExposure,
       publicToOtaku: 0,
       teamLiveToOtaku: 0,
@@ -541,9 +766,13 @@ function updateFanFromEvent(input: {
       freeTrialServed,
       freeTrialLost,
       freeTrialConversionsByMember,
+      paidNewcomerRequested: 0,
+      paidNewcomerServed: 0,
+      paidNewcomerLost: 0,
     },
     momentum: {
       publicToOtakuSampled: publicToO,
+      publicConversions: Array.from({ length: publicToO }, () => ({ path: "team-live" as const })),
       externalToOtaku: externalToO,
       externalToPublic: externalToP,
       externalExposure,
@@ -596,16 +825,21 @@ function resolveWeeklyFanMomentum(input: {
   };
   let remainingPublicConversions = publicToOtaku;
   for (const momentum of input.momenta) {
-    const committed = Math.min(remainingPublicConversions, momentum.publicToOtakuSampled);
-    remainingPublicConversions -= committed;
-    input.audits[momentum.auditIndex].fanFlow.publicToOtaku += committed;
-    input.audits[momentum.auditIndex].fanFlow.teamLiveToOtaku += committed;
-    for (let index = 0; index < committed && momentum.assignInitialAffinityToNewOtaku; index += 1) {
-      const memberId = choose(Object.keys(momentum.memberWeights), (id) => momentum.memberWeights[id]);
-        if (memberId) {
-          additionalAffinity[memberId] = (additionalAffinity[memberId] ?? 0) + 1;
-          input.audits[momentum.auditIndex].fanFlow.initialAffinityByMember[memberId] = (input.audits[momentum.auditIndex].fanFlow.initialAffinityByMember[memberId] ?? 0) + 1;
-        }
+    const conversions: { path: R0ConversionPath; memberId?: string }[] = momentum.publicConversions
+      ?? Array.from({ length: momentum.publicToOtakuSampled }, () => ({ path: "team-live" as R0ConversionPath }));
+    for (const conversion of conversions) {
+      if (remainingPublicConversions <= 0) break;
+      remainingPublicConversions -= 1;
+      const audit = input.audits[momentum.auditIndex];
+      audit.fanFlow.publicToOtaku += 1;
+      audit.fanFlow[r0FlowField(conversion.path)] += 1;
+      const memberId = conversion.memberId ?? (momentum.assignInitialAffinityToNewOtaku
+        ? choose(Object.keys(momentum.memberWeights), (id) => momentum.memberWeights[id])
+        : undefined);
+      if (memberId && (conversion.memberId || momentum.assignInitialAffinityToNewOtaku)) {
+        additionalAffinity[memberId] = (additionalAffinity[memberId] ?? 0) + 1;
+        audit.fanFlow.initialAffinityByMember[memberId] = (audit.fanFlow.initialAffinityByMember[memberId] ?? 0) + 1;
+      }
     }
   }
   // Event-derived external new P is created only here, after the online
@@ -665,10 +899,10 @@ function resolveWeeklyFanMomentum(input: {
       eventExposureNewPublic: input.externalExposurePublic ?? 0,
       newPublic: (input.onlineNewPublic ?? 0) + (input.externalExposurePublic ?? 0),
       publicToOtaku,
-      teamLiveToOtaku: publicToOtaku,
-      memberLiveToOtaku: 0,
-      paidChekiToOtaku: 0,
-      voucherChekiToOtaku: input.momenta.reduce((sum, momentum) => sum + Object.values(input.audits[momentum.auditIndex].fanFlow.freeTrialConversionsByMember).reduce((inner, value) => inner + value, 0), 0),
+      teamLiveToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.teamLiveToOtaku, 0),
+      memberLiveToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.memberLiveToOtaku, 0),
+      paidChekiToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.paidChekiToOtaku, 0),
+      voucherChekiToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.voucherChekiToOtaku, 0),
       externalIdolToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.externalIdolToOtaku, 0),
       externalGeneralToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.externalGeneralToOtaku, 0),
       externalToOtaku,
@@ -755,6 +989,8 @@ export function runStaffAutoplayPrologue(input: {
   audienceDemand?: Partial<StaffAutoplayAudienceDemandConfig>;
   /** Diagnostic-only paired-seed switches; they do not modify the baseline defaults. */
   fanFlowDiagnosticOverrides?: FanFlowDiagnosticOverrides;
+  /** R0 is the C3 default; tests may selectively disable a staged path. */
+  r0Conversion?: Partial<R0ConversionConfig>;
 }): StaffAutoplayResult {
   const s3Variant = input.s3Variant ?? "S3-C";
   const fanAcquisitionStage = input.fanAcquisitionStage ?? (input.audienceDemand?.enabled ? "C3" : "C0");
@@ -770,6 +1006,11 @@ export function runStaffAutoplayPrologue(input: {
     disablePaidChekiToOtaku: input.fanFlowDiagnosticOverrides?.disablePaidChekiToOtaku === true,
     disableExternalDirectOtaku: input.fanFlowDiagnosticOverrides?.disableExternalDirectOtaku === true,
     disableVoucherChekiToOtaku: input.fanFlowDiagnosticOverrides?.disableVoucherChekiToOtaku === true,
+  };
+  const r0Conversion: R0ConversionConfig = {
+    ...r0ConversionDefaultV1,
+    enabled: fanAcquisitionStage === "C3",
+    ...input.r0Conversion,
   };
   const effectiveAudienceChannelConfig: AudienceChannelDiagnosticConfig = {
     ...audienceChannelDiagnosticV1,
@@ -928,10 +1169,11 @@ export function runStaffAutoplayPrologue(input: {
             externalIdolShare: externalFixture?.idolShare ?? effectiveAudienceChannelConfig.externalIdolShare,
           },
           disableExternalDirectOtaku: diagnosticOverrides.disableExternalDirectOtaku,
+          skipLegacyConversion: r0Conversion.enabled,
         })
         : undefined;
       const actualAttendance = audienceAttribution?.actualUniqueAudience ?? contract.attendees;
-      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution, integratedLifecycle: fanAcquisitionStage === "C3", disableVoucherChekiToOtaku: diagnosticOverrides.disableVoucherChekiToOtaku });
+      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution, integratedLifecycle: fanAcquisitionStage === "C3", disableVoucherChekiToOtaku: diagnosticOverrides.disableVoucherChekiToOtaku, r0Conversion });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
         { memberId, tierId: "1000" as const, units: sale.completedUnitsByTier["1000"] },
         { memberId, tierId: "2000" as const, units: sale.completedUnitsByTier["2000"] },
@@ -973,7 +1215,7 @@ export function runStaffAutoplayPrologue(input: {
       fanMonth.eventFlow.publicAttendance += fanOutcome.flow.publicAttendance;
       fanMonth.eventFlow.externalAudience += fanOutcome.flow.externalAudience;
       fanMonth.eventFlow.externalExposure += fanOutcome.flow.externalExposure;
-      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, audienceCapacity: contract.capacity, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow }, audienceAttribution, ticketSettlementSource: "scenario-contract" });
+      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, audienceCapacity: contract.capacity, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY, paidNewcomerRequested: sale.paidNewcomerRequested, paidNewcomerServed: sale.paidNewcomerServed, paidNewcomerLost: sale.paidNewcomerLost }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow }, audienceAttribution, ticketSettlementSource: "scenario-contract" });
       pendingFanMomenta.push({ eventId: event.id, auditIndex: audits.length - 1, ...fanOutcome.momentum });
       if (event.id === "graduation-2014-05-11") {
         // The completed graduation Live participates in this week's momentum;
@@ -1116,7 +1358,7 @@ export function runStaffAutoplayPrologue(input: {
     fanMonths: [...fanMonths.values()],
     fanWeeklyResolutions,
     onlineWeeks,
-    effectiveFanFlowConfig: { audienceChannel: effectiveAudienceChannelConfig, newcomerVoucher, diagnosticOverrides },
+    effectiveFanFlowConfig: { audienceChannel: effectiveAudienceChannelConfig, newcomerVoucher, diagnosticOverrides, r0Conversion },
     familiaritySettlements,
     months,
     minCash,
