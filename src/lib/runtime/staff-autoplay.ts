@@ -10,6 +10,7 @@
 import { settleChekiSales } from "./cheki";
 import { arrangementFor, createArrangementVersion, recordArrangementExposure, settleArrangementFamiliarityWeek, type FamiliaritySettlement } from "./arrangement-familiarity";
 import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1 } from "./fan";
+import { resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
 import { calculateTaibanTicketRevenue, createMonthlyOperatingReport, postLedgerEntry } from "./finance";
 import {
   type CoreAttributes,
@@ -89,6 +90,23 @@ export const newcomerVoucherTrialV1: NewcomerVoucherTrialConfig = {
   variableCostJPY: 180,
 };
 
+/**
+ * C2/C3 test adapter. External viewers must be supplied against a concrete
+ * event id by a Scenario/contract fixture; omitted ids mean zero configured
+ * external viewers, never ``capacity - owned audience``. This remains opt-in
+ * until the v1.1 migration has its paired-seed calibration report.
+ */
+export type StaffAutoplayAudienceDemandConfig = {
+  enabled: boolean;
+  externalWatchingDemandByEventId: Readonly<Record<string, number>>;
+  channelConfig?: Partial<AudienceChannelDiagnosticConfig>;
+};
+
+export const staffAutoplayAudienceDemandV11: StaffAutoplayAudienceDemandConfig = {
+  enabled: false,
+  externalWatchingDemandByEventId: {},
+};
+
 const DEFAULT_SONG_DIRECTION: Record<Color8, number> = {
   red: 0.25, pink: 0.1, orange: 0.1, aqua: 0.1, yellow: 0.1, green: 0.1, blue: 0.1, purple: 0.15,
 };
@@ -159,6 +177,9 @@ export type StaffAutoplayEventAudit = {
     /** A subset of external→O: only completed free newcomer services may enter here. */
     freeTrialConversionsByMember: Record<string, number>;
   };
+  audienceAttribution?: EventAudienceAttribution;
+  /** C2/C3 demand does not alter the pre-existing Scenario ticket contract. */
+  ticketSettlementSource: "scenario-contract";
 };
 
 export type StaffAutoplayFanMonth = {
@@ -294,10 +315,10 @@ function contractFor(event: RuntimeEvent, seed: string) {
   const random = createSeededRandom(`staff-autoplay:${seed}:${event.id}:contract`);
   const sampled = (input: { capacity: number; sellThrough: number; ticketJPY: number; venueCostJPY: number }) => {
     const attendees = sampleBinomial(input.capacity, input.sellThrough, random);
-    return { attendees, receipts: attendees * input.ticketJPY, venueCostJPY: input.venueCostJPY };
+    return { capacity: input.capacity, attendees, receipts: attendees * input.ticketJPY, venueCostJPY: input.venueCostJPY };
   };
-  if (event.kind === "debut") return { attendees: sampled({ capacity: 1_000, sellThrough: 0.08, ticketJPY: 0, venueCostJPY: 0 }).attendees, receipts: 0, venueCostJPY: 0 };
-  if (event.kind === "free-mall") return { attendees: sampled({ capacity: 180, sellThrough: 0.45, ticketJPY: 0, venueCostJPY: 0 }).attendees, receipts: 0, venueCostJPY: 0 };
+  if (event.kind === "debut") return { capacity: 1_000, attendees: sampled({ capacity: 1_000, sellThrough: 0.08, ticketJPY: 0, venueCostJPY: 0 }).attendees, receipts: 0, venueCostJPY: 0 };
+  if (event.kind === "free-mall") return { capacity: 180, attendees: sampled({ capacity: 180, sellThrough: 0.45, ticketJPY: 0, venueCostJPY: 0 }).attendees, receipts: 0, venueCostJPY: 0 };
   if (event.kind === "experimental-regular") return sampled(staffAutoplayScenarioV1.experimentalRegular);
   if (event.kind === "regular") return sampled(staffAutoplayScenarioV1.regular);
   if (event.kind === "graduation") return sampled(staffAutoplayScenarioV1.graduation);
@@ -310,20 +331,26 @@ function updateFanFromEvent(input: {
   fan: FanState; participants: OperatingMember[]; event: RuntimeEvent; totalAudience: number;
   quality: number; exposure: Record<string, { exposureProbability: number; quality: number }>; seed: string;
   newcomerVoucher?: NewcomerVoucherTrialConfig;
+  audienceAttribution?: EventAudienceAttribution;
 }) {
-  // Contract attendance is the actual total audience.  O/P attendance consumes
-  // that capacity first; only the residual is the temporary external X pool.
+  // Legacy mode derives temporary X from a contract attendance total. In
+  // C2/C3 mode all audience populations come from demand attribution, so no
+  // residual-capacity X is created here.
   const oneMan = eventClass(input.event.kind);
   const pOAttend = oneMan ? fanChekiBalanceV1.pOtakuAttendBase.oneMan : fanChekiBalanceV1.pOtakuAttendBase.taiban;
   const pPAttend = oneMan ? fanChekiBalanceV1.pPublicAttendBase.oneMan : fanChekiBalanceV1.pPublicAttendBase.taiban;
   const capacity = Math.max(0, Math.round(input.totalAudience));
-  const attendance = Math.min(capacity, Math.round(input.fan.otakuCount), sampleBinomial(input.fan.otakuCount, pOAttend, createSeededRandom(`${input.seed}:otaku-attendance`)));
-  const publicAttend = Math.min(Math.max(0, capacity - attendance), sampleBinomial(input.fan.publicCount, pPAttend, createSeededRandom(`${input.seed}:public-attendance`)));
-  const externalAudience = Math.max(0, capacity - attendance - publicAttend);
+  const attendance = input.audienceAttribution?.ownedOtakuWatching ?? Math.min(capacity, Math.round(input.fan.otakuCount), sampleBinomial(input.fan.otakuCount, pOAttend, createSeededRandom(`${input.seed}:otaku-attendance`)));
+  const publicAttend = input.audienceAttribution?.ownedPublicWatching ?? Math.min(Math.max(0, capacity - attendance), sampleBinomial(input.fan.publicCount, pPAttend, createSeededRandom(`${input.seed}:public-attendance`)));
+  const externalAudience = input.audienceAttribution
+    ? input.audienceAttribution.externalIdolWatching + input.audienceAttribution.externalGeneralWatching
+    : Math.max(0, capacity - attendance - publicAttend);
   const weights = input.participants.map((member) => Math.max(0, input.exposure[member.id]?.quality ?? 0));
   const denominator = weights.reduce((total, value) => total + value, 0);
   const voucherRandom = createSeededRandom(`${input.seed}:newcomer-voucher`);
-  const voucherEnabled = input.newcomerVoucher?.enabled === true && input.event.chekiAllowed;
+  // C4 combines Live and voucher hazards; until that combined path is enabled,
+  // C2/C3 audience demand deliberately runs without a second voucher draw.
+  const voucherEnabled = input.newcomerVoucher?.enabled === true && input.event.chekiAllowed && !input.audienceAttribution;
   const voucherRequests = voucherEnabled
     ? Array.from({ length: sampleBinomial(externalAudience, input.newcomerVoucher!.externalUptakeProbability, voucherRandom) }, (_, index) => {
         let point = voucherRandom() * denominator;
@@ -354,12 +381,15 @@ function updateFanFromEvent(input: {
   const q = Math.max(0.5, Math.min(1.5, input.quality));
   // Only people actually recorded as attending may convert at this event.
   // This is conditional-on-viewing conversion; never multiply attendance twice.
-  const publicToO = sampleBinomial(publicAttend, Math.min(0.2, fanChekiBalanceV1.pPublicToOtaku * q), createSeededRandom(`${input.seed}:public-conversion`));
+  const publicToO = input.audienceAttribution?.publicToOtaku ?? sampleBinomial(publicAttend, Math.min(0.2, fanChekiBalanceV1.pPublicToOtaku * q), createSeededRandom(`${input.seed}:public-conversion`));
   // Requesters are reserved from normal X conversion: a free-trial requester
   // becomes O only after a completed service, never twice in this Live.
   const externalDirectPool = Math.max(0, externalAudience - voucherRequests.length);
-  const externalDirectToO = sampleBinomial(externalDirectPool, Math.min(0.1, fanChekiBalanceV1.pExternalToOtaku * q), random);
-  const externalToP = sampleBinomial(externalDirectPool - externalDirectToO, Math.min(0.3, fanChekiBalanceV1.pExternalToPublic * q), random);
+  const externalDirectToO = input.audienceAttribution
+    ? input.audienceAttribution.externalIdolToOtaku + input.audienceAttribution.externalGeneralToOtaku
+    : sampleBinomial(externalDirectPool, Math.min(0.1, fanChekiBalanceV1.pExternalToOtaku * q), random);
+  const externalToP = input.audienceAttribution?.externalToPublic
+    ?? sampleBinomial(externalDirectPool - externalDirectToO, Math.min(0.3, fanChekiBalanceV1.pExternalToPublic * q), random);
   const newByMember = Object.fromEntries(input.participants.map((member) => [member.id, 0])) as Record<string, number>;
   for (let index = 0; index < externalDirectToO; index += 1) {
     let point = random() * denominator;
@@ -563,9 +593,17 @@ export function runStaffAutoplayPrologue(input: {
   s3Variant?: StaffAutoplayS3Variant;
   /** Explicit Scenario test contract; default remains disabled. */
   newcomerVoucher?: Partial<NewcomerVoucherTrialConfig>;
+  /** Explicit C2/C3 fixture; no external viewer is inferred when an id is absent. */
+  audienceDemand?: Partial<StaffAutoplayAudienceDemandConfig>;
 }): StaffAutoplayResult {
   const s3Variant = input.s3Variant ?? "S3-C";
   const newcomerVoucher = { ...newcomerVoucherTrialV1, ...input.newcomerVoucher };
+  const audienceDemand: StaffAutoplayAudienceDemandConfig = {
+    ...staffAutoplayAudienceDemandV11,
+    ...input.audienceDemand,
+    externalWatchingDemandByEventId: input.audienceDemand?.externalWatchingDemandByEventId
+      ?? staffAutoplayAudienceDemandV11.externalWatchingDemandByEventId,
+  };
   let state = createPrologueState({ saveId: `staff-autoplay:${input.route}:${input.seed}` });
   state = signRoster(completeMandatoryInterview(state), rosterForRoute(input.route));
   state = completeStrategyAndOriginals(state);
@@ -675,7 +713,21 @@ export function runStaffAutoplayPrologue(input: {
       }
       operating = operating.map((member) => resolved.members.find((updated) => updated.id === member.id) ?? member);
       const fanOpening = snapshotFan(state.fan);
-      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: contract.attendees, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher });
+      const oneMan = eventClass(event.kind);
+      const audienceAttribution = audienceDemand.enabled
+        ? resolveDiagnosticAudienceChannels({
+          publicCount: state.fan.publicCount,
+          otakuCount: state.fan.otakuCount,
+          capacity: contract.capacity,
+          externalWatchingDemand: audienceDemand.externalWatchingDemandByEventId[event.id] ?? 0,
+          otakuAttendanceRate: oneMan ? fanChekiBalanceV1.pOtakuAttendBase.oneMan : fanChekiBalanceV1.pOtakuAttendBase.taiban,
+          quality: resolved.quality,
+          seed: `${input.seed}:${event.id}`,
+          config: audienceDemand.channelConfig,
+        })
+        : undefined;
+      const actualAttendance = audienceAttribution?.actualUniqueAudience ?? contract.attendees;
+      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
         { memberId, tierId: "1000" as const, units: sale.completedUnitsByTier["1000"] },
         { memberId, tierId: "2000" as const, units: sale.completedUnitsByTier["2000"] },
@@ -707,7 +759,7 @@ export function runStaffAutoplayPrologue(input: {
       fanMonth.eventFlow.otakuAttendance += fanOutcome.flow.otakuAttendance;
       fanMonth.eventFlow.publicAttendance += fanOutcome.flow.publicAttendance;
       fanMonth.eventFlow.externalAudience += fanOutcome.flow.externalAudience;
-      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance: contract.attendees, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow } });
+      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow }, audienceAttribution, ticketSettlementSource: "scenario-contract" });
       pendingFanMomenta.push({ eventId: event.id, auditIndex: audits.length - 1, ...fanOutcome.momentum });
       if (event.id === "graduation-2014-05-11") {
         // The completed graduation Live participates in this week's momentum;

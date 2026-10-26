@@ -30,6 +30,8 @@ describe("C1–C3 diagnostic audience channels", () => {
     expect(result.externalIdolWatching + result.externalGeneralWatching).toBeLessThanOrEqual(input.capacity);
     expect(result.externalIdolToOtaku).toBeLessThanOrEqual(result.externalIdolWatching);
     expect(result.externalGeneralToOtaku).toBeLessThanOrEqual(result.externalGeneralWatching);
+    expect(result.publicToOtaku).toBe(result.activePublicToOtaku + result.referredPublicToOtaku);
+    expect(result.referredPublicToOtaku).toBe(0);
   });
 
   it("is deterministic and applies performance only to actual attendees", () => {

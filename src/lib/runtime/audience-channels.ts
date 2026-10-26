@@ -14,6 +14,10 @@ export const audienceChannelDiagnosticV1 = {
   referredPublicShare: 0.5,
   externalIdolShare: 0.5,
   activePublicToOtakuRate: 0.35,
+  // The v1.1 contract requires a lower P_other pathway but does not yet
+  // supply its candidate rate.  Keep it explicitly at zero in this fixture
+  // rather than quietly reusing the active-ticket-holder rate.
+  passivePublicToOtakuRate: 0,
   externalIdolToOtakuRate: 0.01,
   externalGeneralToOtakuRate: 0.004,
   externalToPublicRate: 0.08,
@@ -27,6 +31,7 @@ export type AudienceChannelDiagnosticConfig = {
   referredPublicShare: number;
   externalIdolShare: number;
   activePublicToOtakuRate: number;
+  passivePublicToOtakuRate: number;
   externalIdolToOtakuRate: number;
   externalGeneralToOtakuRate: number;
   externalToPublicRate: number;
@@ -43,6 +48,8 @@ export type EventAudienceAttribution = {
   publicDemand: number;
   ticketedPublic: number;
   actualUniqueAudience: number;
+  activePublicToOtaku: number;
+  referredPublicToOtaku: number;
   publicToOtaku: number;
   externalIdolToOtaku: number;
   externalGeneralToOtaku: number;
@@ -82,7 +89,13 @@ export function resolveDiagnosticAudienceChannels(input: {
   const externalIdolWatching = sampleBinomial(ticketedExternal, config.externalIdolShare, random);
   const externalGeneralWatching = ticketedExternal - externalIdolWatching;
   const q = Math.max(0.5, Math.min(1.5, input.quality));
-  const publicToOtaku = sampleBinomial(ticketedPublic, Math.min(1, config.activePublicToOtakuRate * q), random);
+  // Active ticket buyers and referred/other P viewers are separate v1.1
+  // populations.  The latter has no approved candidate rate yet, so the
+  // diagnostic default intentionally leaves it at zero instead of treating
+  // every P viewer as an active buyer.
+  const activePublicToOtaku = sampleBinomial(activeIntentPublicWatching, Math.min(1, config.activePublicToOtakuRate * q), random);
+  const referredPublicToOtaku = sampleBinomial(referredPublicWatching, Math.min(1, config.passivePublicToOtakuRate * q), random);
+  const publicToOtaku = activePublicToOtaku + referredPublicToOtaku;
   const externalIdolToOtaku = sampleBinomial(externalIdolWatching, Math.min(1, config.externalIdolToOtakuRate * q), random);
   const externalGeneralToOtaku = sampleBinomial(externalGeneralWatching, Math.min(1, config.externalGeneralToOtakuRate * q), random);
   const remainingExternal = ticketedExternal - externalIdolToOtaku - externalGeneralToOtaku;
@@ -98,6 +111,8 @@ export function resolveDiagnosticAudienceChannels(input: {
     publicDemand,
     ticketedPublic,
     actualUniqueAudience: ownedOtakuWatching + ticketedPublic + ticketedExternal,
+    activePublicToOtaku,
+    referredPublicToOtaku,
     publicToOtaku,
     externalIdolToOtaku,
     externalGeneralToOtaku,

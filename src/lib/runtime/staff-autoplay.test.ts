@@ -150,4 +150,49 @@ describe("Staff autoplay prologue E2E", () => {
     expect(Object.values(mall.cheki.queues).every((queue) => queue.freeTrialRequested === 0 && queue.freeTrialServed === 0)).toBe(true);
     expect(runStaffAutoplayPrologue(input)).toEqual(result);
   });
+
+  it("uses explicit C2/C3 demand without filling capacity and preserves the Scenario ticket ledger", () => {
+    const withoutExternalDemand = runStaffAutoplayPrologue({
+      route: "B",
+      seed: 17,
+      audienceDemand: { enabled: true, externalWatchingDemandByEventId: {} },
+    });
+    const withExternalDemand = runStaffAutoplayPrologue({
+      route: "B",
+      seed: 17,
+      audienceDemand: {
+        enabled: true,
+        externalWatchingDemandByEventId: {
+          "debut-2013-05-24": 140,
+          "taiban-2013-05-29": 30,
+          "festival-2014-08-02": 180,
+        },
+      },
+    });
+
+    const noDemandDebut = withoutExternalDemand.events.find((event) => event.liveId === "debut-2013-05-24")!;
+    const demandedDebut = withExternalDemand.events.find((event) => event.liveId === "debut-2013-05-24")!;
+    expect(noDemandDebut.audienceAttribution).toBeDefined();
+    expect(noDemandDebut.fanFlow.externalAudience).toBe(noDemandDebut.audienceAttribution!.referredExternalWatching);
+    expect(demandedDebut.fanFlow.externalAudience).toBeGreaterThanOrEqual(noDemandDebut.fanFlow.externalAudience);
+    expect(withExternalDemand.events.every((event) => event.audienceAttribution
+      && event.actualAttendance === event.audienceAttribution.actualUniqueAudience
+      && event.actualAttendance <= 1_000)).toBe(true);
+    expect(withExternalDemand.events.every((event) => event.fanFlow.otakuAttendance + event.fanFlow.publicAttendance + event.fanFlow.externalAudience === event.actualAttendance)).toBe(true);
+    expect(withExternalDemand.events.every((event) => event.audienceAttribution!.publicToOtaku
+      === event.audienceAttribution!.activePublicToOtaku + event.audienceAttribution!.referredPublicToOtaku)).toBe(true);
+    expect(withExternalDemand.events.every((event) => event.ticketSettlementSource === "scenario-contract")).toBe(true);
+    expect(runStaffAutoplayPrologue({
+      route: "B",
+      seed: 17,
+      audienceDemand: {
+        enabled: true,
+        externalWatchingDemandByEventId: {
+          "debut-2013-05-24": 140,
+          "taiban-2013-05-29": 30,
+          "festival-2014-08-02": 180,
+        },
+      },
+    })).toEqual(withExternalDemand);
+  });
 });
