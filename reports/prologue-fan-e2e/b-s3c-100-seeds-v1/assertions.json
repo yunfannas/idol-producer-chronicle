@@ -162,6 +162,13 @@
       "pass": true,
       "passedSeeds": 100,
       "failedSeeds": []
+    },
+    {
+      "id": "opt_in_newcomer_voucher_probe",
+      "pass": true,
+      "passedSeeds": 1,
+      "sampleSize": 1,
+      "failedSeeds": []
     }
   ],
   "observations": [
@@ -175,7 +182,6 @@
     }
   ],
   "notImplemented": [
-    "No Scenario contract currently issues a free newcomer voucher. The zero free-unit rows are an explicit absence of a coupon flow, not evidence that a future voucher implementation has passed C4.",
     "Public awareness, friend referral, X_idol/X_general split, and U-specific weekly churn/reassignment are not observable in the current Staff adapter and are not represented as fabricated report columns."
   ]
 }

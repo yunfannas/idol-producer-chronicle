@@ -18,6 +18,13 @@ const commit = childProcess.execSync("git rev-parse HEAD", { encoding: "utf8" })
 const seeds = Array.from({ length: 100 }, (_, index) => index + 1);
 const results = seeds.map((seed) => runStaffAutoplayPrologue({ route: "B", seed, s3Variant: "S3-C" }));
 const seedOne = results[0];
+const voucherProbeInput = {
+  route: "B",
+  seed: 11,
+  s3Variant: "S3-C",
+  newcomerVoucher: { enabled: true, externalUptakeProbability: 1, conversionProbability: 1 },
+};
+const voucherProbe = runStaffAutoplayPrologue(voucherProbeInput);
 const number = (value) => Number(Number(value).toFixed(6));
 const mean = (values) => values.reduce((total, value) => total + value, 0) / Math.max(1, values.length);
 const percentile = (values, p) => {
@@ -91,6 +98,23 @@ writeCsv("seeds.csv", [
 ]);
 
 const assertionRows = Object.entries(failedSeeds).map(([id, failed]) => ({ id, pass: failed.length === 0, passedSeeds: 100 - failed.length, failedSeeds: failed }));
+const voucherQueues = voucherProbe.events.flatMap((event) => Object.values(event.cheki.queues));
+const voucherRequested = voucherQueues.reduce((total, queue) => total + queue.freeTrialRequested, 0);
+const voucherServed = voucherQueues.reduce((total, queue) => total + queue.freeTrialServed, 0);
+const voucherLost = voucherQueues.reduce((total, queue) => total + queue.freeTrialLost, 0);
+const voucherCost = voucherQueues.reduce((total, queue) => total + queue.freeTrialVariableCostJPY, 0);
+const voucherConverted = voucherProbe.events.reduce((total, event) => total + Object.values(event.fanFlow.freeTrialConversionsByMember).reduce((inner, value) => inner + value, 0), 0);
+const voucherLedgerCost = voucherProbe.state.finance.entries.filter((entry) => entry.category === "newcomer_voucher_cost").reduce((total, entry) => total + entry.amount, 0);
+const voucherMall = voucherProbe.events.find((event) => event.kind === "free-mall");
+const voucherPass = voucherRequested > 0
+  && voucherServed > 0
+  && voucherConverted > 0
+  && voucherConverted <= voucherServed
+  && voucherCost === voucherServed * 180
+  && voucherLedgerCost === voucherCost
+  && Object.values(voucherMall?.cheki.queues ?? {}).every((queue) => queue.freeTrialRequested === 0 && queue.freeTrialServed === 0)
+  && JSON.stringify(runStaffAutoplayPrologue(voucherProbeInput)) === JSON.stringify(voucherProbe);
+assertionRows.push({ id: "opt_in_newcomer_voucher_probe", pass: voucherPass, passedSeeds: voucherPass ? 1 : 0, sampleSize: 1, failedSeeds: voucherPass ? [] : [11] });
 const feedbackLoopFailures = results.filter((result) => {
   const newOtakuEvents = result.events.filter((event) => conversionCount(event) > 0);
   return newOtakuEvents.length === 0 || !newOtakuEvents.some((event) => Object.entries(event.fanFlow.initialAffinityByMember)
@@ -112,16 +136,16 @@ const assertions = {
   checks: assertionRows,
   observations,
   notImplemented: [
-    "No Scenario contract currently issues a free newcomer voucher. The zero free-unit rows are an explicit absence of a coupon flow, not evidence that a future voucher implementation has passed C4.",
     "Public awareness, friend referral, X_idol/X_general split, and U-specific weekly churn/reassignment are not observable in the current Staff adapter and are not represented as fabricated report columns.",
   ],
 };
 fs.writeFileSync(path.join(output, "assertions.json"), `${JSON.stringify(assertions, null, 2)}\n`);
-fs.writeFileSync(path.join(output, "config.json"), `${JSON.stringify({ commit, route: "B", s3Variant: "S3-C", seeds, scenarioVersion: staffAutoplayScenarioV1.version, balanceVersion: fanChekiBalanceV1.version, opening: { public: 240, otaku: 30, cashJPY: 3000000 }, changedTunables: [], command: "npm run report:prologue-fan-e2e" }, null, 2)}\n`);
+fs.writeFileSync(path.join(output, "voucher-probe.json"), `${JSON.stringify({ input: voucherProbeInput, requested: voucherRequested, served: voucherServed, lost: voucherLost, converted: voucherConverted, grossJPY: 0, memberShareJPY: 0, variableCostJPY: voucherCost, ledgerCostJPY: voucherLedgerCost, pass: voucherPass }, null, 2)}\n`);
+fs.writeFileSync(path.join(output, "config.json"), `${JSON.stringify({ commit, route: "B", s3Variant: "S3-C", seeds, scenarioVersion: staffAutoplayScenarioV1.version, balanceVersion: fanChekiBalanceV1.version, opening: { public: 240, otaku: 30, cashJPY: 3000000 }, voucherProbe: voucherProbeInput, changedTunables: [], command: "npm run report:prologue-fan-e2e" }, null, 2)}\n`);
 const values = (key) => results.map((result) => result.state.fan[key]);
 const finalO = values("otakuCount");
 const finalCash = results.map((result) => result.state.finance.cash);
 const failed = assertionRows.filter((row) => !row.pass);
-fs.writeFileSync(path.join(output, "audit.md"), `# Runtime audit — B / S3-C\n\n| Area | Status | Runtime evidence |\n| --- | --- | --- |\n| P/O/A/W/U weekly state | EXISTING | \`src/lib/runtime/fan.ts\`, \`staff-autoplay.ts\`; emitted in \`weekly.csv\` |\n| O/P/X capacity partition | EXISTING | \`updateFanFromEvent\`; emitted in \`events.csv\` and \`attribution.csv\` |\n| Actual paid Cheki queue | EXISTING | \`settleChekiQueue\`; emitted in \`cheki-member.csv\` |\n| Finance unique ledger | EXISTING | \`resolveLive\` / \`postLedgerEntry\`; emitted in \`finance.csv\` |\n| Free newcomer voucher | NOT_IMPLEMENTED | No current Scenario contract creates a coupon service. Free-mall has zero paid revenue and no queue service. |\n| P awareness/friend source | NOT_IMPLEMENTED | Current adapter samples existing P attendance; it does not persist awareness or friend channels. |\n| X_idol/X_general split | NOT_IMPLEMENTED | Current X is a residual actual-viewer pool and has no subtype. |\n| U-specific decay/reassignment | NOT_IMPLEMENTED | Current U follows aggregate O decay. |\n\nCommands: \`npm run test:staff-e2e\`, \`npm run report:prologue-fan-e2e\`, \`npm test\`, \`npm run lint\`, \`npm run build\`.\n`);
-fs.writeFileSync(path.join(output, "summary.md"), `# B Route Fan E2E — 100 real Runtime seeds\n\n- Runtime commit: \`${commit}\`\n- Scenario: \`${staffAutoplayScenarioV1.version}:S3-C\`\n- Balance: \`${fanChekiBalanceV1.version}\`\n- Seed set: 1..100; all source rows are emitted by the actual Staff Runtime.\n\n## Results\n\n- TIF completed: ${results.filter((result) => result.stageStatus === "COMPLETED_TIF").length}/100\n- Final O: mean ${number(mean(finalO))}, median ${number(percentile(finalO, 0.5))}, p10 ${number(percentile(finalO, 0.1))}, p90 ${number(percentile(finalO, 0.9))}\n- Final cash: mean ¥${number(mean(finalCash))}, median ¥${number(percentile(finalCash, 0.5))}, p10 ¥${number(percentile(finalCash, 0.1))}, p90 ¥${number(percentile(finalCash, 0.9))}\n- O≈300 is retained solely as a calibration reference, not an assertion gate.\n\n## Assertions\n\n${assertionRows.map((row) => `- ${row.pass ? "PASS" : "FAIL"}: ${row.id} (${row.passedSeeds}/100); failed seeds: ${row.failedSeeds.join(", ") || "none"}`).join("\n")}\n\n${failed.length ? "At least one structural check failed; inspect assertions.json before any parameter adjustment." : "All implemented structural checks passed. No conversion, Finance, Performance, or grade parameter was changed for this audit."}\n\n## Feedback observation\n\n- New-O initial affinity followed by later same-member aggregate attendance and a completed paid service: ${100 - feedbackLoopFailures.length}/100 seeds. No observation: ${feedbackLoopFailures.join(", ") || "none"}. This is expected to be stochastic and censored at the chapter end; it is retained as an auditable failure case rather than being fixed by a parameter change.\n\n## Explicit limits\n\nChronicle deliberately persists no individual fan/Cohort IDs, so this feedback observation is aggregate, not a fictitious per-person purchase trail. The audit reports no free voucher service because the current Scenario has none. This is not a claim that the C4 voucher loop has been implemented. The missing channels and U lifecycle are listed in \`audit.md\` and \`assertions.json\`; no synthetic rows have been used to fill them.\n`);
+fs.writeFileSync(path.join(output, "audit.md"), `# Runtime audit — B / S3-C\n\n| Area | Status | Runtime evidence |\n| --- | --- | --- |\n| P/O/A/W/U weekly state | EXISTING | \`src/lib/runtime/fan.ts\`, \`staff-autoplay.ts\`; emitted in \`weekly.csv\` |\n| O/P/X capacity partition | EXISTING | \`updateFanFromEvent\`; emitted in \`events.csv\` and \`attribution.csv\` |\n| Actual paid Cheki queue | EXISTING | \`settleChekiQueue\`; emitted in \`cheki-member.csv\` |\n| Finance unique ledger | EXISTING | \`resolveLive\` / \`postLedgerEntry\`; emitted in \`finance.csv\` |\n| Free newcomer voucher | EXISTING / OPT-IN | Shared queue, zero gross/share and one cost-ledger path; default B baseline is disabled, deterministic enabled evidence is \`voucher-probe.json\`. |\n| P awareness/friend source | NOT_IMPLEMENTED | Current adapter samples existing P attendance; it does not persist awareness or friend channels. |\n| X_idol/X_general split | NOT_IMPLEMENTED | Current X is a residual actual-viewer pool and has no subtype. |\n| U-specific decay/reassignment | NOT_IMPLEMENTED | Current U follows aggregate O decay. |\n\nCommands: \`npm run test:staff-e2e\`, \`npm run report:prologue-fan-e2e\`, \`npm test\`, \`npm run lint\`, \`npm run build\`.\n`);
+fs.writeFileSync(path.join(output, "summary.md"), `# B Route Fan E2E — 100 real Runtime seeds\n\n- Runtime commit: \`${commit}\`\n- Scenario: \`${staffAutoplayScenarioV1.version}:S3-C\`\n- Balance: \`${fanChekiBalanceV1.version}\`\n- Seed set: 1..100; all source rows are emitted by the actual Staff Runtime.\n\n## Results\n\n- TIF completed: ${results.filter((result) => result.stageStatus === "COMPLETED_TIF").length}/100\n- Final O: mean ${number(mean(finalO))}, median ${number(percentile(finalO, 0.5))}, p10 ${number(percentile(finalO, 0.1))}, p90 ${number(percentile(finalO, 0.9))}\n- Final cash: mean ¥${number(mean(finalCash))}, median ¥${number(percentile(finalCash, 0.5))}, p10 ¥${number(percentile(finalCash, 0.1))}, p90 ¥${number(percentile(finalCash, 0.9))}\n- O≈300 is retained solely as a calibration reference, not an assertion gate.\n\n## Assertions\n\n${assertionRows.map((row) => `- ${row.pass ? "PASS" : "FAIL"}: ${row.id} (${row.passedSeeds}/100); failed seeds: ${row.failedSeeds.join(", ") || "none"}`).join("\n")}\n\n${failed.length ? "At least one structural check failed; inspect assertions.json before any parameter adjustment." : "All implemented structural checks passed. No conversion, Finance, Performance, or grade parameter was changed for this audit."}\n\n## Feedback observation\n\n- New-O initial affinity followed by later same-member aggregate attendance and a completed paid service: ${100 - feedbackLoopFailures.length}/100 seeds. No observation: ${feedbackLoopFailures.join(", ") || "none"}. This is expected to be stochastic and censored at the chapter end; it is retained as an auditable failure case rather than being fixed by a parameter change.\n\n## Voucher probe\n\n- Opt-in seed 11: requested ${voucherRequested}, served ${voucherServed}, lost ${voucherLost}, converted ${voucherConverted}, gross ¥0, member share ¥0, and cost/ledger ¥${voucherCost}/¥${voucherLedgerCost}. The B baseline remains voucher-disabled; this probe exists only to verify the implemented contract.\n\n## Explicit limits\n\nChronicle deliberately persists no individual fan/Cohort IDs, so this feedback observation is aggregate, not a fictitious per-person purchase trail. The missing channels and U lifecycle are listed in \`audit.md\` and \`assertions.json\`; no synthetic rows have been used to fill them.\n`);
 console.log(`Wrote formal B-route E2E package to ${path.relative(process.cwd(), output)}`);

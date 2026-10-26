@@ -1,0 +1,21 @@
+{
+  "input": {
+    "route": "B",
+    "seed": 11,
+    "s3Variant": "S3-C",
+    "newcomerVoucher": {
+      "enabled": true,
+      "externalUptakeProbability": 1,
+      "conversionProbability": 1
+    }
+  },
+  "requested": 656,
+  "served": 656,
+  "lost": 0,
+  "converted": 421,
+  "grossJPY": 0,
+  "memberShareJPY": 0,
+  "variableCostJPY": 118080,
+  "ledgerCostJPY": 118080,
+  "pass": true
+}

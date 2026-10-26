@@ -1,5 +1,5 @@
 {
-  "commit": "7ff8a40a97ac718f2edd960e7719f4807ec25661",
+  "commit": "09e0f63207d033ad853bc6508420c9ea2babd964",
   "route": "B",
   "s3Variant": "S3-C",
   "seeds": [
@@ -110,6 +110,16 @@
     "public": 240,
     "otaku": 30,
     "cashJPY": 3000000
+  },
+  "voucherProbe": {
+    "route": "B",
+    "seed": 11,
+    "s3Variant": "S3-C",
+    "newcomerVoucher": {
+      "enabled": true,
+      "externalUptakeProbability": 1,
+      "conversionProbability": 1
+    }
   },
   "changedTunables": [],
   "command": "npm run report:prologue-fan-e2e"

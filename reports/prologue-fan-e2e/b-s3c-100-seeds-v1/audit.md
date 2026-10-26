@@ -6,7 +6,7 @@
 | O/P/X capacity partition | EXISTING | `updateFanFromEvent`; emitted in `events.csv` and `attribution.csv` |
 | Actual paid Cheki queue | EXISTING | `settleChekiQueue`; emitted in `cheki-member.csv` |
 | Finance unique ledger | EXISTING | `resolveLive` / `postLedgerEntry`; emitted in `finance.csv` |
-| Free newcomer voucher | NOT_IMPLEMENTED | No current Scenario contract creates a coupon service. Free-mall has zero paid revenue and no queue service. |
+| Free newcomer voucher | EXISTING / OPT-IN | Shared queue, zero gross/share and one cost-ledger path; default B baseline is disabled, deterministic enabled evidence is `voucher-probe.json`. |
 | P awareness/friend source | NOT_IMPLEMENTED | Current adapter samples existing P attendance; it does not persist awareness or friend channels. |
 | X_idol/X_general split | NOT_IMPLEMENTED | Current X is a residual actual-viewer pool and has no subtype. |
 | U-specific decay/reassignment | NOT_IMPLEMENTED | Current U follows aggregate O decay. |
