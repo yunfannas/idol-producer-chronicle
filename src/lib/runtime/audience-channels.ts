@@ -73,6 +73,8 @@ export function resolveDiagnosticAudienceChannels(input: {
   quality: number;
   seed: string;
   config?: Partial<AudienceChannelDiagnosticConfig>;
+  /** Diagnostic-only ablation: retain the viewers as Sunday X→P exposure. */
+  disableExternalDirectOtaku?: boolean;
 }): EventAudienceAttribution {
   const config = { ...audienceChannelDiagnosticV1, ...input.config };
   const random = createSeededRandom(`audience-channels:${input.seed}`);
@@ -110,8 +112,12 @@ export function resolveDiagnosticAudienceChannels(input: {
   const activePublicToOtaku = sampleBinomial(activeIntentPublicWatching, Math.min(1, config.activePublicToOtakuRate * q), random);
   const referredPublicToOtaku = sampleBinomial(referredPublicTicketed, Math.min(1, config.passivePublicToOtakuRate * q), random);
   const publicToOtaku = activePublicToOtaku + referredPublicToOtaku;
-  const externalIdolToOtaku = sampleBinomial(externalIdolWatching, Math.min(1, config.externalIdolToOtakuRate * q), random);
-  const externalGeneralToOtaku = sampleBinomial(externalGeneralWatching, Math.min(1, config.externalGeneralToOtakuRate * q), random);
+  const externalIdolToOtaku = input.disableExternalDirectOtaku
+    ? 0
+    : sampleBinomial(externalIdolWatching, Math.min(1, config.externalIdolToOtakuRate * q), random);
+  const externalGeneralToOtaku = input.disableExternalDirectOtaku
+    ? 0
+    : sampleBinomial(externalGeneralWatching, Math.min(1, config.externalGeneralToOtakuRate * q), random);
   const externalExposure = ticketedExternal - externalIdolToOtaku - externalGeneralToOtaku;
   return {
     ownedOtakuWatching,

@@ -242,4 +242,39 @@ describe("Staff autoplay prologue E2E", () => {
       && result.state.reputation.music !== null && Number.isFinite(result.state.reputation.music))).toBe(true);
     expect(runs.every((result) => result.events.every((event) => event.fanFlow.externalToPublic <= event.fanFlow.externalExposure))).toBe(true);
   });
+
+  it("exports a conserving weekly C3 fan-flow ledger with its effective conversion settings", () => {
+    const result = runStaffAutoplayPrologue({ route: "B", seed: 37, fanAcquisitionStage: "C3" });
+    expect(result.effectiveFanFlowConfig.audienceChannel.activePublicToOtakuRate).toBe(0.35);
+    for (const week of result.fanWeeklyResolutions) {
+      expect(week.closing.publicCount).toBeCloseTo(
+        week.opening.publicCount + week.newPublic - week.publicToOtaku - week.publicChurn,
+        10,
+      );
+      expect(week.closing.otakuCount).toBeCloseTo(
+        week.opening.otakuCount + week.publicToOtaku + week.externalToOtaku - week.otakuChurn - week.graduationLoss,
+        10,
+      );
+      expect(week.publicToOtaku).toBe(week.teamLiveToOtaku + week.memberLiveToOtaku + week.paidChekiToOtaku);
+      expect(week.externalToOtaku).toBe(week.externalIdolToOtaku + week.externalGeneralToOtaku + week.voucherChekiToOtaku);
+    }
+  });
+
+  it("keeps diagnostic ablations isolated from baseline settings and X exposure", () => {
+    const baseline = runStaffAutoplayPrologue({ route: "B", seed: 41, fanAcquisitionStage: "C3" });
+    const activeTenPercent = runStaffAutoplayPrologue({
+      route: "B", seed: 41, fanAcquisitionStage: "C3",
+      fanFlowDiagnosticOverrides: { activePublicToOtakuRate: 0.1 },
+    });
+    const noExternalDirect = runStaffAutoplayPrologue({
+      route: "B", seed: 41, fanAcquisitionStage: "C3",
+      fanFlowDiagnosticOverrides: { disableExternalDirectOtaku: true },
+    });
+    expect(activeTenPercent.effectiveFanFlowConfig.audienceChannel.activePublicToOtakuRate).toBe(0.1);
+    expect(activeTenPercent.state.fan.otakuCount).toBeLessThan(baseline.state.fan.otakuCount);
+    expect(noExternalDirect.events.every((event) => event.audienceAttribution
+      && event.audienceAttribution.externalIdolToOtaku === 0
+      && event.audienceAttribution.externalGeneralToOtaku === 0
+      && event.fanFlow.externalExposure === event.fanFlow.externalAudience)).toBe(true);
+  });
 });

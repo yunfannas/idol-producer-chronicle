@@ -1,0 +1,248 @@
+{
+  "sourceCommit": "071d700007ff9d97bc5af1c7ed8bf005c7bd27d7",
+  "route": "B",
+  "s3Variant": "S3-C",
+  "fanAcquisitionStage": "C3",
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100
+  ],
+  "actualBaselineEffectiveAudienceChannelConfig": {
+    "version": "audience-channel-diagnostic-v1",
+    "publicAwarenessRate": 0.5,
+    "publicBuyGivenAwareRate": 0.2,
+    "friendBringRate": 0.1,
+    "referredPublicShare": 0.5,
+    "externalIdolShare": 0.5,
+    "activePublicToOtakuRate": 0.35,
+    "passivePublicToOtakuRate": 0,
+    "externalIdolToOtakuRate": 0.01,
+    "externalGeneralToOtakuRate": 0.004,
+    "externalToPublicRate": 0.08
+  },
+  "legacyConversionParametersNotUsedByC3": {
+    "pPublicToOtaku": 0.025,
+    "pExternalToOtaku": 0.004
+  },
+  "newcomerVoucher": {
+    "enabled": false,
+    "externalUptakeProbability": 0.25,
+    "conversionProbability": 0.18,
+    "serviceSeconds": 20,
+    "variableCostJPY": 180
+  },
+  "onlineTunables": {
+    "version": "staff-online-acquisition-v1.1",
+    "crossChannelUniqueRetention": 0.7,
+    "recognitionBaseRate": 0.035,
+    "recognitionQualityWeight": 0.012,
+    "promotionSignalDecay": 0.55,
+    "promotionSignalReachDivisor": 1200,
+    "channels": {
+      "officialTwitter": {
+        "contentCount": 3,
+        "impressionsPerContent": 115,
+        "uniqueRate": 0.62,
+        "newUnknownShare": 0.7,
+        "existingPublicReachRate": 0.2,
+        "engagementQuality": 0.9
+      },
+      "memberTwitterAggregate": {
+        "contentCount": 6,
+        "impressionsPerContent": 72,
+        "uniqueRate": 0.58,
+        "newUnknownShare": 0.62,
+        "existingPublicReachRate": 0.23,
+        "engagementQuality": 0.82
+      },
+      "youtube": {
+        "contentCount": 1,
+        "impressionsPerContent": 190,
+        "uniqueRate": 0.68,
+        "newUnknownShare": 0.78,
+        "existingPublicReachRate": 0.12,
+        "engagementQuality": 0.95
+      },
+      "blog": {
+        "contentCount": 2,
+        "impressionsPerContent": 64,
+        "uniqueRate": 0.6,
+        "newUnknownShare": 0.5,
+        "existingPublicReachRate": 0.3,
+        "engagementQuality": 0.76
+      }
+    }
+  },
+  "externalDemandTunables": {
+    "version": "staff-external-audience-demand-v1.1",
+    "byKind": {
+      "debut": {
+        "watchers": 52,
+        "idolShare": 0.62
+      },
+      "taiban": {
+        "watchers": 24,
+        "idolShare": 0.68
+      },
+      "freeMall": {
+        "watchers": 70,
+        "idolShare": 0.12
+      },
+      "experimentalRegular": {
+        "watchers": 10,
+        "idolShare": 0.4
+      },
+      "regular": {
+        "watchers": 8,
+        "idolShare": 0.35
+      },
+      "graduation": {
+        "watchers": 18,
+        "idolShare": 0.5
+      },
+      "oneMan": {
+        "watchers": 4,
+        "idolShare": 0.3
+      },
+      "festival": {
+        "watchers": 48,
+        "idolShare": 0.72
+      }
+    }
+  },
+  "experiments": [
+    {
+      "id": "A",
+      "name": "Baseline",
+      "overrides": {}
+    },
+    {
+      "id": "B",
+      "name": "Conversion 0.10",
+      "overrides": {
+        "activePublicToOtakuRate": 0.1
+      }
+    },
+    {
+      "id": "C",
+      "name": "No Cheki Conversion",
+      "overrides": {
+        "disablePaidChekiToOtaku": true
+      }
+    },
+    {
+      "id": "D",
+      "name": "No External Direct O",
+      "overrides": {
+        "disableExternalDirectOtaku": true
+      }
+    },
+    {
+      "id": "E",
+      "name": "No Voucher Conversion",
+      "overrides": {
+        "disableVoucherChekiToOtaku": true
+      }
+    }
+  ],
+  "command": "npm run report:s3c-fan-po-diagnostic",
+  "scenarioVersion": "staff-autoplay-scenario-v7-fan-audit-contracts"
+}

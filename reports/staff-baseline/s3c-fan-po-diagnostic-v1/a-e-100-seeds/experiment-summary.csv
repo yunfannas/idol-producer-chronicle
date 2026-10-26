@@ -1,0 +1,106 @@
+experiment,name,metric,mean,p10,p50,p90
+A,Baseline,finalP,282.825597,257.527154,284.472291,308.081901
+A,Baseline,finalO,611.119414,593.976935,611.18244,627.147928
+A,Baseline,totalPopulation,893.945011,865.86531,893.885995,921.839756
+A,Baseline,netGrowth,623.945011,595.86531,623.885995,651.839756
+A,Baseline,snsNewP,769.58,737,769,801
+A,Baseline,eventExposureNewP,8.08,4,8,12
+A,Baseline,teamLiveToO,603.82,586,603,620
+A,Baseline,memberLiveToO,0,0,0,0
+A,Baseline,paidChekiToO,0,0,0,0
+A,Baseline,voucherChekiToO,0,0,0,0
+A,Baseline,externalIdolToO,1.23,0,1,3
+A,Baseline,externalGeneralToO,0.45,0,0,1
+A,Baseline,externalToO,1.68,0,1,3
+A,Baseline,publicChurn,131.014403,126.218361,131.176645,135.593595
+A,Baseline,otakuChurn,24.380586,23.427476,24.365965,25.296409
+A,Baseline,graduationLoss,0,0,0,0
+A,Baseline,chekiServices,236.97,200,238,271
+A,Baseline,freeVoucherServices,0,0,0,0
+A,Baseline,oneManAttendance,259.79,241,260,279
+A,Baseline,oneManTicketRevenue,307710,282000,312000,336000
+A,Baseline,finalCash,525955.5,458800,529800,588250
+B,Conversion 0.10,finalP,598.616484,570.403719,599.994309,628.010384
+B,Conversion 0.10,finalO,273.806671,259.17152,274.036585,286.889828
+B,Conversion 0.10,totalPopulation,872.423155,844.695628,872.077461,899.83815
+B,Conversion 0.10,netGrowth,602.423155,574.695628,602.077461,629.83815
+B,Conversion 0.10,snsNewP,770.1,739,771,802
+B,Conversion 0.10,eventExposureNewP,6.93,3,7,10
+B,Conversion 0.10,teamLiveToO,253.12,237,254,266
+B,Conversion 0.10,memberLiveToO,0,0,0,0
+B,Conversion 0.10,paidChekiToO,0,0,0,0
+B,Conversion 0.10,voucherChekiToO,0,0,0,0
+B,Conversion 0.10,externalIdolToO,1.16,0,1,2
+B,Conversion 0.10,externalGeneralToO,0.44,0,0,1
+B,Conversion 0.10,externalToO,1.6,0,1,3
+B,Conversion 0.10,publicChurn,165.293516,159.68362,165.093314,171.214769
+B,Conversion 0.10,otakuChurn,10.913329,10.098414,10.939018,11.629788
+B,Conversion 0.10,graduationLoss,0,0,0,0
+B,Conversion 0.10,chekiServices,149.84,121,148,178
+B,Conversion 0.10,freeVoucherServices,0,0,0,0
+B,Conversion 0.10,oneManAttendance,200.97,187,201,218
+B,Conversion 0.10,oneManTicketRevenue,307710,282000,312000,336000
+B,Conversion 0.10,finalCash,448611.5,395450,443800,513000
+C,No Cheki Conversion,finalP,282.825597,257.527154,284.472291,308.081901
+C,No Cheki Conversion,finalO,611.119414,593.976935,611.18244,627.147928
+C,No Cheki Conversion,totalPopulation,893.945011,865.86531,893.885995,921.839756
+C,No Cheki Conversion,netGrowth,623.945011,595.86531,623.885995,651.839756
+C,No Cheki Conversion,snsNewP,769.58,737,769,801
+C,No Cheki Conversion,eventExposureNewP,8.08,4,8,12
+C,No Cheki Conversion,teamLiveToO,603.82,586,603,620
+C,No Cheki Conversion,memberLiveToO,0,0,0,0
+C,No Cheki Conversion,paidChekiToO,0,0,0,0
+C,No Cheki Conversion,voucherChekiToO,0,0,0,0
+C,No Cheki Conversion,externalIdolToO,1.23,0,1,3
+C,No Cheki Conversion,externalGeneralToO,0.45,0,0,1
+C,No Cheki Conversion,externalToO,1.68,0,1,3
+C,No Cheki Conversion,publicChurn,131.014403,126.218361,131.176645,135.593595
+C,No Cheki Conversion,otakuChurn,24.380586,23.427476,24.365965,25.296409
+C,No Cheki Conversion,graduationLoss,0,0,0,0
+C,No Cheki Conversion,chekiServices,236.97,200,238,271
+C,No Cheki Conversion,freeVoucherServices,0,0,0,0
+C,No Cheki Conversion,oneManAttendance,259.79,241,260,279
+C,No Cheki Conversion,oneManTicketRevenue,307710,282000,312000,336000
+C,No Cheki Conversion,finalCash,525955.5,458800,529800,588250
+D,No External Direct O,finalP,282.427036,257.527154,282.979206,309.208323
+D,No External Direct O,finalO,610.001276,595.061986,608.629478,625.595883
+D,No External Direct O,totalPopulation,892.428312,864.462434,892.212369,920.324256
+D,No External Direct O,netGrowth,622.428312,594.462434,622.212369,650.324256
+D,No External Direct O,snsNewP,769.53,736,768,802
+D,No External Direct O,eventExposureNewP,8.21,4,8,13
+D,No External Direct O,teamLiveToO,604.3,589,603,619
+D,No External Direct O,memberLiveToO,0,0,0,0
+D,No External Direct O,paidChekiToO,0,0,0,0
+D,No External Direct O,voucherChekiToO,0,0,0,0
+D,No External Direct O,externalIdolToO,0,0,0,0
+D,No External Direct O,externalGeneralToO,0,0,0,0
+D,No External Direct O,externalToO,0,0,0,0
+D,No External Direct O,publicChurn,131.012964,126.439181,131.15126,135.731795
+D,No External Direct O,otakuChurn,24.298724,23.307396,24.261374,25.201996
+D,No External Direct O,graduationLoss,0,0,0,0
+D,No External Direct O,chekiServices,237.25,199,238,277
+D,No External Direct O,freeVoucherServices,0,0,0,0
+D,No External Direct O,oneManAttendance,259.48,239,261,279
+D,No External Direct O,oneManTicketRevenue,307710,282000,312000,336000
+D,No External Direct O,finalCash,526395.5,459450,525550,588250
+E,No Voucher Conversion,finalP,282.825597,257.527154,284.472291,308.081901
+E,No Voucher Conversion,finalO,611.119414,593.976935,611.18244,627.147928
+E,No Voucher Conversion,totalPopulation,893.945011,865.86531,893.885995,921.839756
+E,No Voucher Conversion,netGrowth,623.945011,595.86531,623.885995,651.839756
+E,No Voucher Conversion,snsNewP,769.58,737,769,801
+E,No Voucher Conversion,eventExposureNewP,8.08,4,8,12
+E,No Voucher Conversion,teamLiveToO,603.82,586,603,620
+E,No Voucher Conversion,memberLiveToO,0,0,0,0
+E,No Voucher Conversion,paidChekiToO,0,0,0,0
+E,No Voucher Conversion,voucherChekiToO,0,0,0,0
+E,No Voucher Conversion,externalIdolToO,1.23,0,1,3
+E,No Voucher Conversion,externalGeneralToO,0.45,0,0,1
+E,No Voucher Conversion,externalToO,1.68,0,1,3
+E,No Voucher Conversion,publicChurn,131.014403,126.218361,131.176645,135.593595
+E,No Voucher Conversion,otakuChurn,24.380586,23.427476,24.365965,25.296409
+E,No Voucher Conversion,graduationLoss,0,0,0,0
+E,No Voucher Conversion,chekiServices,236.97,200,238,271
+E,No Voucher Conversion,freeVoucherServices,0,0,0,0
+E,No Voucher Conversion,oneManAttendance,259.79,241,260,279
+E,No Voucher Conversion,oneManTicketRevenue,307710,282000,312000,336000
+E,No Voucher Conversion,finalCash,525955.5,458800,529800,588250

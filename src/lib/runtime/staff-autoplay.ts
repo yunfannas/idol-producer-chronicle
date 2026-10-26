@@ -10,7 +10,7 @@
 import { settleChekiSales } from "./cheki";
 import { arrangementFor, createArrangementVersion, recordArrangementExposure, settleArrangementFamiliarityWeek, type FamiliaritySettlement } from "./arrangement-familiarity";
 import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1 } from "./fan";
-import { resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
+import { audienceChannelDiagnosticV1, resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
 import { resolveWeeklyOnlineAcquisition, staffExternalAudienceDemandV11, type WeeklyOnlineAcquisition } from "./fan-acquisition";
 import { applyBrandEvent, scoreLiveReputation, scoreMusicReputation, settleWeeklyReputation } from "./reputation";
 import { calculateTaibanTicketRevenue, createMonthlyOperatingReport, postLedgerEntry } from "./finance";
@@ -111,6 +111,17 @@ export const staffAutoplayAudienceDemandV11: StaffAutoplayAudienceDemandConfig =
   externalWatchingDemandByEventId: {},
 };
 
+/**
+ * Read-only fan-flow switches for paired seeded diagnosis.  They are not
+ * scenario balance inputs and deliberately default to the current runtime.
+ */
+export type FanFlowDiagnosticOverrides = {
+  activePublicToOtakuRate?: number;
+  disablePaidChekiToOtaku?: boolean;
+  disableExternalDirectOtaku?: boolean;
+  disableVoucherChekiToOtaku?: boolean;
+};
+
 const audienceStageV11 = {
   // C2 keeps v1.0 conversion probabilities as an isolated demand-only
   // comparison. C3 switches to the explicit active-P / X-idol / X-general
@@ -186,6 +197,13 @@ export type StaffAutoplayEventAudit = {
     /** Non-O external reach pending the combined Sunday P settlement. */
     externalExposure: number;
     publicToOtaku: number;
+    /** C3 currently uses the Team Live active-P path; Member/paid Cheki are zero-valued audit lanes. */
+    teamLiveToOtaku: number;
+    memberLiveToOtaku: number;
+    paidChekiToOtaku: number;
+    voucherChekiToOtaku: number;
+    externalIdolToOtaku: number;
+    externalGeneralToOtaku: number;
     externalToOtaku: number;
     externalToPublic: number;
     /** One initial affinity for each event-attributed new Otaku. */
@@ -249,6 +267,11 @@ export type StaffAutoplayResult = {
   fanMonths: StaffAutoplayFanMonth[];
   fanWeeklyResolutions: WeeklyFanResolution[];
   onlineWeeks: WeeklyOnlineAcquisition[];
+  effectiveFanFlowConfig: {
+    audienceChannel: AudienceChannelDiagnosticConfig;
+    newcomerVoucher: NewcomerVoucherTrialConfig;
+    diagnosticOverrides: Required<Omit<FanFlowDiagnosticOverrides, "activePublicToOtakuRate">> & { activePublicToOtakuRate?: number };
+  };
   familiaritySettlements: ({ weekEnd: string } & FamiliaritySettlement)[];
   months: StaffAutoplayMonth[];
   minCash: number;
@@ -272,14 +295,32 @@ type PendingFanMomentum = {
   memberWeights: Record<string, number>;
 };
 
-type WeeklyFanResolution = {
+export type WeeklyFanResolution = {
   weekEnd: string;
   eventIds: string[];
+  /** Decomposed sources of new persistent P after weekly source deduplication. */
+  snsNewPublic: number;
+  songNewPublic: number;
+  workNewPublic: number;
+  taibanExposureNewPublic: number;
+  freeLiveExposureNewPublic: number;
+  otherLiveExposureNewPublic: number;
+  eventExposureNewPublic: number;
+  newPublic: number;
   publicToOtaku: number;
+  teamLiveToOtaku: number;
+  memberLiveToOtaku: number;
+  paidChekiToOtaku: number;
+  voucherChekiToOtaku: number;
+  externalIdolToOtaku: number;
+  externalGeneralToOtaku: number;
   externalToOtaku: number;
   externalToPublic: number;
   externalExposure: number;
   onlineNewPublic: number;
+  publicChurn: number;
+  otakuChurn: number;
+  graduationLoss: number;
   opening: StaffAutoplayFanSnapshot;
   closing: StaffAutoplayFanSnapshot;
 };
@@ -382,6 +423,7 @@ function updateFanFromEvent(input: {
   newcomerVoucher?: NewcomerVoucherTrialConfig;
   audienceAttribution?: EventAudienceAttribution;
   integratedLifecycle?: boolean;
+  disableVoucherChekiToOtaku?: boolean;
 }) {
   // Legacy mode derives temporary X from a contract attendance total. In
   // C2/C3 mode all audience populations come from demand attribution, so no
@@ -453,7 +495,7 @@ function updateFanFromEvent(input: {
   }
   const freeTrialConversionsByMember = Object.fromEntries(input.participants.map((member) => [member.id, 0])) as Record<string, number>;
   for (const request of voucherRequests) {
-    if (servedVoucherIds.has(request.id) && random() < Math.min(1, input.newcomerVoucher!.conversionProbability * q)) {
+    if (!input.disableVoucherChekiToOtaku && servedVoucherIds.has(request.id) && random() < Math.min(1, input.newcomerVoucher!.conversionProbability * q)) {
       freeTrialConversionsByMember[request.memberId] += 1;
       newByMember[request.memberId] += 1;
     }
@@ -483,6 +525,14 @@ function updateFanFromEvent(input: {
       externalAudience,
       externalExposure,
       publicToOtaku: 0,
+      teamLiveToOtaku: 0,
+      memberLiveToOtaku: 0,
+      // Paid Cheki currently only changes A/W and finance.  Keeping this
+      // explicit zero prevents an audit report from implying a hidden O path.
+      paidChekiToOtaku: 0,
+      voucherChekiToOtaku: voucherConversions,
+      externalIdolToOtaku: input.audienceAttribution?.externalIdolToOtaku ?? externalDirectToO,
+      externalGeneralToOtaku: input.audienceAttribution?.externalGeneralToOtaku ?? 0,
       externalToOtaku: externalToO,
       externalToPublic: externalToP,
       initialAffinityByMember: newByMember,
@@ -518,6 +568,8 @@ function resolveWeeklyFanMomentum(input: {
 }): { fan: FanState; resolution: WeeklyFanResolution } {
   const opening = snapshotFan(input.fan);
   const decayed = input.applyDecay === false ? input.fan : applyWeeklyFanDecay(input.fan);
+  const publicChurn = opening.publicCount - decayed.publicCount;
+  const otakuChurn = opening.otakuCount - decayed.otakuCount;
   // Commit only observed event conversions. Cap by the surviving P pool;
   // per-event awards are attributed in chronological order without phantom viewers.
   const publicToOtaku = Math.min(Math.floor(decayed.publicCount), input.momenta.reduce((sum, momentum) => sum + momentum.publicToOtakuSampled, 0));
@@ -547,6 +599,7 @@ function resolveWeeklyFanMomentum(input: {
     const committed = Math.min(remainingPublicConversions, momentum.publicToOtakuSampled);
     remainingPublicConversions -= committed;
     input.audits[momentum.auditIndex].fanFlow.publicToOtaku += committed;
+    input.audits[momentum.auditIndex].fanFlow.teamLiveToOtaku += committed;
     for (let index = 0; index < committed && momentum.assignInitialAffinityToNewOtaku; index += 1) {
       const memberId = choose(Object.keys(momentum.memberWeights), (id) => momentum.memberWeights[id]);
         if (memberId) {
@@ -572,6 +625,12 @@ function resolveWeeklyFanMomentum(input: {
     const target = [...input.momenta].reverse().find((momentum) => momentum.externalExposure > 0);
     if (target) input.audits[target.auditIndex].fanFlow.externalToPublic += remainingExternalPublic;
   }
+  const taibanExposureNewPublic = input.momenta.reduce((sum, momentum) => sum
+    + (input.audits[momentum.auditIndex].kind === "taiban" ? input.audits[momentum.auditIndex].fanFlow.externalToPublic : 0), 0);
+  const freeLiveExposureNewPublic = input.momenta.reduce((sum, momentum) => sum
+    + (input.audits[momentum.auditIndex].kind === "free-mall" ? input.audits[momentum.auditIndex].fanFlow.externalToPublic : 0), 0);
+  const otherLiveExposureNewPublic = input.momenta.reduce((sum, momentum) => sum
+    + (!["taiban", "free-mall"].includes(input.audits[momentum.auditIndex].kind) ? input.audits[momentum.auditIndex].fanFlow.externalToPublic : 0), 0);
   const otakuCount = decayed.otakuCount + publicToOtaku + externalToOtaku;
   const assignedOtaku = Math.max(0, otakuCount - decayed.temporarilyUnassignedOtaku);
   const members = Object.fromEntries(Object.entries(decayed.members).map(([memberId, profile]) => {
@@ -595,11 +654,30 @@ function resolveWeeklyFanMomentum(input: {
     resolution: {
       weekEnd: input.weekEnd,
       eventIds: input.momenta.map((momentum) => momentum.eventId),
+      snsNewPublic: input.onlineNewPublic ?? 0,
+      // No separate song/work P producer has been implemented in C3.  Do not
+      // silently relabel SNS reach as either source in the audit.
+      songNewPublic: 0,
+      workNewPublic: 0,
+      taibanExposureNewPublic,
+      freeLiveExposureNewPublic,
+      otherLiveExposureNewPublic,
+      eventExposureNewPublic: input.externalExposurePublic ?? 0,
+      newPublic: (input.onlineNewPublic ?? 0) + (input.externalExposurePublic ?? 0),
       publicToOtaku,
+      teamLiveToOtaku: publicToOtaku,
+      memberLiveToOtaku: 0,
+      paidChekiToOtaku: 0,
+      voucherChekiToOtaku: input.momenta.reduce((sum, momentum) => sum + Object.values(input.audits[momentum.auditIndex].fanFlow.freeTrialConversionsByMember).reduce((inner, value) => inner + value, 0), 0),
+      externalIdolToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.externalIdolToOtaku, 0),
+      externalGeneralToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.externalGeneralToOtaku, 0),
       externalToOtaku,
       externalToPublic,
       externalExposure: input.momenta.reduce((sum, momentum) => sum + momentum.externalExposure, 0),
       onlineNewPublic: input.onlineNewPublic ?? 0,
+      publicChurn,
+      otakuChurn,
+      graduationLoss: 0,
       opening,
       closing: snapshotFan(fan),
     },
@@ -675,6 +753,8 @@ export function runStaffAutoplayPrologue(input: {
   newcomerVoucher?: Partial<NewcomerVoucherTrialConfig>;
   /** Explicit C2/C3 fixture; no external viewer is inferred when an id is absent. */
   audienceDemand?: Partial<StaffAutoplayAudienceDemandConfig>;
+  /** Diagnostic-only paired-seed switches; they do not modify the baseline defaults. */
+  fanFlowDiagnosticOverrides?: FanFlowDiagnosticOverrides;
 }): StaffAutoplayResult {
   const s3Variant = input.s3Variant ?? "S3-C";
   const fanAcquisitionStage = input.fanAcquisitionStage ?? (input.audienceDemand?.enabled ? "C3" : "C0");
@@ -684,6 +764,20 @@ export function runStaffAutoplayPrologue(input: {
     ...input.audienceDemand,
     externalWatchingDemandByEventId: input.audienceDemand?.externalWatchingDemandByEventId
       ?? staffAutoplayAudienceDemandV11.externalWatchingDemandByEventId,
+  };
+  const diagnosticOverrides = {
+    activePublicToOtakuRate: input.fanFlowDiagnosticOverrides?.activePublicToOtakuRate,
+    disablePaidChekiToOtaku: input.fanFlowDiagnosticOverrides?.disablePaidChekiToOtaku === true,
+    disableExternalDirectOtaku: input.fanFlowDiagnosticOverrides?.disableExternalDirectOtaku === true,
+    disableVoucherChekiToOtaku: input.fanFlowDiagnosticOverrides?.disableVoucherChekiToOtaku === true,
+  };
+  const effectiveAudienceChannelConfig: AudienceChannelDiagnosticConfig = {
+    ...audienceChannelDiagnosticV1,
+    ...audienceDemand.channelConfig,
+    ...(fanAcquisitionStage === "C2" ? audienceStageV11.c2LegacyConversion : {}),
+    ...(diagnosticOverrides.activePublicToOtakuRate === undefined
+      ? {}
+      : { activePublicToOtakuRate: diagnosticOverrides.activePublicToOtakuRate }),
   };
   let state = createPrologueState({ saveId: `staff-autoplay:${input.route}:${input.seed}` });
   state = signRoster(completeMandatoryInterview(state), rosterForRoute(input.route));
@@ -817,7 +911,7 @@ export function runStaffAutoplayPrologue(input: {
       const externalFixture = formalDemand ? externalDemandForEvent(event) : undefined;
       const explicitExternalDemand = audienceDemand.externalWatchingDemandByEventId[event.id];
       const awarenessRate = Math.max(0, Math.min(1,
-        (audienceDemand.channelConfig?.publicAwarenessRate ?? 0.5) + (formalDemand ? promotionSignal : 0),
+        effectiveAudienceChannelConfig.publicAwarenessRate + (formalDemand ? promotionSignal : 0),
       ));
       const audienceAttribution = demandEnabled
         ? resolveDiagnosticAudienceChannels({
@@ -829,15 +923,15 @@ export function runStaffAutoplayPrologue(input: {
           quality: resolved.quality,
           seed: `${input.seed}:${event.id}`,
           config: {
-            ...audienceDemand.channelConfig,
+            ...effectiveAudienceChannelConfig,
             publicAwarenessRate: awarenessRate,
-            externalIdolShare: externalFixture?.idolShare ?? audienceDemand.channelConfig?.externalIdolShare ?? 0.5,
-            ...(fanAcquisitionStage === "C2" ? audienceStageV11.c2LegacyConversion : {}),
+            externalIdolShare: externalFixture?.idolShare ?? effectiveAudienceChannelConfig.externalIdolShare,
           },
+          disableExternalDirectOtaku: diagnosticOverrides.disableExternalDirectOtaku,
         })
         : undefined;
       const actualAttendance = audienceAttribution?.actualUniqueAudience ?? contract.attendees;
-      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution, integratedLifecycle: fanAcquisitionStage === "C3" });
+      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution, integratedLifecycle: fanAcquisitionStage === "C3", disableVoucherChekiToOtaku: diagnosticOverrides.disableVoucherChekiToOtaku });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
         { memberId, tierId: "1000" as const, units: sale.completedUnitsByTier["1000"] },
         { memberId, tierId: "2000" as const, units: sale.completedUnitsByTier["2000"] },
@@ -949,7 +1043,9 @@ export function runStaffAutoplayPrologue(input: {
       state = { ...state, fan: settledFan.fan };
       pendingFanMomenta = [];
       if (pendingGraduationFanTransition) {
+        const beforeGraduation = state.fan.otakuCount;
         state = graduateRina(state);
+        settledFan.resolution.graduationLoss = Math.max(0, beforeGraduation - state.fan.otakuCount);
         pendingGraduationFanTransition = false;
       }
       settledFan.resolution.closing = snapshotFan(state.fan);
@@ -1006,5 +1102,25 @@ export function runStaffAutoplayPrologue(input: {
     paletteMean: Object.values(member.palette).reduce((sum, value) => sum + value, 0) / 8,
     palette: member.palette,
   }]));
-  return { route: input.route, seed: input.seed, runId: `staff-autoplay:${input.route}:${input.seed}`, scenarioVersion: `${staffAutoplayScenarioV1.version}:${s3Variant}`, s3Variant, tuningVersion: staffAutoplayScenarioV1.tuningVersion, fanAcquisitionStage, stageStatus, state: { ...state, monthlyReports: months }, events: audits, fanMonths: [...fanMonths.values()], fanWeeklyResolutions, onlineWeeks, familiaritySettlements, months, minCash, grades, memberDevelopment };
+  return {
+    route: input.route,
+    seed: input.seed,
+    runId: `staff-autoplay:${input.route}:${input.seed}`,
+    scenarioVersion: `${staffAutoplayScenarioV1.version}:${s3Variant}`,
+    s3Variant,
+    tuningVersion: staffAutoplayScenarioV1.tuningVersion,
+    fanAcquisitionStage,
+    stageStatus,
+    state: { ...state, monthlyReports: months },
+    events: audits,
+    fanMonths: [...fanMonths.values()],
+    fanWeeklyResolutions,
+    onlineWeeks,
+    effectiveFanFlowConfig: { audienceChannel: effectiveAudienceChannelConfig, newcomerVoucher, diagnosticOverrides },
+    familiaritySettlements,
+    months,
+    minCash,
+    grades,
+    memberDevelopment,
+  };
 }

@@ -1,0 +1,182 @@
+{
+  "experiments": [
+    {
+      "id": "A",
+      "name": "Baseline"
+    },
+    {
+      "id": "B",
+      "name": "Conversion 0.10"
+    },
+    {
+      "id": "C",
+      "name": "No Cheki Conversion"
+    },
+    {
+      "id": "D",
+      "name": "No External Direct O"
+    },
+    {
+      "id": "E",
+      "name": "No Voucher Conversion"
+    }
+  ],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100
+  ],
+  "checks": [
+    {
+      "id": "weekly_conservation",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    },
+    {
+      "id": "event_population_and_capacity",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    },
+    {
+      "id": "single_event_conversion_dedup",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    },
+    {
+      "id": "cheki_queue_capacity",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    },
+    {
+      "id": "free_event_revenue",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    },
+    {
+      "id": "finance_ledger",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    },
+    {
+      "id": "rina_graduation",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    },
+    {
+      "id": "replay_idempotency",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    },
+    {
+      "id": "tif_completion",
+      "pass": true,
+      "checkedRuns": 500,
+      "failedRuns": []
+    }
+  ]
+}
