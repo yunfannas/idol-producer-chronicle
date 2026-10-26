@@ -6,6 +6,9 @@ describe("Staff autoplay prologue E2E", () => {
     const result = runStaffAutoplayPrologue({ route: "B", seed: 1 });
     expect(result.stageStatus).not.toBe("BLOCKED_BUG");
     expect(result.events.at(-1)?.liveId).toBe("tif-2014-08-02");
+    expect(result.events[0].fanFlow.opening.publicCount).toBeLessThan(240); // pre-debut weekly churn applies
+    expect(result.fanWeeklyResolutions.some((week) => week.weekEnd === "2014-08-02:chapter-close" && week.eventIds.includes("tif-2014-08-02"))).toBe(true);
+    expect(result.fanMonths.at(-1)?.closing.otakuCount).toBe(result.state.fan.otakuCount);
     expect(result.events.every((event) => Number.isFinite(event.performanceInternal))).toBe(true);
     expect(result.events.find((event) => event.liveId === "debut-2013-05-24")?.ticketRevenueJPY).toBe(0);
     expect(result.events.find((event) => event.liveId === "mall-2013-09-29")?.chekiGrossJPY).toBe(0);
