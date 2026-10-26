@@ -1,0 +1,106 @@
+import { createSeededRandom, sampleBinomial } from "./random";
+
+/**
+ * C1–C3 diagnostic inputs from the 2026-10-25 acquisition handoff.
+ * `externalIdolShare` is a neutral 50/50 test split because the source
+ * document deliberately leaves that ratio unresolved. Nothing here is a
+ * locked Scenario balance value.
+ */
+export const audienceChannelDiagnosticV1 = {
+  version: "audience-channel-diagnostic-v1",
+  publicAwarenessRate: 0.5,
+  publicBuyGivenAwareRate: 0.2,
+  friendBringRate: 0.1,
+  referredPublicShare: 0.5,
+  externalIdolShare: 0.5,
+  activePublicToOtakuRate: 0.35,
+  externalIdolToOtakuRate: 0.01,
+  externalGeneralToOtakuRate: 0.004,
+  externalToPublicRate: 0.08,
+} as const;
+
+export type AudienceChannelDiagnosticConfig = {
+  version: string;
+  publicAwarenessRate: number;
+  publicBuyGivenAwareRate: number;
+  friendBringRate: number;
+  referredPublicShare: number;
+  externalIdolShare: number;
+  activePublicToOtakuRate: number;
+  externalIdolToOtakuRate: number;
+  externalGeneralToOtakuRate: number;
+  externalToPublicRate: number;
+};
+
+export type EventAudienceAttribution = {
+  ownedOtakuWatching: number;
+  ownedPublicWatching: number;
+  externalIdolWatching: number;
+  externalGeneralWatching: number;
+  activeIntentPublicWatching: number;
+  referredPublicWatching: number;
+  referredExternalWatching: number;
+  publicDemand: number;
+  ticketedPublic: number;
+  actualUniqueAudience: number;
+  publicToOtaku: number;
+  externalIdolToOtaku: number;
+  externalGeneralToOtaku: number;
+  externalToPublic: number;
+};
+
+export function resolveDiagnosticAudienceChannels(input: {
+  publicCount: number;
+  otakuCount: number;
+  capacity: number;
+  /** Known actual external viewers from the event contract. Empty seats never create them. */
+  externalWatchingDemand: number;
+  otakuAttendanceRate: number;
+  quality: number;
+  seed: string;
+  config?: Partial<AudienceChannelDiagnosticConfig>;
+}): EventAudienceAttribution {
+  const config = { ...audienceChannelDiagnosticV1, ...input.config };
+  const random = createSeededRandom(`audience-channels:${input.seed}`);
+  const capacity = Math.max(0, Math.floor(input.capacity));
+  const publicCount = Math.max(0, Math.floor(input.publicCount));
+  const otakuCount = Math.max(0, Math.floor(input.otakuCount));
+  const ownedOtakuWatching = Math.min(capacity, sampleBinomial(otakuCount, Math.max(0, Math.min(1, input.otakuAttendanceRate)), random));
+
+  // A referred public viewer is removed before ordinary awareness demand is
+  // sampled, making the event-local P sources disjoint without persisting IDs.
+  const friendTotal = sampleBinomial(ownedOtakuWatching, config.friendBringRate, random);
+  const referredPublicWatching = Math.min(publicCount, sampleBinomial(friendTotal, config.referredPublicShare, random));
+  const referredExternalWatching = friendTotal - referredPublicWatching;
+  const remainingPublic = publicCount - referredPublicWatching;
+  const awarePublic = sampleBinomial(remainingPublic, config.publicAwarenessRate, random);
+  const activeIntentPublicWatching = sampleBinomial(awarePublic, config.publicBuyGivenAwareRate, random);
+  const publicDemand = referredPublicWatching + activeIntentPublicWatching;
+  const ticketedPublic = Math.min(publicDemand, Math.max(0, capacity - ownedOtakuWatching));
+  const externalDemand = Math.max(0, Math.floor(input.externalWatchingDemand)) + referredExternalWatching;
+  const ticketedExternal = Math.min(externalDemand, Math.max(0, capacity - ownedOtakuWatching - ticketedPublic));
+  const externalIdolWatching = sampleBinomial(ticketedExternal, config.externalIdolShare, random);
+  const externalGeneralWatching = ticketedExternal - externalIdolWatching;
+  const q = Math.max(0.5, Math.min(1.5, input.quality));
+  const publicToOtaku = sampleBinomial(ticketedPublic, Math.min(1, config.activePublicToOtakuRate * q), random);
+  const externalIdolToOtaku = sampleBinomial(externalIdolWatching, Math.min(1, config.externalIdolToOtakuRate * q), random);
+  const externalGeneralToOtaku = sampleBinomial(externalGeneralWatching, Math.min(1, config.externalGeneralToOtakuRate * q), random);
+  const remainingExternal = ticketedExternal - externalIdolToOtaku - externalGeneralToOtaku;
+  const externalToPublic = sampleBinomial(remainingExternal, Math.min(1, config.externalToPublicRate * q), random);
+  return {
+    ownedOtakuWatching,
+    ownedPublicWatching: ticketedPublic,
+    externalIdolWatching,
+    externalGeneralWatching,
+    activeIntentPublicWatching,
+    referredPublicWatching,
+    referredExternalWatching,
+    publicDemand,
+    ticketedPublic,
+    actualUniqueAudience: ownedOtakuWatching + ticketedPublic + ticketedExternal,
+    publicToOtaku,
+    externalIdolToOtaku,
+    externalGeneralToOtaku,
+    externalToPublic,
+  };
+}

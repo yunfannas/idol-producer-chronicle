@@ -82,3 +82,9 @@ The isolated C4 newcomer-voucher queue contract is now available only behind an
 explicit Scenario switch and uses named TUNABLE values; it does not enable
 vouchers in the default B-route or reconcile the wider proposal. See
 `docs/implementation/Chronicle_Newcomer_Voucher_Contract_v0.1.md`.
+
+The C1–C3 audience-channel Kernel likewise exposes the document's diagnostic
+values without replacing default attendance or conversion. Its 50/50 external
+subtype split is an explicit neutral test placeholder because the design does
+not yet provide that ratio. See
+`docs/implementation/Chronicle_Audience_Channel_Diagnostic_v1.md`.

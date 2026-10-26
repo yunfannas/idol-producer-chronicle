@@ -1,8 +1,8 @@
 # Chronicle｜序章 Fan Acquisition × Affinity × Cheki E2E 测试指南 v1.0
 
-**Status: EXECUTION RUNBOOK / 2026-10-25 / B structural audit executed; C4 free-voucher contract is implemented behind an explicit Scenario switch; C5 awareness/referral and X subtypes remain NOT_IMPLEMENTED.**
+**Status: EXECUTION RUNBOOK / 2026-10-25 / B structural audit executed; C1–C3 audience channels and C4 free-voucher contract are available as isolated diagnostic/Scenario inputs; full B-route integration and U lifecycle remain NOT_IMPLEMENTED.**
 
-**执行记录（2026-10-25）**：B / S3-C 的结构验收已由 `reports/prologue-fan-e2e/b-s3c-100-seeds-v1/` 输出。该记录只声明其当时默认 Runtime 的已实现边界；之后新增的 C4 免费券必须以显式 Scenario 合同另跑 paired-seed 回归，不能回写为该基线已经启用。P 认知/朋友渠道、X 子类型与 U 专用 lifecycle 仍按报告标记为 `NOT_IMPLEMENTED`。
+**执行记录（2026-10-25）**：B / S3-C 的结构验收已由 `reports/prologue-fan-e2e/b-s3c-100-seeds-v1/` 输出。该记录只声明其当时默认 Runtime 的已实现边界；之后新增的 C1–C3 观众渠道诊断 Kernel 与 C4 免费券必须以显式 Scenario 合同另跑 paired-seed 回归，不能回写为该基线已经启用。U 专用 lifecycle 仍按报告标记为 `NOT_IMPLEMENTED`。
 
 目标：在 **Chronicle 仓库的真实 Runtime** 内检验“固定序章日程 → SNS/朋友/Taiban 认知 → Public 购票 → Impression → 新规赠券与付费 Cheki → P/O/A_i/W_i/U → Finance”的完整闭环。**不可用新建的独立 Python 世界模拟替代 Runtime E2E**。本指南是测试任务，不宣称源码已经实现这些接口或测试通过。
 

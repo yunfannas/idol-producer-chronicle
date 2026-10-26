@@ -22,6 +22,8 @@
 
 **新规免费券合同（C4）**：[Chronicle_Newcomer_Voucher_Contract_v0.1.md](Chronicle_Newcomer_Voucher_Contract_v0.1.md) 将合同授权的外部新规免费体验接入既有共享 Cheki 队列、周度 Fan momentum 与 Finance；默认 Staff 基准保持关闭，直到场次授权和数值校准正式批准。
 
+**C1–C3 观众渠道诊断夹具**：[Chronicle_Audience_Channel_Diagnostic_v1.md](Chronicle_Audience_Channel_Diagnostic_v1.md) 将文档候选的 SNS 知晓、Public 购票、朋友结伴与外部观众分源写成可复现测试 Kernel；它不替换默认 B-route 的既有到场模型。
+
 **首次回归记录**：[Fan_Cheki_Regression_2026-10-24.md](Fan_Cheki_Regression_2026-10-24.md) 记录中性 fixture、12周×20 seeds 的初始基线、唯一调整的集中参数和校准后结果；它不是正式 Scenario 数据。
 
 **第二轮压力回归（已验证）**：[Fan_Cheki_Stress_Regression_2026-10-24.md](Fan_Cheki_Stress_Regression_2026-10-24.md) 覆盖热门成员容量、多推共享时间、Live/互动成长响应的确定性测试夹具；不修改原中性参数与持久 Fan 数据结构。
