@@ -16,6 +16,8 @@
 
 **Fan × Cheki 可运行数值基线（TUNABLE）**：[Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md](Chronicle_Fan_Cheki_Executable_Formulas_v1.0.md) 已给出到场、单场多推重建、Gamma 购买预算、双档选购、共享排队、Fan 转化/流失、毕业与剧本新人 seed 的**完整第一版算法**。实现时必须读取；具体概率为初始校准值，不是历史事实。原 Fan 文档缺口由此文件填充，后续通过 seeded 5/9/15 人回归调参。
 
+**序章获客 / Affinity / 新规券设计与独立模拟交接（2026-10-25）**：[Chronicle_Prologue_Acquisition_Affinity_Cheki_Calibration_2026-10-25.md](Chronicle_Prologue_Acquisition_Affinity_Cheki_Calibration_2026-10-25.md) 汇总 SNS、朋友推荐、Taiban、Public 购票需求、成员多推与赠券经济闭环的讨论决议、独立夹具结果及正式 Runtime 回归要求；**TUNABLE 候选尚未合并为运行时参数，非 E2E 已通过声明**。
+
 **首次回归记录**：[Fan_Cheki_Regression_2026-10-24.md](Fan_Cheki_Regression_2026-10-24.md) 记录中性 fixture、12周×20 seeds 的初始基线、唯一调整的集中参数和校准后结果；它不是正式 Scenario 数据。
 
 **第二轮压力回归（已验证）**：[Fan_Cheki_Stress_Regression_2026-10-24.md](Fan_Cheki_Stress_Regression_2026-10-24.md) 覆盖热门成员容量、多推共享时间、Live/互动成长响应的确定性测试夹具；不修改原中性参数与持久 Fan 数据结构。
