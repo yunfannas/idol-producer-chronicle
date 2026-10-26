@@ -24,11 +24,19 @@ const quote=x=>{let t=typeof x==="string"?x:JSON.stringify(x??"");return /[",\n]
 const csv=(name,header,rows)=>fs.writeFileSync(path.join(out,name),[header,...rows].map(r=>r.map(quote).join(",")).join("\n")+"\n");
 const runs=[];
 const failures=[];
+const checkpoints=[["debut","2013-05-24"],["free_mall","2013-09-29"],["trial_regular","2014-02-28"],["weekly_regular","2014-04-30"],["graduation","2014-05-11"],["pre_one_man","2014-07-26"],["tif","2014-08-02"]];
+const checkpointFan=(r,date)=>{const weeks=r.fanWeeklyResolutions.filter(w=>w.weekEnd.slice(0,10)<=date);return weeks.length?weeks.at(-1).closing:r.fanWeeklyResolutions[0].opening};
+const compactRun=(r)=>({
+  stageStatus:r.stageStatus,
+  state:{fan:{...r.state.fan,members:Object.fromEntries(Object.entries(r.state.fan.members).map(([id,m])=>[id,{affinityCount:m.affinityCount,purchaseWeightKJPY:m.purchaseWeightKJPY}]))},finance:{cash:r.state.finance.cash,operatingRevenue:r.state.finance.operatingRevenue,operatingCost:r.state.finance.operatingCost,capitalizedAssets:r.state.finance.capitalizedAssets,loans:r.state.finance.loans}},
+  onlineWeeks:r.onlineWeeks.map(w=>({newPublic:w.newPublic})),
+  events:r.events.map(e=>({date:e.date,liveId:e.liveId,kind:e.kind,actualAttendance:e.actualAttendance,audienceCapacity:e.audienceCapacity,chekiGrossJPY:e.chekiGrossJPY,cashAfterJPY:e.cashAfterJPY,fanFlow:{otakuAttendance:e.fanFlow.otakuAttendance,publicAttendance:e.fanFlow.publicAttendance,externalAudience:e.fanFlow.externalAudience,publicToOtaku:e.fanFlow.publicToOtaku,externalToOtaku:e.fanFlow.externalToOtaku},audienceAttribution:e.audienceAttribution&&{awarePublic:e.audienceAttribution.awarePublic,ticketedPublic:e.audienceAttribution.ticketedPublic,activeIntentPublicWatching:e.audienceAttribution.activeIntentPublicWatching,activePublicToOtaku:e.audienceAttribution.activePublicToOtaku,publicToOtaku:e.audienceAttribution.publicToOtaku}})),
+  checkpoints:Object.fromEntries(checkpoints.map(([name,date])=>{const fan=checkpointFan(r,date);return [name,{date,publicCount:fan.publicCount,otakuCount:fan.otakuCount,temporarilyUnassignedOtaku:fan.temporarilyUnassignedOtaku,members:Object.fromEntries(Object.entries(fan.members).map(([id,m])=>[id,{affinityCount:m.affinityCount}]))}]})),
+});
 for(const rate of rates){
   for(const seed of seeds){
     const args={route:"B",seed,s3Variant:"S3-C",fanAcquisitionStage:"C3",audienceDemand:{channelConfig:{activePublicToOtakuRate:rate}}};
     const r=runStaffAutoplayPrologue(args);
-    runs.push({rate,seed,r});
     const f=[];
     if(r.stageStatus!=="COMPLETED_TIF") f.push("tif");
     if(r.events.some(e=>e.fanFlow.otakuAttendance+e.fanFlow.publicAttendance+e.fanFlow.externalAudience!==e.actualAttendance||e.actualAttendance>e.audienceCapacity))f.push("capacity");
@@ -39,6 +47,9 @@ for(const rate of rates){
     if(r.events.filter(e=>e.date>"2014-05-11").some(e=>e.participantIds.includes("IPC1-001")||e.cheki.queues["IPC1-001"]||e.fanFlow.initialAffinityByMember["IPC1-001"]))f.push("graduation");
     if(JSON.stringify(runStaffAutoplayPrologue(args))!==JSON.stringify(r))f.push("replay");
     if(f.length)failures.push({rate,seed,checks:f});
+    // Keep only report fields. Holding 500 full Prologue states alongside 500
+    // deterministic replay states exhausts Node's heap before any CSV exists.
+    runs.push({rate,seed,r:compactRun(r)});
   }
 }
 const getPaid=r=>sum(r.events.map(e=>e.chekiGrossJPY));
@@ -51,11 +62,9 @@ const sumAff=r=>sum(Object.values(r.state.fan.members).map(m=>m.affinityCount));
 const income=r=>r.state.finance.operatingRevenue;
 const expense=r=>r.state.finance.operatingCost;
 const memberIds=[...new Set(runs.flatMap(({r})=>Object.keys(r.state.fan.members)))].sort();
-const checkpoints=[["debut","2013-05-24"],["free_mall","2013-09-29"],["trial_regular","2014-02-28"],["weekly_regular","2014-04-30"],["graduation","2014-05-11"],["pre_one_man","2014-07-26"],["tif","2014-08-02"]];
-const at=(r,date)=>{const weeks=r.fanWeeklyResolutions.filter(w=>w.weekEnd.slice(0,10)<=date);if(weeks.length)return weeks.at(-1).closing;return r.fanWeeklyResolutions[0].opening};
 csv("seeds.csv",["rate","seed","status","final_P","final_O","final_U","sum_A","online_new_P","P_ticketed_attendance","active_P_attendance","active_P_to_O","all_P_to_O","X_to_O","cheki_gross_jpy","operating_revenue_jpy","operating_cost_jpy","final_cash_jpy"],runs.map(({rate,seed,r})=>[rate,seed,r.stageStatus,round(r.state.fan.publicCount),round(r.state.fan.otakuCount),round(r.state.fan.temporarilyUnassignedOtaku),round(sumAff(r)),sum(r.onlineWeeks.map(w=>w.newPublic)),getPTickets(r),getActiveViewed(r),getActiveConverted(r),getPConverted(r),getExternalConverted(r),getPaid(r),income(r),expense(r),r.state.finance.cash]));
 csv("members.csv",["rate","seed","member_id","A","W_KJPY"],runs.flatMap(({rate,seed,r})=>memberIds.map(id=>[rate,seed,id,round(r.state.fan.members[id]?.affinityCount??0),round(r.state.fan.members[id]?.purchaseWeightKJPY??0)])));
-csv("checkpoints.csv",["rate","seed","checkpoint","cutoff","P","O","U","sum_A"],runs.flatMap(({rate,seed,r})=>checkpoints.map(([name,date])=>{const fan=at(r,date);return [rate,seed,name,date,round(fan.publicCount),round(fan.otakuCount),round(fan.temporarilyUnassignedOtaku),round(sum(Object.values(fan.members).map(m=>m.affinityCount)))];})));
+csv("checkpoints.csv",["rate","seed","checkpoint","cutoff","P","O","U","sum_A"],runs.flatMap(({rate,seed,r})=>checkpoints.map(([name])=>{const fan=r.checkpoints[name];return [rate,seed,name,fan.date,round(fan.publicCount),round(fan.otakuCount),round(fan.temporarilyUnassignedOtaku),round(sum(Object.values(fan.members).map(m=>m.affinityCount)))];})));
 csv("events.csv",["rate","seed","date","live_id","kind","P_aware","P_ticketed","P_active_viewers","P_active_to_O","P_all_to_O","X_to_O","cheki_gross_jpy","cash_after_jpy"],runs.flatMap(({rate,seed,r})=>r.events.map(e=>[rate,seed,e.date,e.liveId,e.kind,e.audienceAttribution?.awarePublic??"",e.audienceAttribution?.ticketedPublic??"",e.audienceAttribution?.activeIntentPublicWatching??"",e.audienceAttribution?.activePublicToOtaku??"",e.fanFlow.publicToOtaku,e.fanFlow.externalToOtaku,e.chekiGrossJPY,e.cashAfterJPY])));
 const stats=runs.length&&rates.map(rate=>{const a=runs.filter(x=>x.rate===rate).map(x=>x.r);return {rate,seeds:a.length,P:round(avg(a.map(r=>r.state.fan.publicCount))),O:round(avg(a.map(r=>r.state.fan.otakuCount))),O_p10:round(pct(a.map(r=>r.state.fan.otakuCount),.1)),O_p90:round(pct(a.map(r=>r.state.fan.otakuCount),.9)),U:round(avg(a.map(r=>r.state.fan.temporarilyUnassignedOtaku))),sum_A:round(avg(a.map(sumAff))),P_attendance:round(avg(a.map(getPTickets))),active_P_attendance:round(avg(a.map(getActiveViewed))),active_P_to_O:round(avg(a.map(getActiveConverted))),all_P_to_O:round(avg(a.map(getPConverted))),X_to_O:round(avg(a.map(getExternalConverted))),cheki_gross_jpy:round(avg(a.map(getPaid))),operating_revenue_jpy:round(avg(a.map(income))),operating_cost_jpy:round(avg(a.map(expense))),cash_jpy:round(avg(a.map(r=>r.state.finance.cash)))}});
 csv("summary.csv",Object.keys(stats[0]),stats.map(s=>Object.values(s)));
