@@ -2,6 +2,8 @@
 
 **Status: IMPLEMENTATION BASELINE / TUNABLE, 2026-10-24.** 本文件是可运行的第一版数值提案；除引用的既有 `P/O/A_i/W_i`、购买力、Cheki 时长、20%佣金、Policy 权限等规则外，**全部具体概率/系数/分布是新提出的可调参数，不是历史事实或此前冻结公式**。后续必须通过 5/9/15 人、序章周/月模拟校准。此文件优先于 `Chronicle_Fan_Cheki_Finance_v1.0.md` 的同名 `TUNABLE` 空位，不覆盖既有 `LOCKED` 规则。
 
+**后续正式设计覆盖通知（2026-10-25）**：[Chronicle_Fan_Acquisition_Audience_Demand_v1.1.md](Chronicle_Fan_Acquisition_Audience_Demand_v1.1.md) 已正式取代本文第1节旧的固定 Public 到场抽样、由容量余额补外部 X、SNS 缺失及统一 P/X→O 条件转化逻辑；这份 v1.0 保留供 legacy 回归以及未被覆盖的队列/Finance/churn 公式使用。**文档设计版本变化不等于当前 Runtime 已迁移。**
+
 **当前 Runtime 校准（fan-acquisition-v2）**：在修复合同容量分源与周度 momentum 后，`fanChekiBalanceV1.version` 为 `fanChekiBalanceV1-fan-acquisition-v2`。仅周度自然流失改为下表的 `.004/.0015/.00075`；P/O 转化率、合同、Performance、Finance 和评级阈值保持不变。实跑证据见 `reports/staff-baseline/fan-acquisition-v2/`。
 
 ## 0. 核心定义与不可违反的约束
