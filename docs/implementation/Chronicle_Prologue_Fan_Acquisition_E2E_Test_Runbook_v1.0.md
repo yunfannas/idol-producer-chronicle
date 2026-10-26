@@ -1,6 +1,6 @@
 # Chronicle｜序章 Fan Acquisition × Affinity × Cheki E2E 测试指南 v1.0
 
-**Status: EXECUTION RUNBOOK / 2026-10-25 / NOT YET EXECUTED.**
+**Status: EXECUTION RUNBOOK / 2026-10-25 / B structural audit executed; C4/C5 feature work remains NOT_IMPLEMENTED.**
 
 **执行记录（2026-10-25）**：B / S3-C 的结构验收已由 `reports/prologue-fan-e2e/b-s3c-100-seeds-v1/` 输出。该记录只声明其中的 Runtime 已实现边界；新规免费券、P 认知/朋友渠道、X 子类型与 U 专用 lifecycle 仍按报告标记为 `NOT_IMPLEMENTED`。
 

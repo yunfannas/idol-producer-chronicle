@@ -1,0 +1,181 @@
+{
+  "runId": "b-s3c-100-seeds-v1",
+  "evaluatedSeeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100
+  ],
+  "checks": [
+    {
+      "id": "population",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "capacity",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "attribution",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "affinity",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "freeRevenue",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "queue",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "graduation",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "finance",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "replay",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    },
+    {
+      "id": "tif",
+      "pass": true,
+      "passedSeeds": 100,
+      "failedSeeds": []
+    }
+  ],
+  "observations": [
+    {
+      "id": "new_otaku_later_aggregate_paid_loop",
+      "observedSeeds": 99,
+      "notObservedSeeds": [
+        77
+      ],
+      "note": "This is not a per-person assertion: Chronicle deliberately persists no fan/Cohort IDs. A non-observation means no later sampled affinity visitor completed paid service for that member before the chapter ended, not that the event invented or lost an unrecorded fan."
+    }
+  ],
+  "notImplemented": [
+    "No Scenario contract currently issues a free newcomer voucher. The zero free-unit rows are an explicit absence of a coupon flow, not evidence that a future voucher implementation has passed C4.",
+    "Public awareness, friend referral, X_idol/X_general split, and U-specific weekly churn/reassignment are not observable in the current Staff adapter and are not represented as fabricated report columns."
+  ]
+}
