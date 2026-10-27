@@ -9,6 +9,7 @@ describe("persisted prologue UI read model", () => {
     const inbox = buildInbox(state);
     expect(inbox[0]).toMatchObject({ id: "decision-opening", tier: "blocking", href: "/inbox/decision-opening" });
     expect(inbox.some((item) => item.title.includes("優花の雑誌"))).toBe(false);
+    expect(inbox.some((item) => item.id.startsWith("upcoming-"))).toBe(false);
   });
 
   it("turns a confirmed opening into a factual report with the persisted roster and ledger", () => {
@@ -23,6 +24,6 @@ describe("persisted prologue UI read model", () => {
     const state = startTestRoute(createPrologueState({ saveId: "ui-test" }), 3);
     const event = state.events[0];
     const detail = getReadonlyLiveDetail(state, event.id);
-    expect(detail).toMatchObject({ event: { status: "DORMANT" }, participants: [], entries: [] });
+    expect(detail).toBeUndefined();
   });
 });
