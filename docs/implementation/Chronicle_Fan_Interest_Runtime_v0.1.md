@@ -1,16 +1,12 @@
-# Chronicle Fan Interest Runtime Foundation v0.1
+# Chronicle Fan Interest Runtime v1.0
 
 ## Status
 
-This is the first implementation slice for the authoritative
-`Chronicle_Fan_SNS_Interest_Cheki_Spec_v1.5.md`. It establishes persistence,
-save migration and pure settlement transactions only. It does **not** claim
-that the old C3 Staff autoplay route, its direct Live conversion paths, queue
-request sampling, or weekly SNS acquisition are v1.5-compliant.
-
-The C3 route remains an explicit legacy/compatibility fixture until a later
-adapter selects v1.5 as a named mode. There is no silent fallback from the new
-model into the old direct `Live -> O/A` or fixed trial probability paths.
+This implements the formal Staff adapter path for the authoritative
+`Chronicle_Fan_SNS_Interest_Cheki_Spec_v1.5.md`. `runStaffAutoplayPrologue()`
+defaults to named `V15`; C0–C3 are explicit legacy/compatibility fixtures.
+There is no silent fallback from `V15` into direct `Live -> O/A`, fixed R1
+trial, or legacy newcomer-participation conversion paths.
 
 ## Persistent state
 
@@ -46,6 +42,29 @@ Population caps are reconciled at the weekly Interest boundary. Event-local
 Interest is intentionally not clipped early while a same-week P/O settlement
 is still pending.
 
+## Staff V15 event and weekly integration
+
+The default Staff route uses one v1.5 chronology:
+
+1. Demand attribution samples P/O/X attendance once. Interest raises P/O
+   attendance with the v1.5 additive bounded response; spare capacity never
+   creates viewers.
+2. Live Performance/exposure creates per-member `I_P/I_O`, not O/A. The event
+   ledger records zero direct Live conversion lanes.
+3. Interest-backed first trials and established A/W demand use the same real
+   queue. Only a completed paid/free service receives the relationship-success
+   check and invokes the conversion owner. Vouchers are explicit contract
+   authorization for a limited extra free-service allocation; they have no
+   revenue and retain real variable cost and queue seconds.
+4. The weekly online pipeline deduplicates new P once, then records Followers,
+   SNS Interest, renewal and four-slot ageing. New P is not booked twice.
+
+The current operating member schema has no authoritative Fan Service,
+Appearance or content-attribute fields. V15 therefore uses the specified
+neutral relationship baseline and does not invent substitute attribute keys;
+the future expanded schema can replace that neutral modifier without changing
+the P/O/A ownership or queue contracts.
+
 ## Save compatibility and tests
 
 `ensureFanMembers()` upgrades existing fan state with zero-valued v1.5 fields.
@@ -58,11 +77,9 @@ completed-service-only P/O/A formation, multi-oshi aggregate A, and roster
 extension. Existing full Runtime tests confirm that legacy Staff routes retain
 their previous outcomes while preserving the added fields.
 
-## Deliberately pending
+## Calibration boundary
 
-1. Named v1.5 Staff adapter mode with direct Live/SNS conversion disabled.
-2. Live/SNS/external exposure -> Interest and follower weekly audit.
-3. Broad tokuten request generation, W_trial, paid/voucher service integration
-   and conversion probability using Fan Service/Appearance.
-4. Weekly Interest settlement after actual weekly exposure plus a v1.5
-   paired-seed report for the required roster/event scenarios.
+The explicit v1.5 coefficients in `fan-v15.ts` remain TUNABLE. Required
+next work is paired-seed calibration/reporting for the roster, high-overlap,
+standalone and graduation cases named in v1.5—not reverting to a direct-Live
+path or fixing outcomes with unearned P/O/Follower grants.

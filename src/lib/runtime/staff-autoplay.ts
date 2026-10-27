@@ -12,6 +12,7 @@ import { arrangementFor, createArrangementVersion, recordArrangementExposure, se
 import { applyWeeklyFanDecay, ensureFanMembers, fanChekiBalanceV1 } from "./fan";
 import { audienceChannelDiagnosticV1, resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
 import { resolveWeeklyOnlineAcquisition, staffExternalAudienceDemandV11, type WeeklyOnlineAcquisition } from "./fan-acquisition";
+import { resolveV15FanEvent, settleV15WeeklySns } from "./fan-v15";
 import {
   chekiConversionProbability,
   chekiInteractionSatisfaction,
@@ -48,8 +49,8 @@ import type { ChekiSettlementLine, Color8, FanState, KeyPartType, PriorityAssign
 
 export type StaffAutoplayRoute = "A" | "B" | "C";
 export type StaffAutoplayS3Variant = "S3-A" | "S3-B" | "S3-C";
-/** v1.1 rollout stages. C0 remains the historical Runtime control. */
-export type FanAcquisitionStage = "C0" | "C1" | "C2" | "C3";
+/** C0–C3 are compatibility diagnostics; V15 is the formal Runtime mode. */
+export type FanAcquisitionStage = "C0" | "C1" | "C2" | "C3" | "V15";
 export type StageStatus = "COMPLETED_TIF" | "BANKRUPT_OR_DEBT_DISTRESS" | "BLOCKED_BUG";
 
 export const staffAutoplayScenarioV1 = {
@@ -339,6 +340,8 @@ type PendingFanMomentum = {
   eventId: string;
   auditIndex: number;
   publicToOtakuSampled: number;
+  /** Already applied by the v1.5 completed-service owner; audit-only here. */
+  immediatePublicToOtaku?: number;
   publicConversions?: { path: R0ConversionPath; memberId?: string }[];
   externalToOtaku: number;
   externalToPublic: number;
@@ -860,6 +863,7 @@ function resolveWeeklyFanMomentum(input: {
   // Commit only observed event conversions. Cap by the surviving P pool;
   // per-event awards are attributed in chronological order without phantom viewers.
   const publicToOtaku = Math.min(Math.floor(decayed.publicCount), input.momenta.reduce((sum, momentum) => sum + momentum.publicToOtakuSampled, 0));
+  const immediatePublicToOtaku = input.momenta.reduce((sum, momentum) => sum + (momentum.immediatePublicToOtaku ?? 0), 0);
   const random = createSeededRandom(`${input.seed}:fan-week:${input.weekEnd}`);
   const externalToOtaku = input.momenta.reduce((sum, momentum) => sum + momentum.externalToOtaku, 0);
   const externalToPublic = input.momenta.reduce((sum, momentum) => sum + momentum.externalToPublic, 0)
@@ -964,7 +968,7 @@ function resolveWeeklyFanMomentum(input: {
       otherLiveExposureNewPublic,
       eventExposureNewPublic: input.externalExposurePublic ?? 0,
       newPublic: (input.onlineNewPublic ?? 0) + (input.externalExposurePublic ?? 0),
-      publicToOtaku,
+      publicToOtaku: publicToOtaku + immediatePublicToOtaku,
       teamLiveToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.teamLiveToOtaku, 0),
       memberLiveToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.memberLiveToOtaku, 0),
       paidChekiToOtaku: input.momenta.reduce((sum, momentum) => sum + input.audits[momentum.auditIndex].fanFlow.paidChekiToOtaku, 0),
@@ -1047,7 +1051,7 @@ export function runStaffAutoplayPrologue(input: {
   route: StaffAutoplayRoute;
   seed: number;
   s3Variant?: StaffAutoplayS3Variant;
-  /** C0 is the legacy control; C1–C3 are the v1.1 paired rollout. */
+  /** V15 is formal Runtime; C0–C3 remain explicit historical comparisons. */
   fanAcquisitionStage?: FanAcquisitionStage;
   /** Explicit Scenario test contract; default remains disabled. */
   newcomerVoucher?: Partial<NewcomerVoucherTrialConfig>;
@@ -1060,7 +1064,8 @@ export function runStaffAutoplayPrologue(input: {
   r1Affinity?: Partial<R1AffinityConfig>;
 }): StaffAutoplayResult {
   const s3Variant = input.s3Variant ?? "S3-C";
-  const fanAcquisitionStage = input.fanAcquisitionStage ?? (input.audienceDemand?.enabled ? "C3" : "C0");
+  const fanAcquisitionStage = input.fanAcquisitionStage ?? "V15";
+  const formalV15 = fanAcquisitionStage === "V15";
   const newcomerVoucher = { ...newcomerVoucherTrialV1, ...input.newcomerVoucher };
   const audienceDemand: StaffAutoplayAudienceDemandConfig = {
     ...staffAutoplayAudienceDemandV11,
@@ -1215,12 +1220,16 @@ export function runStaffAutoplayPrologue(input: {
       operating = operating.map((member) => resolved.members.find((updated) => updated.id === member.id) ?? member);
       const fanOpening = snapshotFan(state.fan);
       const oneMan = eventClass(event.kind);
-      const demandEnabled = fanAcquisitionStage === "C2" || fanAcquisitionStage === "C3" || audienceDemand.enabled;
+      const demandEnabled = formalV15 || fanAcquisitionStage === "C2" || fanAcquisitionStage === "C3" || audienceDemand.enabled;
       // The legacy opt-in diagnostic keeps its explicit-map-only behavior.
       // Scenario fixtures are used only by an explicitly selected v1.1 stage.
-      const formalDemand = input.fanAcquisitionStage === "C2" || input.fanAcquisitionStage === "C3";
+      const formalDemand = formalV15 || input.fanAcquisitionStage === "C2" || input.fanAcquisitionStage === "C3";
       const externalFixture = formalDemand ? externalDemandForEvent(event) : undefined;
       const explicitExternalDemand = audienceDemand.externalWatchingDemandByEventId[event.id];
+      const publicInterestHeat = Object.values(state.fan.interests).reduce((sum, interest) => sum + interest.public.reduce((inner, value) => inner + value, 0), 0) / Math.max(1, state.fan.publicCount);
+      const otakuInterestHeat = Object.values(state.fan.interests).reduce((sum, interest) => sum + interest.otaku.reduce((inner, value) => inner + value, 0), 0) / Math.max(1, state.fan.otakuCount);
+      const interestPublicAttendanceBoost = event.chekiAllowed ? 0.08 * publicInterestHeat / (0.5 + publicInterestHeat) : 0;
+      const interestOtakuAttendanceBoost = event.chekiAllowed ? 0.04 * otakuInterestHeat / (0.5 + otakuInterestHeat) : 0;
       const awarenessRate = Math.max(0, Math.min(1,
         effectiveAudienceChannelConfig.publicAwarenessRate + (formalDemand ? promotionSignal : 0),
       ));
@@ -1230,20 +1239,85 @@ export function runStaffAutoplayPrologue(input: {
           otakuCount: state.fan.otakuCount,
           capacity: contract.capacity,
           externalWatchingDemand: explicitExternalDemand ?? externalFixture?.watchers ?? 0,
-          otakuAttendanceRate: oneMan ? fanChekiBalanceV1.pOtakuAttendBase.oneMan : fanChekiBalanceV1.pOtakuAttendBase.taiban,
+          otakuAttendanceRate: (oneMan ? fanChekiBalanceV1.pOtakuAttendBase.oneMan : fanChekiBalanceV1.pOtakuAttendBase.taiban) + (formalV15 ? interestOtakuAttendanceBoost : 0),
           quality: resolved.quality,
           seed: `${input.seed}:${event.id}`,
           config: {
             ...effectiveAudienceChannelConfig,
-            publicAwarenessRate: awarenessRate,
+            // v1.5 attendance is one additive probability with Interest,
+            // rather than a second downstream attendance multiplier.
+            publicAwarenessRate: formalV15 ? 1 : awarenessRate,
+            publicBuyGivenAwareRate: formalV15
+              ? (oneMan ? fanChekiBalanceV1.pPublicAttendBase.oneMan : fanChekiBalanceV1.pPublicAttendBase.taiban) + interestPublicAttendanceBoost
+              : effectiveAudienceChannelConfig.publicBuyGivenAwareRate,
             externalIdolShare: externalFixture?.idolShare ?? effectiveAudienceChannelConfig.externalIdolShare,
           },
           disableExternalDirectOtaku: diagnosticOverrides.disableExternalDirectOtaku,
-          skipLegacyConversion: r0Conversion.enabled,
+          // V15 has no direct Live conversion. It still uses the exact same
+          // event demand/attendance attribution as the legacy diagnostics.
+          skipLegacyConversion: formalV15 || r0Conversion.enabled,
         })
         : undefined;
       const actualAttendance = audienceAttribution?.actualUniqueAudience ?? contract.attendees;
-      const fanOutcome = updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution, integratedLifecycle: fanAcquisitionStage === "C3", disableVoucherChekiToOtaku: diagnosticOverrides.disableVoucherChekiToOtaku, r0Conversion, r1Affinity });
+      const v15Outcome = formalV15 && audienceAttribution
+        ? resolveV15FanEvent({
+          fan: state.fan,
+          event,
+          attribution: audienceAttribution,
+          memberIds: participants.map((member) => member.id),
+          quality: resolved.quality,
+          exposure: resolved.memberPerformance,
+          seed: `${input.seed}:${event.id}`,
+          voucher: newcomerVoucher.enabled && event.chekiAllowed ? newcomerVoucher : undefined,
+        })
+        : undefined;
+      if (v15Outcome) state = { ...state, fan: v15Outcome.fan };
+      const fanOutcome = v15Outcome
+        ? {
+          sales: v15Outcome.sales,
+          flow: {
+            otakuAttendance: audienceAttribution!.ownedOtakuWatching,
+            publicAttendance: audienceAttribution!.ownedPublicWatching,
+            externalAudience: audienceAttribution!.externalIdolWatching + audienceAttribution!.externalGeneralWatching,
+            teamSourcePublicAttendance: audienceAttribution!.activeIntentPublicWatching,
+            memberSourcePublicAttendance: audienceAttribution!.referredPublicWatching,
+            teamSourceExternalAttendance: audienceAttribution!.externalIdolWatching,
+            memberSourceExternalAttendance: audienceAttribution!.externalGeneralWatching,
+            externalExposure: v15Outcome.externalExposure,
+            publicToOtaku: v15Outcome.audit.newOtaku, teamLiveToOtaku: 0, memberLiveToOtaku: 0,
+            paidChekiToOtaku: v15Outcome.audit.newOtaku - v15Outcome.audit.newOtakuFromVoucher,
+            voucherChekiToOtaku: v15Outcome.audit.newOtakuFromVoucher,
+            externalIdolToOtaku: 0, externalGeneralToOtaku: 0, externalToOtaku: 0, externalToPublic: 0,
+            initialAffinityByMember: Object.fromEntries(Object.keys(state.fan.members).map((id) => [id, 0])),
+            memberLiveAffinityByMember: Object.fromEntries(Object.keys(state.fan.members).map((id) => [id, 0])),
+            paidChekiAffinityByMember: v15Outcome.audit.newAffinityByMember,
+            voucherChekiAffinityByMember: Object.fromEntries(Object.keys(state.fan.members).map((id) => [id, 0])),
+            existingOtakuAffinityByMember: Object.fromEntries(Object.keys(state.fan.members).map((id) => [id, 0])),
+            existingOtakuChekiAffinityByMember: v15Outcome.audit.newAffinityByMember,
+            purchaseWeightLogChangeByMember: v15Outcome.logWByMember,
+            freeTrialRequested: Object.values(v15Outcome.sales).reduce((sum, sale) => sum + sale.freeTrialRequested, 0),
+            freeTrialServed: Object.values(v15Outcome.sales).reduce((sum, sale) => sum + sale.freeTrialServed, 0),
+            freeTrialLost: Object.values(v15Outcome.sales).reduce((sum, sale) => sum + sale.freeTrialLost, 0),
+            freeTrialConversionsByMember: v15Outcome.audit.newOtakuFromVoucherByMember,
+            paidNewcomerRequested: Object.values(v15Outcome.audit.publicTrialRequestedByMember).reduce((sum, value) => sum + value, 0)
+              + Object.values(v15Outcome.audit.otakuTrialRequestedByMember).reduce((sum, value) => sum + value, 0),
+            paidNewcomerServed: Object.values(v15Outcome.audit.publicTrialServedByMember).reduce((sum, value) => sum + value, 0)
+              + Object.values(v15Outcome.audit.otakuTrialServedByMember).reduce((sum, value) => sum + value, 0),
+            paidNewcomerLost: Object.values(v15Outcome.audit.publicTrialRequestedByMember).reduce((sum, value) => sum + value, 0)
+              + Object.values(v15Outcome.audit.otakuTrialRequestedByMember).reduce((sum, value) => sum + value, 0)
+              - Object.values(v15Outcome.audit.publicTrialServedByMember).reduce((sum, value) => sum + value, 0)
+              - Object.values(v15Outcome.audit.otakuTrialServedByMember).reduce((sum, value) => sum + value, 0),
+          },
+          momentum: {
+            publicToOtakuSampled: 0, immediatePublicToOtaku: v15Outcome.audit.newOtaku, publicConversions: [], externalToOtaku: 0, externalToPublic: 0,
+            externalExposure: v15Outcome.externalExposure, assignInitialAffinityToNewOtaku: false,
+            newAffinityByMember: Object.fromEntries(Object.keys(state.fan.members).map((id) => [id, 0])),
+            initialAffinityByMember: Object.fromEntries(Object.keys(state.fan.members).map((id) => [id, 0])),
+            logWByMember: v15Outcome.logWByMember,
+            memberWeights: Object.fromEntries(participants.map((member) => [member.id, resolved.memberPerformance[member.id]?.quality ?? 0])),
+          },
+        }
+        : updateFanFromEvent({ fan: state.fan, participants, event, totalAudience: actualAttendance, quality: resolved.quality, exposure: resolved.memberPerformance, seed: `${input.seed}:${event.id}`, newcomerVoucher, audienceAttribution, integratedLifecycle: fanAcquisitionStage === "C3", disableVoucherChekiToOtaku: diagnosticOverrides.disableVoucherChekiToOtaku, r0Conversion, r1Affinity });
       const chekiSales = Object.entries(fanOutcome.sales).flatMap(([memberId, sale]) => [
         { memberId, tierId: "1000" as const, units: sale.completedUnitsByTier["1000"] },
         { memberId, tierId: "2000" as const, units: sale.completedUnitsByTier["2000"] },
@@ -1326,7 +1400,7 @@ export function runStaffAutoplayPrologue(input: {
           activeMembers: state.members.filter((member) => member.active).length,
           performanceQuality: weeklyPerformanceCount > 0 ? weeklyPerformanceTotal / weeklyPerformanceCount : 1,
           previousPromotionSignal: promotionSignal,
-          externalNewUnknownReach: fanAcquisitionStage === "C3"
+          externalNewUnknownReach: fanAcquisitionStage === "C3" || formalV15
             ? pendingFanMomenta.reduce((sum, momentum) => sum + momentum.externalExposure, 0)
             : 0,
           seed: `${input.seed}:${input.route}`,
@@ -1344,6 +1418,20 @@ export function runStaffAutoplayPrologue(input: {
         onlineNewPublic: online ? online.newPublic - online.externalNewPublic : undefined,
         externalExposurePublic: online?.externalNewPublic,
       });
+      if (formalV15 && online) {
+        // `resolveWeeklyFanMomentum` above owns the once-per-week P addition
+        // and retention. v1.5 SNS consumes that already-applied P fact to
+        // create Followers/Interest, then ages the four-slot Interest state.
+        settledFan.fan = settleV15WeeklySns({
+          fan: settledFan.fan,
+          memberIds: state.members.filter((member) => member.active).map((member) => member.id),
+          newPublic: online.newPublic,
+          publicAlreadyApplied: true,
+          existingPublicReach: online.existingPublicReach,
+          hadLiveExposure: pendingFanMomenta.length > 0,
+          seed: `${input.seed}:${input.route}:${date}`,
+        }).fan;
+      }
       const afterDecay = applyWeeklyFanDecay(beforeDecay);
       const fanMonth = fanMonths.get(month)!;
       fanMonth.weeklyChurn.publicCount += beforeDecay.publicCount - afterDecay.publicCount;

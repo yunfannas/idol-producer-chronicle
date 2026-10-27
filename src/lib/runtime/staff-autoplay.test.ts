@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { totalInterest } from "./fan-interest";
 import { runStaffAutoplayPrologue } from "./staff-autoplay";
 
 describe("Staff autoplay prologue E2E", () => {
@@ -94,7 +95,7 @@ describe("Staff autoplay prologue E2E", () => {
   });
 
   it("keeps contract attendance capacity-bounded and applies pending Fan momentum exactly once per week", () => {
-    const result = runStaffAutoplayPrologue({ route: "B", seed: 1, s3Variant: "S3-C" });
+    const result = runStaffAutoplayPrologue({ route: "B", seed: 1, s3Variant: "S3-C", fanAcquisitionStage: "C0" });
     const eventFlow = result.events.reduce((total, event) => ({
       publicToOtaku: total.publicToOtaku + event.fanFlow.publicToOtaku,
       externalToOtaku: total.externalToOtaku + event.fanFlow.externalToOtaku,
@@ -133,6 +134,7 @@ describe("Staff autoplay prologue E2E", () => {
     const input = {
       route: "B" as const,
       seed: 11,
+      fanAcquisitionStage: "C3" as const,
       newcomerVoucher: { enabled: true, externalUptakeProbability: 1, conversionProbability: 1 },
     };
     const result = runStaffAutoplayPrologue(input);
@@ -156,11 +158,13 @@ describe("Staff autoplay prologue E2E", () => {
     const withoutExternalDemand = runStaffAutoplayPrologue({
       route: "B",
       seed: 17,
+      fanAcquisitionStage: "C3",
       audienceDemand: { enabled: true, externalWatchingDemandByEventId: {} },
     });
     const withExternalDemand = runStaffAutoplayPrologue({
       route: "B",
       seed: 17,
+      fanAcquisitionStage: "C3",
       audienceDemand: {
         enabled: true,
         externalWatchingDemandByEventId: {
@@ -174,7 +178,9 @@ describe("Staff autoplay prologue E2E", () => {
     const noDemandDebut = withoutExternalDemand.events.find((event) => event.liveId === "debut-2013-05-24")!;
     const demandedDebut = withExternalDemand.events.find((event) => event.liveId === "debut-2013-05-24")!;
     expect(noDemandDebut.audienceAttribution).toBeDefined();
-    expect(noDemandDebut.fanFlow.externalAudience).toBe(noDemandDebut.audienceAttribution!.referredExternalWatching);
+    // Explicit C3 selects its Scenario watcher fixture; it is still demand,
+    // not residual venue capacity.
+    expect(noDemandDebut.fanFlow.externalAudience).toBe(noDemandDebut.audienceAttribution!.configuredExternalDemand + noDemandDebut.audienceAttribution!.referredExternalWatching);
     expect(demandedDebut.fanFlow.externalAudience).toBeGreaterThanOrEqual(noDemandDebut.fanFlow.externalAudience);
     expect(withExternalDemand.events.every((event) => event.audienceAttribution
       && event.actualAttendance === event.audienceAttribution.actualUniqueAudience
@@ -186,6 +192,7 @@ describe("Staff autoplay prologue E2E", () => {
     expect(runStaffAutoplayPrologue({
       route: "B",
       seed: 17,
+      fanAcquisitionStage: "C3",
       audienceDemand: {
         enabled: true,
         externalWatchingDemandByEventId: {
@@ -219,6 +226,24 @@ describe("Staff autoplay prologue E2E", () => {
     expect(c3.onlineWeeks.some((week) => week.externalNewPublic > 0)).toBe(true);
     expect(c2.events.some((event) => event.audienceAttribution!.configuredExternalDemand > 0)).toBe(true);
     expect(runStaffAutoplayPrologue({ route: "B", seed: 23, fanAcquisitionStage: "C3" })).toEqual(c3);
+  });
+
+  it("uses v1.5 by default: Live/SNS create Interest and only completed broad Cheki changes O/A", () => {
+    const result = runStaffAutoplayPrologue({ route: "B", seed: 53 });
+    expect(result.fanAcquisitionStage).toBe("V15");
+    expect(result.events.every((event) => event.audienceAttribution
+      && event.audienceAttribution.publicToOtaku === 0
+      && event.audienceAttribution.externalIdolToOtaku === 0
+      && event.audienceAttribution.externalGeneralToOtaku === 0)).toBe(true);
+    expect(result.events.every((event) => event.fanFlow.teamLiveToOtaku === 0
+      && event.fanFlow.memberLiveToOtaku === 0
+      && event.fanFlow.voucherChekiToOtaku === 0
+      && Object.values(event.fanFlow.existingOtakuAffinityByMember).every((value) => value === 0))).toBe(true);
+    expect(result.events.some((event) => event.fanFlow.paidNewcomerServed > 0)).toBe(true);
+    expect(result.state.fan.followers.team).toBeGreaterThan(0);
+    expect(Object.values(result.state.fan.followers.members).some((followers) => followers > 0)).toBe(true);
+    expect(Object.values(result.state.fan.interests).some((interest) => totalInterest(interest.public) + totalInterest(interest.otaku) > 0)).toBe(true);
+    expect(runStaffAutoplayPrologue({ route: "B", seed: 53 })).toEqual(result);
   });
 
   it("settles TIF Brand and Reputation once on the following Sunday", () => {

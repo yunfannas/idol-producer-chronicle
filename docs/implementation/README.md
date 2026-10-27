@@ -3,7 +3,7 @@
 
 > **2026-10-26 最新覆盖规范：** [Fan Lifecycle × Cheki × Reputation Integrated Spec v1.0](Chronicle_Fan_Reputation_Integrated_Spec_v1.0.md)。本文件内「不实现 Tier / Reputation」以及所有新 O 必须立即建立 A、TIF 当天结局等历史禁令，**均已被新规范覆盖**。玩家仅显示综合 Reputation（出道后），内部 Live/Music/Brand 三分项；NPC 固定综合值。新规范为设计合同，**不代表 Runtime 已实现**。旧模块未冲突条款仍然有效。
 
-> **2026-10-26 Fan 机制最新增量：** [Fan / SNS / Interest / Broad Cheki v1.5](../design/Chronicle_Fan_SNS_Interest_Cheki_Spec_v1.5.md) 覆盖与其冲突的直接 Live→P/O/A、固定 R1 trial 与固定新人 Cheki 参加率规则。当前仅完成 [Interest Runtime Foundation v0.1](Chronicle_Fan_Interest_Runtime_v0.1.md) 的持久状态与独立结算 Kernel；旧 C3 Staff adapter 仍是显式 legacy，尚未冒充 v1.5 端到端实现。
+> **2026-10-26 Fan 机制最新增量：** [Fan / SNS / Interest / Broad Cheki v1.5](../design/Chronicle_Fan_SNS_Interest_Cheki_Spec_v1.5.md) 覆盖与其冲突的直接 Live→P/O/A、固定 R1 trial 与固定新人 Cheki 参加率规则。[Interest Runtime v1.0](Chronicle_Fan_Interest_Runtime_v0.1.md) 已作为 Staff adapter 默认 `V15` 模式：旧 C0–C3 仅保留为显式兼容/历史回归夹具，不能作为正式路径。
 
 **实施唯一入口（2026-10-24）** · 状态：**文档已整理、公式已抽取；不是 Runtime 已完成或测试已通过的声明**。实现 Agent **不需要，也不应依赖读取 `idol-data-lab`**；游戏所需已提取公式、约束、优先级和待校准缺口全部保存在 Chronicle 本目录。外部研究仓库仅用于未来**显式批准的版本升级**，不能在实现中临时找旧公式填空。
 
