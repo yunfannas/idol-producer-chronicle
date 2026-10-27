@@ -23,7 +23,7 @@ export default async function CalendarPage() {
           </section>
         ) : null}
         <ul className="divide-y divide-[var(--stage-line)]">
-          {state.events.filter((event) => event.date >= state.date).slice(0, 12).map((event) => (
+          {state.events.filter((event) => (event.status === "OFFERED" || event.status === "RESOLVED") && event.date >= state.date).slice(0, 12).map((event) => (
             <li key={event.id} className="py-4">
               <p className="text-xs tracking-wide text-[var(--stage-teal)]">
                 {formatGameDateJa(event.date)}
