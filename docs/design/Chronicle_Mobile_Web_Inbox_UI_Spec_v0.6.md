@@ -146,3 +146,21 @@ Routes (suggested, implementation path may differ): `/inbox`, `/inbox/:messageId
 2. Update `docs/ux-flows.md` to route to this spec. Remove existing four-destination menu and Meeting interaction guidance as current UX.
 3. Audit current mock mobile shell vs runtime; mark unimplemented Inbox choice persistence, linked reports, bottom sheet, deep links and advance blockers as **NOT_IMPLEMENTED** until actually tested.
 4. Keep runtime/system contracts in Implementation Pack and story chronology/scenario permissions in v0.10. Do not change economy or actor availability in a visual UI PR.
+
+## 10. Visibility of unscheduled scenario events (2026-10-27 clarification)
+
+**At a new game on 2013-01-07, the player's Live list is empty.** The immutable scenario's prospective event seeds (`DORMANT`) are internal scheduling hints, **not** actual accepted invitations, contracts or player-visible scheduled Lives. Do not display them in Inbox, Calendar, Live or directly linked Live detail URLs merely because a date has been predeclared.
+
+- **DORMANT / ELIGIBLE**: internal scenario metadata; never displayed as confirmed event or upcoming player schedule.
+- **OFFERED**: can appear in Inbox as a pending offer/required resolution and may appear in the relevant event-context views clearly marked unconfirmed; cannot be described as completed or legally confirmed simply due to its status name.
+- **RESOLVED**: actual executed record; visible in Live history and linked reports, backed by settlement facts.
+- For an explicit confirmed future booking, introduce a separate persisted accepted/confirmed commitment status with source, approval and date rather than coercing DORMANT or OFFERED into `scheduled`. Do not create that status casually without aligning story and Runtime.
+- A direct URL to a hidden internal DORMANT event must not disclose a player-visible Live detail. Chapter goals can be separately described as goals, **not** Calendar events.
+- **Advance 1 Day / 翌日へ** must call a true one-JST-day operation (maximum 1 date, stopping earlier for a legitimate gate); a distinct explicitly labeled multi-day control may use the existing <=7-day capability.
+- Until a real Live settlement adapter is connected, do not present an interactive fake settlement or claim the player can complete a Live through UI. Implementation must treat missing adapter as an incomplete gameplay path, not forge accounting facts.
+
+### Additional acceptance tests
+
+- **UI10**: freshly created state has zero visible Live entries in Inbox, Calendar and Live module, and direct DORMANT Live detail links are not accessible.
+- **UI11**: pressing one-day advance on 2013-01-07 after required opening decisions advances to 2013-01-08 (unless an earlier genuine block exists), never automatically to 2013-01-14.
+- **UI12**: internal historical event seed tables remain intact; newly arranged/persisted commitments become visible only through their own confirmed lifecycle, and actual performance/results appear only after genuine settlement.
