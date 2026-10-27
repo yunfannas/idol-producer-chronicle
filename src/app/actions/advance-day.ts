@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { advanceWithStaff, startTestRoute } from "@/lib/runtime/operations";
 import { loadOrCreateSave, resetLocalSave, savePrologueState } from "@/lib/runtime/save-repository.server";
 
@@ -17,9 +18,11 @@ export async function startTestRouteAction(formData: FormData) {
     throw new Error("Unsupported local test route");
   }
   const state = await loadOrCreateSave();
-  if (state.gates.G01) return;
-  await savePrologueState(startTestRoute(state, rosterSize));
+  if (!state.gates.G01) {
+    await savePrologueState(startTestRoute(state, rosterSize));
+  }
   revalidateChronicle();
+  redirect("/reports/opening");
 }
 
 export async function resetPrologueAction() {
@@ -32,4 +35,6 @@ function revalidateChronicle() {
   revalidatePath("/calendar");
   revalidatePath("/members");
   revalidatePath("/manage");
+  revalidatePath("/manage/live");
+  revalidatePath("/reports", "layout");
 }

@@ -8,7 +8,7 @@ export default function ManagePage() {
     <>
       <AppHeader
         title="Manage"
-        subtitle="六大モジュール。いまはナビのみ。"
+        subtitle="会議と、保存済みの運営記録。"
       />
       <main className="px-4 pt-2">
         <ul className="divide-y divide-[var(--stage-line)]">

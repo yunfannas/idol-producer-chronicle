@@ -8,7 +8,9 @@ authoritative specifications instead of reproducing their rules or numbers.
 - [Chronicle Runtime Implementation Pack v1.0](implementation/README.md) is
   the current implementation authority for Runtime formulas and contracts.
 - [Chronicle Game Design v0.10](design/Chronicle_Game_Design_v0.10.md) is the
-  authority for Chronicle story mode, dates, contracts and mobile UX.
+  authority for Chronicle story mode, dates and contracts. For mobile web
+  interaction surfaces, [Mobile Web Inbox UI v0.6](design/Chronicle_Mobile_Web_Inbox_UI_Spec_v0.6.md)
+  takes precedence through [UX flows](ux-flows.md).
   [v0.9](design/Chronicle_Game_Design_v0.9.md) is historical/supplementary only
   where it does not conflict with v0.10.
 - [Project tracker](PROJECT_TRACKER.md) maps the work to Vertical Slice A–C
@@ -27,15 +29,18 @@ gap without an explicit versioned update.
 
 Chronicle is a mobile-first, fictional Japanese idol Producer story mode. The
 Inbox is the workbench, daily advancement is the default time unit, and
-meetings—not pages—are the decision spaces. The initial scenario starts on
+Inbox details—not standalone meetings or Live scenes—are the decision spaces.
+The initial scenario starts on
 2013-01-07 JST with the three founders and progresses through the 2014-08
 prologue snapshot. See v0.10 §§0–9 for the normative scope.
 
-The Calendar/header now read a persisted local prologue Runtime and its
-ledger-derived month reports, but the rest of the mobile shell still contains
-mock presentation. This is not an approved replacement for the parent
-Performance, Fan, Cheki-demand, or Staff eligibility Runtime. Use the tracker
-before opening a new implementation stream.
+The Calendar/header and Inbox now read a persisted local prologue Runtime.
+Inbox includes the implemented opening contract editor and a factual report
+path into read-only Live/Finance details; those surfaces show only persisted
+Scenario and ledger facts. This is not an approved replacement for the parent
+Performance, Fan, Cheki-demand, or Staff eligibility Runtime: persistent Live
+settlement and the remaining meeting modules are still incomplete. Use the
+tracker before opening a new implementation stream.
 
 ## Source precedence
 

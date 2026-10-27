@@ -37,4 +37,18 @@ It supersedes older Chronicle v0.10/v0.9 guidance **only for mobile-web navigati
 
 ## Implementation status
 
-The checked-in app currently has persisted Calendar/advance and ledger-derived month reports, but Inbox, member/group and Manage presentations may still be mock. The v0.6 spec is an **approved UI design target, not a statement that the runtime UI has shipped**. Confirm actual code, routes, tests and persistence before marking each UI acceptance scenario complete. Follow [project tracker](PROJECT_TRACKER.md) and [implementation README](implementation/README.md).
+Inbox now reads the persisted prologue state and supports the implemented
+opening contract editor: Inbox → full-page decision → persisted Scenario and
+Finance entries → factual opening report. Reports can link to Live and Finance
+read-only detail, but do not mutate state. Live detail shows its contract,
+settled participants and event-linked ledger entries only when those facts
+exist; an offered or dormant event must not display invented attendance,
+Performance, Fan, ticket or Cheki results.
+
+Calendar and the shared day control also read the persisted prologue state and
+ledger-derived month reports. Day advance still stops honestly at an
+unintegrated persistent Live settlement. Idols/Groups and the remaining
+module presentations are incomplete. The v0.6 spec remains an approved UI
+target beyond these verified paths; confirm actual code, routes, tests and
+persistence before marking its acceptance scenarios complete. Follow
+[project tracker](PROJECT_TRACKER.md) and [implementation README](implementation/README.md).

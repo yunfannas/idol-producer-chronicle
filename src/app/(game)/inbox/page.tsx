@@ -1,19 +1,21 @@
 import { AppHeader } from "@/components/shell/app-header";
 import { InboxList } from "@/components/inbox/inbox-list";
-import { MOCK_INBOX } from "@/lib/mock/inbox";
+import { buildInbox } from "@/lib/presentation/prologue-ui";
+import { loadOrCreateSave } from "@/lib/runtime/save-repository.server";
 
 export const dynamic = "force-dynamic";
 
-export default function InboxPage() {
+export default async function InboxPage() {
+  const state = await loadOrCreateSave();
   return (
     <>
       <AppHeader
         title="Inbox"
-        subtitle="Producer の作業台。Blocking から Ambient まで。"
+        subtitle="決定、実行記録、報告の入口。"
         showAdvance
       />
       <main className="px-4 pt-2">
-        <InboxList initialItems={MOCK_INBOX} />
+        <InboxList items={buildInbox(state)} />
       </main>
     </>
   );

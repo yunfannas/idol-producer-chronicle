@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import type { InboxTier } from "@/lib/mock/types";
+import type { InboxTier } from "@/lib/presentation/prologue-ui";
 import { cn } from "@/lib/utils";
 
 const TIER_META: Record<
