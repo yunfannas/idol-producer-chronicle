@@ -85,6 +85,8 @@ export type LiveKind =
   | "festival"
   | "closed";
 
+export type ContractDecision = "PENDING" | "ACCEPTED" | "DECLINED";
+
 export type RuntimeMember = {
   id: string;
   nameJa: string;
@@ -154,6 +156,22 @@ export type RuntimeEvent = {
   scenarioInstance: string;
   chekiAllowed: boolean;
   participantIds: string[];
+  /** Scenario Offer date; omitted for routine, automatically handled events. */
+  offerDate?: string;
+  /** Only approved Scenario Offers may require an Inbox decision. */
+  requiresProducerDecision?: boolean;
+  contractDecision?: ContractDecision;
+  contractSummary?: string;
+};
+
+export type ScenarioDecisionRecord = {
+  id: string;
+  eventId: string;
+  eventGate: PrologueGate;
+  scenarioInstance: string;
+  choice: "accept" | "decline";
+  actor: "producer";
+  effectiveDate: string;
 };
 
 export type LedgerKind =
@@ -242,6 +260,7 @@ export type PrologueState = {
   monthlyReports: MonthlyOperatingReport[];
   resolvedEventKeys: string[];
   weeklyReviewHosts: { date: string; memberId: string }[];
+  scenarioDecisions: ScenarioDecisionRecord[];
 };
 
 export type MonthlyOperatingReport = {

@@ -25,11 +25,21 @@ export function formatYen(amount: number) {
 }
 
 function eventLabel(event: RuntimeEvent) {
-  return event.kind === "debut" ? "デビュー公演" : event.kind === "free-mall" ? "無料公開 Live" : event.kind === "experimental-regular" ? "試験定期" : event.kind === "regular" ? "定期公演" : event.kind === "one-man" ? "1st One-man" : event.kind === "festival" ? "TIF" : event.kind === "graduation" ? "卒業公演" : "対バン Live";
+  return event.kind === "debut" ? "デビュー公演" : event.kind === "free-mall" ? "無料公開 Live" : event.kind === "experimental-regular" ? "試験定期" : event.kind === "regular" ? "定期公演" : event.kind === "one-man" ? "1st One-man" : event.kind === "festival" ? "TIF" : event.kind === "graduation" ? "卒業公演" : event.kind === "closed" ? "クローズド商演" : "対バン Live";
 }
 
 function dateLabel(date: string) {
   return `${date} JST`;
+}
+
+/**
+ * Only a delivered routine offer, an accepted Scenario offer, or a settled
+ * record is player-visible. DORMANT and ELIGIBLE are Scenario/Staff internals;
+ * a pending invitation remains Inbox-only, while EXPIRED and SUPERSEDED no
+ * longer describe an available player commitment.
+ */
+export function isEventVisible(event: RuntimeEvent) {
+  return event.status === "RESOLVED" || (event.status === "OFFERED" && (!event.requiresProducerDecision || event.contractDecision === "ACCEPTED"));
 }
 
 /**
@@ -86,16 +96,30 @@ export function buildInbox(state: PrologueState): ChronicleInboxItem[] {
     });
   }
 
-  for (const event of state.events.filter((item) => item.status === "OFFERED")) {
+  for (const event of state.events.filter((item) => item.status === "OFFERED" && item.requiresProducerDecision && item.contractDecision === "PENDING")) {
     items.push({
       id: `event-${event.id}`,
       tier: "blocking",
-      title: `${eventLabel(event)}：契約の実行待ち`,
-      summary: "契約は Staff が提示済みです。Live の持久 Runtime 結算が接続されるまで、実績は記録しません。",
+      title: `${eventLabel(event)}：出演依頼`,
+      summary: "企業向けクローズドイベントの出演依頼です。受諾または辞退を決めてください。",
       body: [
-        "契約の Offer は演出完了ではありません。到場、票務、Cheki、Performance の実績をここで推測してはいけません。",
-        "現在は契約内容と既に存在する台帳のみを閲覧できます。",
+        event.contractSummary ?? "契約内容を確認してください。",
+        "受諾は日程を確定するだけで、出演料や費用を先に記帳しません。特典会は契約上ありません。",
       ],
+      from: "Live Desk",
+      dateLabel: dateLabel(event.date),
+      href: `/inbox/event-${event.id}`,
+      action: { label: "依頼内容を確認する", href: `/inbox/event-${event.id}` },
+    });
+  }
+
+  for (const event of state.events.filter((item) => item.status === "OFFERED" && !item.requiresProducerDecision)) {
+    items.push({
+      id: `event-${event.id}`,
+      tier: "blocking",
+      title: `${eventLabel(event)}：結算待ち`,
+      summary: "実績を記録する承認済み Runtime adapter を待っています。",
+      body: ["契約の Offer は演出完了ではありません。到場、票務、Cheki、Performance の実績をここで推測してはいけません。"],
       from: "Live Desk",
       dateLabel: dateLabel(event.date),
       href: `/inbox/event-${event.id}`,
@@ -127,7 +151,7 @@ export function getInboxItem(state: PrologueState, id: string) {
 
 export function getReadonlyLiveDetail(state: PrologueState, eventId: string): ReadonlyLiveDetail | undefined {
   const event = state.events.find((item) => item.id === eventId);
-  if (!event || event.status === "DORMANT" || event.status === "ELIGIBLE") return undefined;
+  if (!event || !isEventVisible(event)) return undefined;
   return {
     event,
     participants: event.participantIds.map((memberId) => state.members.find((member) => member.id === memberId)?.nameJa ?? memberId),

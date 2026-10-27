@@ -82,6 +82,25 @@ function event(
   return { id, date, gate, kind, status: "DORMANT", scenarioInstance: id, chekiAllowed, participantIds: [] };
 }
 
+const addDays = (isoDate: string, days: number) => {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+
+/**
+ * The only commercial invitation currently authored for the persisted
+ * prologue. It is not a recurring income source: the offer exists only after
+ * the debut gate has actually completed, and its fee/cost are settled only by
+ * a future completed-Live adapter.
+ */
+export const postDebutCommercialOfferV1 = {
+  id: "commercial-invite-post-debut-v1",
+  gate: "G05" as const,
+  offerDelayDays: 7,
+  contractSummary: "企業関係者向けのクローズドイベント。固定出演料は、実演完了後に契約どおり精算します。特典会はありません。",
+};
+
 function regularWednesdayEvents(): RuntimeEvent[] {
   const events: RuntimeEvent[] = [];
   const end = new Date("2014-08-02T00:00:00Z");
@@ -152,6 +171,54 @@ export function createPrologueState(input: { saveId: string; difficulty?: Diffic
     monthlyReports: [],
     resolvedEventKeys: [],
     weeklyReviewHosts: [{ date: "2013-01-07", memberId: "IPC1-001" }],
+    scenarioDecisions: [],
+  };
+}
+
+/** Materializes the authored offer only after the corresponding story gate. */
+export function materializeScenarioOffers(state: PrologueState, offerDate: string): PrologueState {
+  if (!state.gates.G05 || state.events.some((event) => event.id === postDebutCommercialOfferV1.id)) return state;
+  const eventDate = addDays(offerDate, postDebutCommercialOfferV1.offerDelayDays);
+  const commercial: RuntimeEvent = {
+    id: postDebutCommercialOfferV1.id,
+    date: eventDate,
+    offerDate,
+    gate: postDebutCommercialOfferV1.gate,
+    kind: "closed",
+    status: "DORMANT",
+    scenarioInstance: postDebutCommercialOfferV1.id,
+    chekiAllowed: false,
+    participantIds: [],
+    requiresProducerDecision: true,
+    contractDecision: "PENDING",
+    contractSummary: postDebutCommercialOfferV1.contractSummary,
+  };
+  return { ...state, events: [...state.events, commercial] };
+}
+
+/** Scenario decision is idempotent and does not settle a Live or any money. */
+export function decideCommercialOffer(state: PrologueState, input: { eventId: string; choice: "accept" | "decline" }): PrologueState {
+  const runtimeEvent = state.events.find((event) => event.id === input.eventId);
+  if (!runtimeEvent || runtimeEvent.kind !== "closed" || !runtimeEvent.requiresProducerDecision || runtimeEvent.status !== "OFFERED") {
+    throw new Error("Commercial offer is not awaiting a producer decision");
+  }
+  const decisionId = `${state.saveId}:${runtimeEvent.gate}:${runtimeEvent.scenarioInstance}:contract`;
+  if (state.scenarioDecisions.some((decision) => decision.id === decisionId)) return state;
+  const accepted = input.choice === "accept";
+  return {
+    ...state,
+    events: state.events.map((event) => event.id === runtimeEvent.id
+      ? { ...event, contractDecision: accepted ? "ACCEPTED" as const : "DECLINED" as const, status: accepted ? "OFFERED" as const : "EXPIRED" as const }
+      : event),
+    scenarioDecisions: [...state.scenarioDecisions, {
+      id: decisionId,
+      eventId: runtimeEvent.id,
+      eventGate: runtimeEvent.gate,
+      scenarioInstance: runtimeEvent.scenarioInstance,
+      choice: input.choice,
+      actor: "producer",
+      effectiveDate: state.date,
+    }],
   };
 }
 

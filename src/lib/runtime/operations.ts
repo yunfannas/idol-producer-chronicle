@@ -2,6 +2,7 @@ import { createMonthlyOperatingReport, postLedgerEntry } from "./finance";
 import {
   completeMandatoryInterview,
   completeStrategyAndOriginals,
+  materializeScenarioOffers,
   markEventEligible,
   offerEligibleEvent,
   routeCandidateIds,
@@ -78,16 +79,29 @@ export function advanceWithStaff(state: PrologueState, maxDays = 7): DayAdvanceR
   if (!state.gates.G03) return { state, advancedDays: 0, blockingGate: "G03" };
   if (!state.gates.G04) return { state, advancedDays: 0, blockingGate: "G04" };
 
+  const pendingDecision = state.events.find((event) => event.status === "OFFERED" && event.requiresProducerDecision && event.contractDecision === "PENDING");
+  if (pendingDecision) return { state, advancedDays: 0, awaitingSettlementEventId: pendingDecision.id };
+
   let next = state;
   for (let advancedDays = 0; advancedDays < maxDays; advancedDays += 1) {
     const date = nextDate(next.date);
     next = finalizePreviousMonth(postScheduledCosts(next, date), date);
+    next = materializeScenarioOffers(next, date);
+    const offerDue = next.events.find((event) => event.offerDate === date && event.status === "DORMANT");
+    if (offerDue) {
+      next = offerEligibleEvent(markEventEligible(next, offerDue.id), offerDue.id);
+      return { state: { ...next, date }, advancedDays: advancedDays + 1, awaitingSettlementEventId: offerDue.id };
+    }
     const scheduled = next.events.find((event) => event.date === date && event.status === "DORMANT");
     if (scheduled) {
       // Staff may make the scheduled event eligible and offer it, but only the
       // approved parent Performance/Fan/Cheki adapter may supply its facts.
       next = offerEligibleEvent(markEventEligible(next, scheduled.id), scheduled.id);
       return { state: { ...next, date }, advancedDays: advancedDays + 1, awaitingSettlementEventId: scheduled.id };
+    }
+    const acceptedCommercial = next.events.find((event) => event.date === date && event.status === "OFFERED" && event.contractDecision === "ACCEPTED");
+    if (acceptedCommercial) {
+      return { state: { ...next, date }, advancedDays: advancedDays + 1, awaitingSettlementEventId: acceptedCommercial.id };
     }
     next = { ...next, date };
   }

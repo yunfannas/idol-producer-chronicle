@@ -20,10 +20,19 @@ describe("persisted prologue UI read model", () => {
     expect(state.finance.entries.filter((entry) => entry.id.startsWith("making:"))).toHaveLength(3);
   });
 
-  it("exposes only an event contract until a Live has actually been settled", () => {
+  it("does not expose dormant future events by Inbox, list, or direct detail", () => {
     const state = startTestRoute(createPrologueState({ saveId: "ui-test" }), 3);
     const event = state.events[0];
     const detail = getReadonlyLiveDetail(state, event.id);
     expect(detail).toBeUndefined();
+    expect(buildInbox(state).some((item) => item.id.includes(event.id))).toBe(false);
+  });
+
+  it("keeps eligible-but-undelivered events out of player surfaces", () => {
+    const state = startTestRoute(createPrologueState({ saveId: "ui-eligible-test" }), 3);
+    const event = { ...state.events[0], status: "ELIGIBLE" as const };
+    const pending = { ...state, events: [event, ...state.events.slice(1)] };
+    expect(getReadonlyLiveDetail(pending, event.id)).toBeUndefined();
+    expect(buildInbox(pending).some((item) => item.id.includes(event.id))).toBe(false);
   });
 });

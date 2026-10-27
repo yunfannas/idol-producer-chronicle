@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { MANAGE_MODULES } from "@/lib/mock/manage";
-import { eventDisplayName, formatYen } from "@/lib/presentation/prologue-ui";
+import { eventDisplayName, formatYen, isEventVisible } from "@/lib/presentation/prologue-ui";
 import { loadOrCreateSave } from "@/lib/runtime/save-repository.server";
 
 export default async function ManageModulePage({
@@ -47,7 +47,7 @@ export default async function ManageModulePage({
           <section className="space-y-3 rounded-xl border border-[var(--stage-line)] bg-white p-4">
             <div><h2 className="font-medium text-[var(--stage-ink)]">Live contract record</h2><p className="mt-1 text-sm leading-relaxed text-muted-foreground">契約・出場記録・既存台帳を読む専用です。未結算の Live に実績は表示しません。</p></div>
             <ul className="divide-y divide-[var(--stage-line)]">
-              {state.events.filter((event) => event.status === "OFFERED" || event.status === "RESOLVED").slice(0, 12).map((event) => (
+              {state.events.filter((event) => isEventVisible(event) && (event.date >= state.date || event.status === "RESOLVED")).slice(0, 12).map((event) => (
                 <li key={event.id} className="py-3">
                   <Link href={`/manage/live/${event.id}`} className="flex items-center justify-between gap-3 hover:text-[var(--stage-teal)]"><span><span className="block text-xs text-muted-foreground">{event.date} JST · {event.status}</span><span className="mt-1 block font-medium text-[var(--stage-ink)]">{eventDisplayName(event)}</span></span><ChevronRight className="size-4 shrink-0" /></Link>
                 </li>

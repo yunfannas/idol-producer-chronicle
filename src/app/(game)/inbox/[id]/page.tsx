@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { startTestRouteAction } from "@/app/actions/advance-day";
+import { decideCommercialOfferAction, startTestRouteAction } from "@/app/actions/advance-day";
 import { InboxTierBadge } from "@/components/inbox/inbox-tier-badge";
 import { Separator } from "@/components/ui/separator";
 import { getInboxItem } from "@/lib/presentation/prologue-ui";
@@ -56,6 +56,19 @@ function OpeningDecisionEditor() {
   );
 }
 
+function CommercialOfferDecision({ eventId }: { eventId: string }) {
+  return (
+    <section className="space-y-3 rounded-xl border border-[var(--stage-line)] bg-white p-4">
+      <h2 className="font-[family-name:var(--font-display)] text-xl text-[var(--stage-ink)]">出演依頼の決定</h2>
+      <p className="text-sm leading-relaxed text-muted-foreground">受諾後は当日の実演結算まで予定として保持されます。辞退しても収益・費用は発生しません。</p>
+      <div className="grid grid-cols-2 gap-2">
+        <form action={decideCommercialOfferAction}><input type="hidden" name="eventId" value={eventId} /><input type="hidden" name="choice" value="decline" /><button type="submit" className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-[var(--stage-line)] text-sm font-medium hover:bg-muted">辞退する</button></form>
+        <form action={decideCommercialOfferAction}><input type="hidden" name="eventId" value={eventId} /><input type="hidden" name="choice" value="accept" /><button type="submit" className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-[var(--stage-ink)] text-sm font-medium text-[var(--stage-paper)] hover:opacity-90">受諾する</button></form>
+      </div>
+    </section>
+  );
+}
+
 export default async function InboxDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const state = await loadOrCreateSave();
@@ -76,7 +89,8 @@ export default async function InboxDetailPage({ params }: { params: Promise<{ id
           {item.body.map((paragraph) => <p key={paragraph} className="text-[0.95rem] leading-relaxed text-[var(--stage-ink)]/90">{paragraph}</p>)}
         </div>
         {id === "decision-opening" ? <OpeningDecisionEditor /> : null}
-        {id !== "decision-opening" && item.action ? (
+        {id.startsWith("event-commercial-invite-") ? <CommercialOfferDecision eventId={id.slice("event-".length)} /> : null}
+        {id !== "decision-opening" && !id.startsWith("event-commercial-invite-") && item.action ? (
           <Link href={item.action.href} className="inline-flex h-10 w-full items-center justify-center gap-1 rounded-lg bg-[var(--stage-ink)] px-3 text-sm font-medium text-[var(--stage-paper)] hover:opacity-90">
             {item.action.label} <ChevronRight className="size-4" />
           </Link>

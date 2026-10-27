@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/shell/app-header";
 import { loadOrCreateSave } from "@/lib/runtime/save-repository.server";
+import { isEventVisible } from "@/lib/presentation/prologue-ui";
 import { formatGameDateJa } from "@/lib/mock/game-date";
 
 export const dynamic = "force-dynamic";
 
 export default async function CalendarPage() {
   const state = await loadOrCreateSave();
-  const outstanding = state.events.find((event) => event.status === "OFFERED");
+  const outstanding = state.events.find((event) => isEventVisible(event) && event.status === "OFFERED" && event.date <= state.date);
   return (
     <>
       <AppHeader
@@ -23,7 +24,7 @@ export default async function CalendarPage() {
           </section>
         ) : null}
         <ul className="divide-y divide-[var(--stage-line)]">
-          {state.events.filter((event) => (event.status === "OFFERED" || event.status === "RESOLVED") && event.date >= state.date).slice(0, 12).map((event) => (
+          {state.events.filter((event) => event.date >= state.date && isEventVisible(event)).slice(0, 12).map((event) => (
             <li key={event.id} className="py-4">
               <p className="text-xs tracking-wide text-[var(--stage-teal)]">
                 {formatGameDateJa(event.date)}

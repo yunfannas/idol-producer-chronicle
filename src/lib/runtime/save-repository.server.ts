@@ -28,12 +28,13 @@ export async function loadOrCreateSave(input: {
     const saved = JSON.parse(await readFile(savePath(saveId), "utf8")) as PrologueState;
     // v1.5 save migration adds Followers and four-week Interest without
     // assigning a fictional fan, follower, or relationship to old saves.
-    if (!saved.fan || !saved.performanceProgression || !saved.reputation || !saved.fan.followers || !saved.fan.interests) {
+    if (!saved.fan || !saved.performanceProgression || !saved.reputation || !saved.fan.followers || !saved.fan.interests || !saved.scenarioDecisions) {
       const migrated = {
         ...saved,
         fan: saved.fan ? ensureFanMembers(saved.fan, saved.members.map((member) => member.id)) : createFanState(saved.members.map((member) => member.id)),
         performanceProgression: saved.performanceProgression ?? createPerformanceProgression({ songId: "prologue-staff-default-song", arrangementVersion: "v1", initialFamiliarity: 0 }),
         reputation: saved.reputation ?? createReputationState(),
+        scenarioDecisions: saved.scenarioDecisions ?? [],
       };
       await savePrologueState(migrated);
       return migrated;

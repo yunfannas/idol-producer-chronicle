@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { advanceWithStaff, startTestRoute } from "@/lib/runtime/operations";
+import { decideCommercialOffer } from "@/lib/runtime/prologue";
 import { loadOrCreateSave, resetLocalSave, savePrologueState } from "@/lib/runtime/save-repository.server";
 
 export async function advanceOneDayAction() {
@@ -30,11 +31,25 @@ export async function resetPrologueAction() {
   revalidateChronicle();
 }
 
+export async function decideCommercialOfferAction(formData: FormData) {
+  const eventId = formData.get("eventId");
+  const choice = formData.get("choice");
+  if (typeof eventId !== "string" || (choice !== "accept" && choice !== "decline")) {
+    throw new Error("Invalid commercial offer decision");
+  }
+  const state = await loadOrCreateSave();
+  await savePrologueState(decideCommercialOffer(state, { eventId, choice }));
+  revalidateChronicle();
+  redirect("/inbox");
+}
+
 function revalidateChronicle() {
   revalidatePath("/inbox");
   revalidatePath("/calendar");
   revalidatePath("/members");
   revalidatePath("/manage");
   revalidatePath("/manage/live");
+  revalidatePath("/idols");
+  revalidatePath("/groups");
   revalidatePath("/reports", "layout");
 }

@@ -33,6 +33,9 @@ It supersedes older Chronicle v0.10/v0.9 guidance **only for mobile-web navigati
 - Prologue still follows v0.10's G00–G12 gates, including required scripted audition and 2013-05-24 debut.
 - No free-form Audition. R1 tuning is only editable when permitted; R2/R3/R4 chapter/world-fixed permissions persist.
 - Reports link to canonical actual event/ledger records; no double Live/Cheki settlement or hidden Performance/Impression display.
+- A Scenario event remains hidden from Inbox, Calendar, Live lists and direct
+  detail until it reaches `OFFERED`; `DORMANT` and `ELIGIBLE` are internal
+  scheduling states, not player-facing previews.
 - Producer knowledge visibility and terminology remain constrained by [Terminology v0.2](design/Terminology_ZH_JA_EN_v0.2.md) and the implementation authority.
 
 ## Implementation status
@@ -52,3 +55,11 @@ module presentations are incomplete. The v0.6 spec remains an approved UI
 target beyond these verified paths; confirm actual code, routes, tests and
 persistence before marking its acceptance scenarios complete. Follow
 [project tracker](PROJECT_TRACKER.md) and [implementation README](implementation/README.md).
+
+One authored post-debut Scenario Offer is now materialized only after `G05`:
+a company invitation to a closed commercial performance. It is a blocking
+Inbox accept/decline decision, creates an idempotent decision record, forbids
+Cheki, and records neither revenue nor costs at acceptance. An accepted offer
+is shown as a future commitment and stops advance on its event day until the
+approved completed-Live settlement adapter supplies actual contract and
+ledger facts.
