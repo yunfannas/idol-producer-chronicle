@@ -40,6 +40,23 @@ describe("Fan x Cheki integration audit invariants", () => {
     expect(sales.hot.queueLostJPY).toBeGreaterThan(0);
   });
 
+  it("keeps an existing A fan eligible for a real, separately served second-member trial", () => {
+    const fan = createFanState(["a", "b"], { otakuCount: 1 });
+    fan.members.a = { affinityCount: 1, purchaseWeightKJPY: 0 };
+    let eligible: Record<string, number> = {};
+    const sales = settleChekiQueue({
+      fan, memberIds: ["a", "b"], attendeeOtaku: 1, seed: "second-oshi",
+      exposureProbabilityByMember: { a: 1, b: 1 },
+      existingOtakuTrialProbabilityByMember: { a: 1, b: 1 },
+      onAudience: (audience) => { eligible = audience.eligibleExposedOWithoutAffinity; },
+    });
+    expect(eligible.a).toBe(0);
+    expect(eligible.b).toBe(1);
+    expect(sales.a.existingOtakuTrialRequested).toBe(0);
+    expect(sales.b.existingOtakuTrialRequested).toBe(1);
+    expect(sales.b.existingOtakuTrialServed).toBe(1);
+  });
+
   it("documents fixed natural retention until R2 supplies Live/SNS/satisfaction factors", () => {
     const fan = createFanState(["member"], { publicCount: 100, otakuCount: 100 });
     fan.members.member = { affinityCount: 50, purchaseWeightKJPY: 2 };

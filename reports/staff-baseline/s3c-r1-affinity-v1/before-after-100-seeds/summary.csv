@@ -1,0 +1,15 @@
+experiment,metric,mean
+before,final_p,562.946842
+before,final_o,321.378109
+before,final_a,233.288008
+before,a_per_o,0.725833
+before,cheki_gross,1273880
+before,cheki_net,828626.2
+before,cash,1145013.7
+after,final_p,562.946922
+after,final_o,321.378079
+after,final_a,237.748241
+after,a_per_o,0.739723
+after,cheki_gross,1309940
+after,cheki_net,857479.6
+after,cash,1173867.1

@@ -18,7 +18,8 @@
     "report:c3-active-public-calibration": "node scripts/calibrate-c3-active-public-conversion.cjs",
     "report:s3c-fan-po-diagnostic": "node scripts/generate-s3c-fan-po-diagnostic-report.cjs",
     "report:s3c-r0-conversion": "node scripts/generate-s3c-r0-conversion-report.cjs",
-    "report:s3c-fan-cheki-finance-retention": "node scripts/generate-s3c-fan-cheki-finance-retention-report.cjs"
+    "report:s3c-fan-cheki-finance-retention": "node scripts/generate-s3c-fan-cheki-finance-retention-report.cjs",
+    "report:s3c-r1-affinity": "node scripts/generate-s3c-r1-affinity-report.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
