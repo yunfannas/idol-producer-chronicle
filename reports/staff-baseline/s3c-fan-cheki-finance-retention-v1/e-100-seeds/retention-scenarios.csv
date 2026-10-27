@@ -1,0 +1,7 @@
+scenario,status,base_o_rate,effective_factor,reason
+normal_live_sns_neutral,NOT_IMPLEMENTED,0.0015,1,Runtime has no Live/SNS/satisfaction retention input; fixed natural decay applies
+few_live_sns_active,NOT_IMPLEMENTED,0.0015,1,Runtime has no Live/SNS/satisfaction retention input; fixed natural decay applies
+normal_live_low_satisfaction,NOT_IMPLEMENTED,0.0015,1,Runtime has no Live/SNS/satisfaction retention input; fixed natural decay applies
+high_satisfaction_sns_active,NOT_IMPLEMENTED,0.0015,1,Runtime has no Live/SNS/satisfaction retention input; fixed natural decay applies
+no_live_no_sns,NOT_IMPLEMENTED,0.0015,1,Runtime has no Live/SNS/satisfaction retention input; fixed natural decay applies
+post_graduation_normal_ops,NOT_IMPLEMENTED,0.0015,1,Runtime has no Live/SNS/satisfaction retention input; fixed natural decay applies

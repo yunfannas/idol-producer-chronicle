@@ -201,6 +201,7 @@ export type StaffAutoplayEventAudit = {
   cheki: {
     lines: ChekiSettlementLine[];
     queues: Record<string, {
+      requestedJPY: number;
       requestedUnits: number;
       completedUnits: number;
       completedUnitsByTier: { "1000": number; "2000": number };
@@ -240,8 +241,16 @@ export type StaffAutoplayEventAudit = {
     externalToPublic: number;
     /** One initial affinity for each event-attributed new Otaku. */
     initialAffinityByMember: Record<string, number>;
+    /** R0 member-Live new O/A only; Team trigger intentionally stays absent. */
+    memberLiveAffinityByMember: Record<string, number>;
+    /** R0 paid-Cheki new O/A after a completed paid service only. */
+    paidChekiAffinityByMember: Record<string, number>;
+    /** R0 voucher-Cheki new O/A after a completed free service only. */
+    voucherChekiAffinityByMember: Record<string, number>;
     /** Existing assigned O gaining an additional member affinity at this Live. */
     existingOtakuAffinityByMember: Record<string, number>;
+    /** Event contribution to the once-per-week permanent W settlement. */
+    purchaseWeightLogChangeByMember: Record<string, number>;
     freeTrialRequested: number;
     freeTrialServed: number;
     freeTrialLost: number;
@@ -510,6 +519,8 @@ function updateFanFromR0Event(input: FanEventUpdateInput) {
   const externalByContext: Record<"external-idol" | "external-general", number> = { "external-idol": 0, "external-general": 0 };
   const externalByPath: Record<R0ConversionPath, number> = { "team-live": 0, "member-live": 0, "paid-cheki": 0, "voucher-cheki": 0 };
   const externalInitialAffinityByMember = Object.fromEntries(Object.keys(input.fan.members).map((id) => [id, 0])) as Record<string, number>;
+  const memberLiveAffinityByMember = Object.fromEntries(Object.keys(input.fan.members).map((id) => [id, 0])) as Record<string, number>;
+  const paidChekiAffinityByMember = Object.fromEntries(Object.keys(input.fan.members).map((id) => [id, 0])) as Record<string, number>;
   const voucherConversionsByMember = Object.fromEntries(Object.keys(input.fan.members).map((id) => [id, 0])) as Record<string, number>;
   const recordConversion = (candidate: R0EventCandidate, path: R0ConversionPath, memberId?: string) => {
     if (candidate.ownership === "public") {
@@ -517,9 +528,13 @@ function updateFanFromR0Event(input: FanEventUpdateInput) {
     } else {
       externalByContext[candidate.context as "external-idol" | "external-general"] += 1;
       externalByPath[path] += 1;
-      if (memberId) externalInitialAffinityByMember[memberId] = (externalInitialAffinityByMember[memberId] ?? 0) + 1;
+      if (memberId) {
+        externalInitialAffinityByMember[memberId] = (externalInitialAffinityByMember[memberId] ?? 0) + 1;
+        if (path === "member-live") memberLiveAffinityByMember[memberId] = (memberLiveAffinityByMember[memberId] ?? 0) + 1;
+        if (path === "paid-cheki") paidChekiAffinityByMember[memberId] = (paidChekiAffinityByMember[memberId] ?? 0) + 1;
+        if (path === "voucher-cheki") voucherConversionsByMember[memberId] = (voucherConversionsByMember[memberId] ?? 0) + 1;
+      }
     }
-    if (path === "voucher-cheki" && memberId) voucherConversionsByMember[memberId] = (voucherConversionsByMember[memberId] ?? 0) + 1;
   };
   for (const candidate of candidates) {
     const probability = candidate.source === "team"
@@ -610,7 +625,11 @@ function updateFanFromR0Event(input: FanEventUpdateInput) {
       externalToOtaku,
       externalToPublic: 0,
       initialAffinityByMember: externalInitialAffinityByMember,
+      memberLiveAffinityByMember,
+      paidChekiAffinityByMember,
+      voucherChekiAffinityByMember: voucherConversionsByMember,
       existingOtakuAffinityByMember: newAffinityByMember,
+      purchaseWeightLogChangeByMember: logWByMember,
       freeTrialRequested: Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialRequested, 0),
       freeTrialServed: Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialServed, 0),
       freeTrialLost: Object.values(sales).reduce((sum, sale) => sum + sale.freeTrialLost, 0),
@@ -761,7 +780,11 @@ function updateFanFromEvent(input: FanEventUpdateInput) {
       externalToOtaku: externalToO,
       externalToPublic: externalToP,
       initialAffinityByMember: newByMember,
+      memberLiveAffinityByMember: Object.fromEntries(Object.keys(input.fan.members).map((id) => [id, 0])),
+      paidChekiAffinityByMember: Object.fromEntries(Object.keys(input.fan.members).map((id) => [id, 0])),
+      voucherChekiAffinityByMember: freeTrialConversionsByMember,
       existingOtakuAffinityByMember: newAffinityByMember,
+      purchaseWeightLogChangeByMember: logWByMember,
       freeTrialRequested,
       freeTrialServed,
       freeTrialLost,
@@ -839,6 +862,13 @@ function resolveWeeklyFanMomentum(input: {
       if (memberId && (conversion.memberId || momentum.assignInitialAffinityToNewOtaku)) {
         additionalAffinity[memberId] = (additionalAffinity[memberId] ?? 0) + 1;
         audit.fanFlow.initialAffinityByMember[memberId] = (audit.fanFlow.initialAffinityByMember[memberId] ?? 0) + 1;
+        if (conversion.path === "member-live") {
+          audit.fanFlow.memberLiveAffinityByMember[memberId] = (audit.fanFlow.memberLiveAffinityByMember[memberId] ?? 0) + 1;
+        } else if (conversion.path === "paid-cheki") {
+          audit.fanFlow.paidChekiAffinityByMember[memberId] = (audit.fanFlow.paidChekiAffinityByMember[memberId] ?? 0) + 1;
+        } else if (conversion.path === "voucher-cheki") {
+          audit.fanFlow.voucherChekiAffinityByMember[memberId] = (audit.fanFlow.voucherChekiAffinityByMember[memberId] ?? 0) + 1;
+        }
       }
     }
   }
@@ -1215,7 +1245,7 @@ export function runStaffAutoplayPrologue(input: {
       fanMonth.eventFlow.publicAttendance += fanOutcome.flow.publicAttendance;
       fanMonth.eventFlow.externalAudience += fanOutcome.flow.externalAudience;
       fanMonth.eventFlow.externalExposure += fanOutcome.flow.externalExposure;
-      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, audienceCapacity: contract.capacity, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY, paidNewcomerRequested: sale.paidNewcomerRequested, paidNewcomerServed: sale.paidNewcomerServed, paidNewcomerLost: sale.paidNewcomerLost }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow }, audienceAttribution, ticketSettlementSource: "scenario-contract" });
+      audits.push({ date, liveId: event.id, kind: event.kind, contractId: `scenario:${event.kind}`, audienceCapacity: contract.capacity, participantIds: participants.map((member) => member.id), expectedAttendance: contract.attendees, actualAttendance, performanceInternal: resolved.quality, ticketRevenueJPY: ticketRevenue, venueCostJPY: contract.venueCostJPY, chekiGrossJPY: lines.reduce((sum, line) => sum + line.grossSales, 0), chekiCommissionJPY: lines.reduce((sum, line) => sum + line.memberShare, 0), chekiVariableCostJPY: lines.reduce((sum, line) => sum + line.variableCost, 0) + Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.freeTrialVariableCostJPY, 0), queueLostJPY: Object.values(fanOutcome.sales).reduce((sum, sale) => sum + sale.queueLostJPY, 0), publicCount: state.fan.publicCount, otakuCount: state.fan.otakuCount, affinityTotal: Object.values(state.fan.members).reduce((sum, profile) => sum + profile.affinityCount, 0), cashAfterJPY: state.finance.cash, songId: s3Variant === "S3-A" ? undefined : staffAutoplayScenarioV1.arrangement.songId, arrangementVersion: s3Variant === "S3-A" ? undefined : arrangementVersion, familiarityAtLive: s3Variant === "S3-A" ? undefined : arrangement.familiarity, paletteExecution: resolved.paletteExecution, resolvedDuties: s3Variant === "S3-C" ? resolvedDuties : undefined, cheki: { lines, queues: Object.fromEntries(Object.entries(fanOutcome.sales).map(([memberId, sale]) => [memberId, { requestedJPY: sale.requestedJPY, requestedUnits: sale.requestedUnits, completedUnits: sale.completedUnits, completedUnitsByTier: { ...sale.completedUnitsByTier }, affinityVisitors: sale.affinityVisitors, buyerCount: sale.buyerCount, queueLostBuyers: sale.queueLostBuyers, queueLostJPY: sale.queueLostJPY, freeTrialRequested: sale.freeTrialRequested, freeTrialServed: sale.freeTrialServed, freeTrialLost: sale.freeTrialLost, freeTrialVariableCostJPY: sale.freeTrialVariableCostJPY, paidNewcomerRequested: sale.paidNewcomerRequested, paidNewcomerServed: sale.paidNewcomerServed, paidNewcomerLost: sale.paidNewcomerLost }])) }, fanFlow: { opening: fanOpening, ...fanOutcome.flow }, audienceAttribution, ticketSettlementSource: "scenario-contract" });
       pendingFanMomenta.push({ eventId: event.id, auditIndex: audits.length - 1, ...fanOutcome.momentum });
       if (event.id === "graduation-2014-05-11") {
         // The completed graduation Live participates in this week's momentum;

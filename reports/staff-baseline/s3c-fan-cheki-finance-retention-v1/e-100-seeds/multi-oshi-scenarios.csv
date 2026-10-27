@@ -1,0 +1,8 @@
+scenario,status,evidence
+all_members_have_capacity,NOT_IMPLEMENTED,No multi-oshi demand aggregation model
+single_hot_member_full,NOT_IMPLEMENTED,FIFO loss is tested; no overflow routing
+two_members_similar_a_w,NOT_IMPLEMENTED,S_ij and q_base are absent
+two_members_dissimilar_a_w,NOT_IMPLEMENTED,S_ij and q_base are absent
+multiple_members_full,NOT_IMPLEMENTED,No residual-capacity coordination
+all_members_full,NOT_IMPLEMENTED,No multi-oshi demand budget model
+voucher_and_paid_congested,PASS_SHARED_QUEUE_ONLY,Real queue and free/paid finance separation are asserted; overflow remains absent
