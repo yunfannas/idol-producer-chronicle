@@ -117,21 +117,6 @@ export function buildInbox(state: PrologueState): ChronicleInboxItem[] {
     });
   }
 
-  const next = state.events.find((event) => event.date >= state.date && event.status === "DORMANT");
-  if (next) {
-    items.push({
-      id: `upcoming-${next.id}`,
-      tier: "ambient",
-      title: `次の予定：${eventLabel(next)}`,
-      summary: `${dateLabel(next.date)}。通常業務は承認済み Staff 方針の範囲で進行します。`,
-      body: ["通常の練習と承認済み日程は Staff が実行します。重要な決定だけが Inbox に戻ります。"],
-      from: "Calendar",
-      dateLabel: dateLabel(next.date),
-      href: `/inbox/upcoming-${next.id}`,
-      action: { label: "Live 詳細を読む", href: `/manage/live/${next.id}` },
-    });
-  }
-
   const order: Record<InboxTier, number> = { blocking: 0, actionable: 1, report: 2, ambient: 3 };
   return items.sort((left, right) => order[left.tier] - order[right.tier]);
 }
@@ -142,7 +127,7 @@ export function getInboxItem(state: PrologueState, id: string) {
 
 export function getReadonlyLiveDetail(state: PrologueState, eventId: string): ReadonlyLiveDetail | undefined {
   const event = state.events.find((item) => item.id === eventId);
-  if (!event) return undefined;
+  if (!event || event.status === "DORMANT" || event.status === "ELIGIBLE") return undefined;
   return {
     event,
     participants: event.participantIds.map((memberId) => state.members.find((member) => member.id === memberId)?.nameJa ?? memberId),
