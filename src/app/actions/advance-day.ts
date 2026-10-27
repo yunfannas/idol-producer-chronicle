@@ -7,7 +7,7 @@ import { loadOrCreateSave, resetLocalSave, savePrologueState } from "@/lib/runti
 
 export async function advanceOneDayAction() {
   const state = await loadOrCreateSave();
-  const result = advanceWithStaff(state, 7);
+  const result = advanceWithStaff(state, 1);
   await savePrologueState(result.state);
   revalidateChronicle();
 }
