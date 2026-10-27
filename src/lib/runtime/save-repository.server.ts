@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createPrologueState } from "./prologue";
-import { createFanState } from "./fan";
+import { createFanState, ensureFanMembers } from "./fan";
 import { createPerformanceProgression } from "./arrangement-familiarity";
 import { createReputationState } from "./reputation";
 import type { Difficulty, PrologueState } from "./types";
@@ -26,11 +26,12 @@ export async function loadOrCreateSave(input: {
   const saveId = input.saveId ?? SAVE_ID;
   try {
     const saved = JSON.parse(await readFile(savePath(saveId), "utf8")) as PrologueState;
-    // v1 save migration: prior local saves predate the P/O/A/W state.
-    if (!saved.fan || !saved.performanceProgression || !saved.reputation) {
+    // v1.5 save migration adds Followers and four-week Interest without
+    // assigning a fictional fan, follower, or relationship to old saves.
+    if (!saved.fan || !saved.performanceProgression || !saved.reputation || !saved.fan.followers || !saved.fan.interests) {
       const migrated = {
         ...saved,
-        fan: saved.fan ?? createFanState(saved.members.map((member) => member.id)),
+        fan: saved.fan ? ensureFanMembers(saved.fan, saved.members.map((member) => member.id)) : createFanState(saved.members.map((member) => member.id)),
         performanceProgression: saved.performanceProgression ?? createPerformanceProgression({ songId: "prologue-staff-default-song", arrangementVersion: "v1", initialFamiliarity: 0 }),
         reputation: saved.reputation ?? createReputationState(),
       };

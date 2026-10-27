@@ -9,7 +9,7 @@
  */
 import { settleChekiSales } from "./cheki";
 import { arrangementFor, createArrangementVersion, recordArrangementExposure, settleArrangementFamiliarityWeek, type FamiliaritySettlement } from "./arrangement-familiarity";
-import { applyWeeklyFanDecay, createFanState, fanChekiBalanceV1 } from "./fan";
+import { applyWeeklyFanDecay, ensureFanMembers, fanChekiBalanceV1 } from "./fan";
 import { audienceChannelDiagnosticV1, resolveDiagnosticAudienceChannels, type AudienceChannelDiagnosticConfig, type EventAudienceAttribution } from "./audience-channels";
 import { resolveWeeklyOnlineAcquisition, staffExternalAudienceDemandV11, type WeeklyOnlineAcquisition } from "./fan-acquisition";
 import {
@@ -942,7 +942,8 @@ function resolveWeeklyFanMomentum(input: {
         : (newAffinity > 0 ? fanChekiBalanceV1.defaultNewAffinityW : 0),
     }];
   }));
-  const fan = {
+  const fan: FanState = {
+      ...decayed,
       publicCount: Math.max(0, decayed.publicCount - publicToOtaku + externalToPublic + (input.onlineNewPublic ?? 0)),
       otakuCount,
       temporarilyUnassignedOtaku: decayed.temporarilyUnassignedOtaku,
@@ -1140,9 +1141,7 @@ export function runStaffAutoplayPrologue(input: {
     }
     if (input.route === "C" && !augmented && date === "2013-10-01") {
       // Scenario-only October audition: a fresh pool, not rejected January IDs.
-      state = { ...state, members: [...state.members, ...C_NEWCOMERS], fan: {
-        ...state.fan, members: { ...state.fan.members, ...createFanState(C_NEWCOMERS.map((member) => member.id)).members },
-      } };
+      state = { ...state, members: [...state.members, ...C_NEWCOMERS], fan: ensureFanMembers(state.fan, C_NEWCOMERS.map((member) => member.id)) };
       operating = state.members.map(operatingMember);
       state = post(state, { id: "scenario:c-october-costumes", date, kind: "capitalized_asset", amount: 150_000, category: "october_roster_costume", note: "Scenario C October new-pool contracts and costumes" });
       augmented = true;

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { runTwelveWeekRoute, settleChekiQueue, type ChekiServiceRecord } from "./regression";
+import { createFanState } from "./fan";
 import type { FanState } from "./types";
 
 const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -7,7 +8,9 @@ const total = (sales: ReturnType<typeof settleChekiQueue>, field: "requestedJPY"
   Object.values(sales).reduce((sum, item) => sum + item[field], 0);
 
 function state(otaku: number, profiles: Record<string, { affinityCount: number; purchaseWeightKJPY: number }>): FanState {
-  return { publicCount: 300, otakuCount: otaku, temporarilyUnassignedOtaku: 0, members: profiles };
+  const fan = createFanState(Object.keys(profiles), { publicCount: 300, otakuCount: otaku });
+  fan.members = profiles;
+  return fan;
 }
 
 
@@ -75,10 +78,9 @@ describe("Fan/Cheki event sampling fixes", () => {
   });
 
   it("counts only assigned and actually exposed non-affinity O as acquisition candidates", () => {
-    const fan: FanState = {
-      publicCount: 0, otakuCount: 20, temporarilyUnassignedOtaku: 5,
-      members: { a: { affinityCount: 15, purchaseWeightKJPY: 2 } },
-    };
+    const fan = createFanState(["a"], { publicCount: 0, otakuCount: 20 });
+    fan.temporarilyUnassignedOtaku = 5;
+    fan.members.a = { affinityCount: 15, purchaseWeightKJPY: 2 };
     let candidates = -1;
     settleChekiQueue({
       fan, memberIds: ["a"], attendeeOtaku: 20, seed: "eligible:unassigned:1",

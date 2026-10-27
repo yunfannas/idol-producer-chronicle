@@ -1,4 +1,5 @@
 import { createSeededRandom, sampleBinomial } from "./random";
+import { createFanInterestState, emptyMemberInterest } from "./fan-interest";
 import type { FanAttendance, FanState, LiveKind } from "./types";
 
 export const fanChekiBalanceV1 = {
@@ -35,6 +36,22 @@ export function createFanState(memberIds: string[], seed?: Partial<Pick<FanState
     otakuCount: seed?.otakuCount ?? 0,
     temporarilyUnassignedOtaku: 0,
     members: Object.fromEntries(memberIds.map((id) => [id, { affinityCount: 0, purchaseWeightKJPY: 0 }])),
+    followers: { team: 0, members: Object.fromEntries(memberIds.map((id) => [id, 0])) },
+    interests: createFanInterestState(memberIds),
+  };
+}
+
+/** Adds v1.5 per-active-member state without fabricating followers or Interest. */
+export function ensureFanMembers(fan: FanState, memberIds: string[]): FanState {
+  const ids = [...new Set([...Object.keys(fan.members), ...memberIds])];
+  return {
+    ...fan,
+    members: Object.fromEntries(ids.map((id) => [id, fan.members[id] ?? { affinityCount: 0, purchaseWeightKJPY: 0 }])),
+    followers: {
+      team: Math.max(0, fan.followers?.team ?? 0),
+      members: Object.fromEntries(ids.map((id) => [id, Math.max(0, fan.followers?.members?.[id] ?? 0)])),
+    },
+    interests: Object.fromEntries(ids.map((id) => [id, fan.interests?.[id] ?? emptyMemberInterest()])),
   };
 }
 
@@ -75,7 +92,7 @@ export function applyWeeklyFanDecay(fan: FanState): FanState {
     ...value,
     affinityCount: Math.min(survivingAssigned, value.affinityCount * (1 - fanChekiBalanceV1.pWeeklyOChurn) * (1 - fanChekiBalanceV1.pWeeklyAffinityChurn)),
   }]));
-  return { publicCount, otakuCount, temporarilyUnassignedOtaku, members };
+  return { ...fan, publicCount, otakuCount, temporarilyUnassignedOtaku, members };
 }
 
 /**
@@ -98,6 +115,11 @@ export function graduateMemberFanAffinity(fan: FanState, memberId: string): FanS
     members: {
       ...fan.members,
       [memberId]: { ...departing, affinityCount: 0 },
+    },
+    interests: Object.fromEntries(Object.entries(fan.interests).filter(([id]) => id !== memberId)),
+    followers: {
+      ...fan.followers,
+      members: Object.fromEntries(Object.entries(fan.followers.members).filter(([id]) => id !== memberId)),
     },
   };
 }

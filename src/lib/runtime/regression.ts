@@ -1,5 +1,6 @@
 import { fanChekiBalanceV1, requestProductsForBudget, sampleFanAttendance, samplePurchaseBudgetKJPY } from "./fan";
 import { createSeededRandom, sampleBinomial, sampleHypergeometric } from "./random";
+import { createFanState } from "./fan";
 import type { FanState } from "./types";
 
 export type MemberSales = {
@@ -60,15 +61,12 @@ const memberIdsFor = (rosterSize: number) => Array.from({ length: rosterSize }, 
 function initialFan(memberIds: string[]): FanState {
   // Neutral regression fixture, deliberately not a narrative/Scenario seed.
   const otaku = regressionFixtureV1.initialOtakuCount;
-  return {
-    publicCount: regressionFixtureV1.initialPublicCount,
-    otakuCount: otaku,
-    temporarilyUnassignedOtaku: 0,
-    members: Object.fromEntries(memberIds.map((id) => [id, {
+  const fan = createFanState(memberIds, { publicCount: regressionFixtureV1.initialPublicCount, otakuCount: otaku });
+  fan.members = Object.fromEntries(memberIds.map((id) => [id, {
       affinityCount: (otaku * regressionFixtureV1.initialAffinityShare) / memberIds.length,
       purchaseWeightKJPY: regressionFixtureV1.initialPurchaseWeightKJPY,
-    }])),
-  };
+    }]));
+  return fan;
 }
 
 type TemporaryFan = {
@@ -342,7 +340,7 @@ function settleWeek(input: { fan: FanState; memberIds: string[]; seed: string; r
       purchaseWeightKJPY: current.purchaseWeightKJPY * Math.exp(logW),
     }];
   }));
-  const fan: FanState = { publicCount: Math.max(0, survivingP), otakuCount: Math.max(0, survivingO), temporarilyUnassignedOtaku: 0, members };
+  const fan: FanState = { ...input.fan, publicCount: Math.max(0, survivingP), otakuCount: Math.max(0, survivingO), temporarilyUnassignedOtaku: 0, members };
   const grossJPY = Object.values(sales).reduce((sum, sale) => sum + sale.grossJPY, 0);
   const variableCostJPY = Object.values(sales).reduce((sum, sale) => sum + sale.variableCostJPY, 0);
   const retainedJPY = grossJPY * 0.8 - variableCostJPY;

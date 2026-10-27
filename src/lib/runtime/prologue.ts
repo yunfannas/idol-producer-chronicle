@@ -1,5 +1,5 @@
 import { chekiLedgerEntries, settleChekiSales } from "./cheki";
-import { createFanState, graduateMemberFanAffinity } from "./fan";
+import { createFanState, ensureFanMembers, graduateMemberFanAffinity } from "./fan";
 import { createFinanceState, postLedgerEntry } from "./finance";
 import { createPerformanceProgression } from "./arrangement-familiarity";
 import { createReputationState } from "./reputation";
@@ -188,11 +188,7 @@ export function signRoster(state: PrologueState, candidateIds: string[]): Prolog
   // Contracting newcomers must extend the existing P/O/A/W state, never
   // recreate it.  In particular, the Scenario's founding asset is not a
   // reward for signing six members and may not be copied to them.
-  const fanMembers = {
-    ...state.fan.members,
-    ...Object.fromEntries(additions.map((member) => [member.id, { affinityCount: 0, purchaseWeightKJPY: 0 }])),
-  };
-  return { ...state, members, fan: { ...state.fan, members: fanMembers }, gates: { ...state.gates, G02: true } };
+  return { ...state, members, fan: ensureFanMembers(state.fan, additions.map((member) => member.id)), gates: { ...state.gates, G02: true } };
 }
 
 export function completeStrategyAndOriginals(state: PrologueState): PrologueState {

@@ -107,12 +107,29 @@ export type ReputationState = {
   pendingBrandGains: number;
 };
 
-/** Fan Market v0.2 / executable v1: Core and BoxRate are intentionally absent. */
+/** Four weekly age slots, ordered oldest to newest. Values are aggregate expected persons. */
+export type InterestSlots = [number, number, number, number];
+
+export type MemberInterestState = {
+  /** Public people with an unfulfilled first-meet interest in this member. */
+  public: InterestSlots;
+  /** Existing Otaku without this member's affinity who may form a new relationship. */
+  otaku: InterestSlots;
+};
+
+export type FanFollowers = {
+  team: number;
+  members: Record<string, number>;
+};
+
+/** Fan Market v1.5: Core, fan IDs, cohorts and BoxRate are intentionally absent. */
 export type FanState = {
   publicCount: number;
   otakuCount: number;
   temporarilyUnassignedOtaku: number;
   members: Record<string, { affinityCount: number; purchaseWeightKJPY: number }>;
+  followers: FanFollowers;
+  interests: Record<string, MemberInterestState>;
 };
 
 export type FanAttendance = {

@@ -5,6 +5,7 @@ import { emptyPalette, paletteExecutionBreakdown, paletteMultiplier } from "./pa
 import { applyActivityLoad, liveSongGeneralLoad } from "./performance";
 import { createSeededRandom, sampleBinomial } from "./random";
 import { settleChekiQueue } from "./regression";
+import { createFanState } from "./fan";
 import type { DevelopedPalette, FanState, FinanceState, RuntimeEvent, RuntimeMember, SongPalette } from "./types";
 
 export type CoreAttributes = {
@@ -125,7 +126,9 @@ function initialMembers(rosterSize: 5 | 9 | 15): OperatingMember[] {
 }
 
 function initialFan(members: OperatingMember[], fixture: FanFixture): FanState {
-  return { publicCount: fixture.publicCount, otakuCount: fixture.otakuCount, temporarilyUnassignedOtaku: 0, members: Object.fromEntries(members.map((member) => [member.id, { affinityCount: fixture.affinityTotal / members.length, purchaseWeightKJPY: fixture.purchaseWeightKJPY }])) };
+  const fan = createFanState(members.map((member) => member.id), { publicCount: fixture.publicCount, otakuCount: fixture.otakuCount });
+  fan.members = Object.fromEntries(members.map((member) => [member.id, { affinityCount: fixture.affinityTotal / members.length, purchaseWeightKJPY: fixture.purchaseWeightKJPY }]));
+  return fan;
 }
 
 function train(members: OperatingMember[]): OperatingMember[] {
@@ -297,7 +300,7 @@ function resolveFan(input: { fan: FanState; participantIds: string[]; contract: 
     const logW = Math.max(-0.05, Math.min(0.05, 0.015 * served * ((1 + (input.quality - 1) * operatingSimulationV1.interactionEngagementScale) - 1) - 0.01 * lost));
     return [id, { affinityCount: Math.min(otakuCount, profile.affinityCount * (1 - fanChekiBalanceV1.pWeeklyOChurn) * (1 - fanChekiBalanceV1.pWeeklyAffinityChurn) + newAffinity), purchaseWeightKJPY: profile.purchaseWeightKJPY * Math.exp(logW) }];
   }));
-  return { fan: { publicCount, otakuCount, temporarilyUnassignedOtaku: 0, members }, attendance, sales, eligibleExposedOWithoutAffinity: eligible, newAffinityByMember };
+  return { fan: { ...input.fan, publicCount, otakuCount, temporarilyUnassignedOtaku: 0, members }, attendance, sales, eligibleExposedOWithoutAffinity: eligible, newAffinityByMember };
 }
 
 export type OperatingWeekReport = { week: number; eventId: string; quality: number; attendance: number; ticketRevenueJPY: number; chekiGrossJPY: number; operatingRevenueJPY: number; operatingCostJPY: number; cash: number; publicCount: number; otakuCount: number; affinityTotal: number; meanCondition: number; members: Record<string, { affinityCount: number; purchaseWeightKJPY: number; impression: number; expectedImpression: number; quality: number; eligibleExposedOtaku: number; newAffinity: number; chekiRequestedJPY: number; chekiGrossJPY: number; chekiQueueLostJPY: number }> };
