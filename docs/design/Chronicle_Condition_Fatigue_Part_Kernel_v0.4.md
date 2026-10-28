@@ -150,3 +150,28 @@ No direct Condition term, no duplicate RecentLoadFactor or q in this **morning p
 **Prologue target:** normal protected/rested schedule, ordinary 4-song Taiban and 12-song One-man should produce near-zero new abnormality, because PF/VF remain well below 25; this is a **testable tuning goal, not hard-coded plot immunity**. Consecutive exhausting performances, low recovery, and overtraining may still cause abnormality. Verify via seeded scenario replay and Monte Carlo with natural sleep/recovery, training policies, and the prologue calendar before locking the probability coefficients. The above incidence formula is a proposed starting calibration, not measured or runtime-tested.
 
 **Recalculated fatigue-only fixture** (same 8-member uniform average, NF14/S14, C0=100, no recovery): 12 songs difficulty12/12 PF≈3.6, VF≈3.3; 20 songs difficulty12/12 PF≈19.6, VF≈18.4; 20 songs difficulty15/15 PF≈29.1, VF≈27.3. **Condition values remain** 64.8 / 39.4 / 24.5 respectively. Existing older fatigue fixture table above is historical and superseded by these numbers; all full regression rows should be regenerated in code.
+
+## 2026-10-28 v0.4b override — Existing abnormality accelerates matching fatigue
+
+**Rule:** once a member already has Physical/Vocal Abnormality, subsequent *matching* low-Condition activity accumulates PF/VF faster. This is a feedback loop **Abnormality → faster matching PF/VF → higher next-morning risk**, not additional direct Condition subtraction.
+
+Suggested severity multipliers (new tuning defaults, subject to replay/Monte Carlo):
+| Current matching abnormality | Accumulation multiplier |
+| --- | ---: |
+| none | 1.00 |
+| mild | 1.25 |
+| moderate | 1.50 |
+| severe | 2.00 |
+
+```text
+deltaPF_live  = 1.00 * Wd       * q * AbnormalityAccumMultiplier(physicalAbnormality)
+deltaVF_live  = 1.00 * WvMember * q * AbnormalityAccumMultiplier(vocalAbnormality)
+deltaPF_train = 0.65 * Wphysical * q * AbnormalityAccumMultiplier(physicalAbnormality)
+deltaVF_train = 0.65 * Wvocal    * q * AbnormalityAccumMultiplier(vocalAbnormality)
+```
+
+**Boundaries:** physical abnormalities affect PF accumulation only; vocal abnormalities affect VF only; both apply independently if both are present. Multipliers require the relevant activity load and q>0 — existing abnormality alone **does not** create PF/VF in rest or at Condition>=70. Apply the abnormality status **at start of the song/0.5h training slot**; no mid-slot severity changes. The daily morning risk check reads the resulting PF/VF and may advance one severity level, with no same-morning reroll. Existing abnormality-related reductions to effective vocal/dance execution and hard medical limits still apply; no extra direct penalty to Condition cost solely from this multiplier. Cap PF/VF at 100, and do not multiply these loads by A(C), training cost 1.25, or any low-Condition severity function.
+
+**Regression examples:** with q=1, Wd=2, Wv=1.9: normal live ΔPF=2.0 and ΔVF=1.9; physical mild causes ΔPF=2.5 while ΔVF remains 1.9 if no vocal abnormality; vocal moderate causes ΔVF=2.85 while ΔPF remains 2.0 if no physical abnormality. Existing no-abnormality 4/12/20-song baseline tables remain unchanged.
+
+**Safety/realism:** severe abnormalities may render the member ineligible for strenuous live/lesson; first apply existing eligibility and medical restrictions — the multiplier is **not** permission to perform. Calibrate prolonged-abnormality schedules to avoid runaway escalation or routine prologue injuries. This multiplier table is a design default; actual event incidence has not been runtime-tested.
