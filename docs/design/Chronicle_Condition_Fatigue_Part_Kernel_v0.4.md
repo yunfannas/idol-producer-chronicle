@@ -55,8 +55,8 @@ One-song calculations use **song-start C** for A(C); 1-song C cannot be reduced 
 Let q = fraction of **this song's load/duration** spent at estimated Condition <70, computed from straight-line interpolation between C_before and C_after (without rest). If start/end both ≥70 q=0; both ≤70 q=1; if crossing downward, q=(70-C_after)/(C_before-C_after), clamped to [0,1]. For an anomalous net recovery/upward crossing use actual load trajectory rather than net recovery endpoint. q is a **threshold exposure fraction only**, not a severity multiplier.
 
 ```text
-deltaPF_live = 0.75 * Wd * q
-deltaVF_live = 0.75 * Wv_m * q
+deltaPF_live = 1.00 * Wd * q
+deltaVF_live = 1.00 * Wv_m * q
 PF_after = clamp(PF_before + deltaPF_live - PF_recovery, 0,100)
 VF_after = clamp(VF_before + deltaVF_live - VF_recovery, 0,100)
 ```
@@ -75,8 +75,8 @@ For each scheduled 0.5h slot:
 Wtrain = RawLoad_per_hour * hours
 Cost_train = Wtrain * 1.25 * StaminaMultiplier * A(C_before)
 C_after = clamp(C_before - Cost_train,0,100)
-deltaPF_train = 0.50 * Wphysical * q
-deltaVF_train = 0.50 * Wvocal * q
+deltaPF_train = 0.65 * Wphysical * q
+deltaVF_train = 0.65 * Wvocal * q
 Wphysical + Wvocal = Wtrain
 ```
 Activity load shares: combined training/song rehearsal PF:VF = 50:50; dance-specific 100:0; vocal-specific 0:100. q is same below-70 linear interpolation over that 0.5h slot. **Training Condition multiplier LOCKED = 1.25. Training PF/VF multiplier LOCKED = 0.50**; Live PF/VF multiplier LOCKED = 0.75. Do not multiply PF/VF by training Condition factor 1.25.
@@ -125,3 +125,28 @@ Overrides prior:
 Does NOT override unrelated real observations, data provenance, palette v2.1 axes, normal rest policies, member growth or the core distinction between Team and Member Impression.
 
 **Implementation checklists**: code schema/fixtures migration (especially old key-part IDs and any saves), deterministic tests for C/PF/VF at 4/12/20, q crossing at70, per-member relay assignment, opening_sabi extra20, S14 normalization, training 1.25, training PF/VF .50, fatigue-triggered abnormalities, no repeated Condition subtraction. This document freezes intended design; pending tests must not be falsely marked passed.
+
+## 2026-10-28 v0.4a override — Morning abnormality draw and higher accumulated fatigue
+
+This section supersedes any older **0.75 Live / 0.50 Training** PF/VF coefficients and risk-band suggestions elsewhere in this file. **Condition cost, training Condition multiplier 1.25, Stamina, NF, time and difficulty formulas stay unchanged.**
+
+**New accumulated fatigue coefficients** (at C<70 only, threshold fraction q unchanged; no nonlinear low-Condition multiplier):
+```text
+deltaPF_live = 1.00 * Wd * q
+deltaVF_live = 1.00 * Wv_member * q
+deltaPF_training = 0.65 * Wphysical * q
+deltaVF_training = 0.65 * Wvocal * q
+```
+These are increments to two persistent fatigue states, **not Condition deductions**. For the same load q, live PF/VF rise by 4/3 versus earlier 0.75, training by 1.3 versus earlier 0.50. No increase in immediate Condition cost.
+
+**Every morning, after the previous day's load/recovery accounting and at one consistently selected checkpoint**, perform at most **one independently deterministic-seeded Bernoulli check per member per abnormality type** (physical uses PF, vocal uses VF). Do not make additional checks after each song/training slot; skip events whose member/condition is no longer eligible. Save the result and RNG key `save_id + local_date + member_id + type` so reload/replay cannot reroll. Morning check uses **current fatigue**; choose a fixed order between sleep recovery and check (recommended: sleep recovery then check).
+
+Proposed initial daily probability for corresponding fatigue `F`:
+```text
+p_abnormal(F) = min(0.08, 0.0015 * max(0, F - 25))
+```
+No direct Condition term, no duplicate RecentLoadFactor or q in this **morning probability** (activity was already counted when F increased); if F<=25 then no risk. Examples F=30→0.75%, F=40→2.25%, F=60→5.25%, F>=79→8% daily. A successful roll creates **mild** abnormality if none; an existing mild can progress **at most one severity step** on a later morning success. No instant severe result from a single event, and no guaranteed event solely on crossing a threshold. Recoveries and progression may have separate persistence/eligibility rules later, but must not roll multiple times daily.
+
+**Prologue target:** normal protected/rested schedule, ordinary 4-song Taiban and 12-song One-man should produce near-zero new abnormality, because PF/VF remain well below 25; this is a **testable tuning goal, not hard-coded plot immunity**. Consecutive exhausting performances, low recovery, and overtraining may still cause abnormality. Verify via seeded scenario replay and Monte Carlo with natural sleep/recovery, training policies, and the prologue calendar before locking the probability coefficients. The above incidence formula is a proposed starting calibration, not measured or runtime-tested.
+
+**Recalculated fatigue-only fixture** (same 8-member uniform average, NF14/S14, C0=100, no recovery): 12 songs difficulty12/12 PF≈3.6, VF≈3.3; 20 songs difficulty12/12 PF≈19.6, VF≈18.4; 20 songs difficulty15/15 PF≈29.1, VF≈27.3. **Condition values remain** 64.8 / 39.4 / 24.5 respectively. Existing older fatigue fixture table above is historical and superseded by these numbers; all full regression rows should be regenerated in code.
