@@ -1,5 +1,8 @@
 # Chronicle｜Key-Part Assignment & Rotation v0.1
 
+> **2026-10-28 PART OVERRIDE:** [Chronicle Condition / Fatigue / Part Kernel v0.4](Chronicle_Condition_Fatigue_Part_Kernel_v0.4.md) supersedes this file's key-part types and default assignment distribution. All eight sections support optional lead; melo_1/melo_2 default relay, ochi_sabi lead, others unison. Keep this file's eligible 1st/2nd/3rd replacement resolution and no-standing/rotation protections where consistent.
+
+
 **状态**：Chronicle 专项设计决定（2026-10-24）；用于覆盖 Lab 的站位细节，尚未实现/测试。  
 **优先级**：Chronicle 游戏化简化优先于 `idol-data-lab` 03E 的 `StandingExposure` 和 center/front/mid/back 模型；保留 03H 八色 Palette 的实际参演成员平均、Key-Part Contrast 与 Familiarity。参见 [Chronicle Game Design v0.10](Chronicle_Game_Design_v0.10.md) 和 [Eight-Color Palette Kernel v0.2](Chronicle_Eight_Color_Palette_Performance_Kernel_v0.2.md)。
 
