@@ -1,5 +1,7 @@
 # Idol Producer: Chronicle｜Game Design v0.10（正式实施规范）
 
+> **Condition / Part v0.4（2026-10-28）：** [统一 Condition、PF/VF、Abnormality、八段 Part、训练倍率与回归锚点](Chronicle_Condition_Fatigue_Part_Kernel_v0.4.md) 覆盖早期无双疲劳/旧逐曲负荷/旧关键 Part 默认分配规则；文档目标规范，尚非 Runtime 已实现证明。
+
 > **Palette v2.1（2026-10-28）：** [八色语义、固定 Code 顺序、Radar/一维显示及迁移边界](Chronicle_Palette_v2.1.md) 为本仓库当前 Palette 目标契约。与旧 L2B 语义存在 Y/A 交换，历史数据须显式迁移；本项不代表 Runtime 已迁移。
 
 > **2026-10-26 专项规范覆盖：** 当前 Reputation、Fan、TIF 周日结局见 [集成规范](../implementation/Chronicle_Fan_Reputation_Integrated_Spec_v1.0.md)。本文件关于「不展示/不计算团体 Tier/Overall」以及 TIF 当日结束的旧限制已被覆盖，其他剧情、固定日程和政策继续有效。更新正式 Runtime 时须显式改写旧限制。
