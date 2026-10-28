@@ -1,5 +1,8 @@
 # Chronicle｜Member · Training · Condition · Performance Kernel v0.1
 
+> **2026-10-28 CONDITION/PART OVERRIDE:** [Chronicle Condition / Fatigue / Part Kernel v0.4](Chronicle_Condition_Fatigue_Part_Kernel_v0.4.md) supersedes this v0.1 Condition, FatigueDebt, abnormality trigger and song load calculations; old state examples retained only for historical traceability. Training Condition multiplier = 1.25.
+
+
 > **2026-10-24 更新后的权威覆盖**：`idol-data-lab/main@5499e7c5355b` 已将 03C/03E/03H 改为八色。本文件 §0 关于“03H仍是十色”和 §6 的 `SOURCE_PENDING`/旧十色公式**现已失效**；八色执行、Opp3、PE倍率、成长求和及最新测试请直接使用 [Eight-Color Palette · Performance Kernel v0.2](Chronicle_Eight_Color_Palette_Performance_Kernel_v0.2.md)。本文件其他成员属性、Training、Condition 和 Part/Impression 结构继续有效，直到更高版本替代。禁止实现本文件 §6 历史十色公式。
 
 > **Chronicle 站位简化覆盖（2026-10-24）**：本文件 §5.2 的 `StandingExposure` 乘数及 center/front/mid/back 等描述是 Lab 历史提取，**不作为 Chronicle Runtime 规则**。Chronicle 的 `MemberImpression[m,L] = Σ_p FinalPartImpression[L,p] × DutyShare[m,p]`；关键段落有 first/second/third 候补和 Staff 自动补位。见 [Key-Part Assignment & Rotation v0.1](Chronicle_Key_Part_Assignment_and_Rotation_v0.1.md)。
