@@ -1,5 +1,8 @@
 # Chronicle｜成员、训练、Condition 与 Staff 公式 v1.0
 
+> **2026-10-28 override:** [Condition / Fatigue / Part v0.4c](../design/Chronicle_Condition_Fatigue_Part_Kernel_v0.4.md) supersedes this file's FatigueDebt-only/no-PF/VF state, old song Condition cost, abnormality risk, and immediate recovery timing. Actual Condition/PF/VF **daily recovery** at next morning; 4/12/28 qualified days for anomaly resolution (NF14, 8h normal sleep). Keep compatible sleep/NF formula, growth and training scheduling. Do not apply rest credits twice.
+
+
 **实施级本地规范 · 2026-10-24**。不需要打开外部研究仓库。数值状态：`LOCKED` 已确定；`TUNABLE` 公式形状确定但系数未冻结。**未标 LOCKED 的数值不得当作权威默认值**。
 
 ## 实施覆盖与排除
