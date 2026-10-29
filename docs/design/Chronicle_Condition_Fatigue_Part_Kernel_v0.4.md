@@ -175,3 +175,51 @@ deltaVF_train = 0.65 * Wvocal    * q * AbnormalityAccumMultiplier(vocalAbnormali
 **Regression examples:** with q=1, Wd=2, Wv=1.9: normal live ΔPF=2.0 and ΔVF=1.9; physical mild causes ΔPF=2.5 while ΔVF remains 1.9 if no vocal abnormality; vocal moderate causes ΔVF=2.85 while ΔPF remains 2.0 if no physical abnormality. Existing no-abnormality 4/12/20-song baseline tables remain unchanged.
 
 **Safety/realism:** severe abnormalities may render the member ineligible for strenuous live/lesson; first apply existing eligibility and medical restrictions — the multiplier is **not** permission to perform. Calibrate prolonged-abnormality schedules to avoid runaway escalation or routine prologue injuries. This multiplier table is a design default; actual event incidence has not been runtime-tested.
+
+## 2026-10-28 v0.4c — daily recovery & abnormality duration (authoritative override)
+
+This replaces any earlier assertion of **immediate** recovery after every training/live/rest segment, and the previous candidate abnormality recovery logic. **Condition / PF / VF recovery is posted once per in-game morning**, based on the immediately preceding day's qualified recovery and sleep. Activities still deduct Condition and add low-Condition PF/VF at each song/0.5h training slot, so Live performance continues to read current Condition; the *recovery* ledger alone is deferred.
+
+**Daily recovery ledger and operation order:** on calendar day D record actual sleep hours and quality, any offsite/late-night/night-bus circumstances, actual rest slots, and recovery entitlements; no recovery is applied twice. At D+1 morning: (1) apply eligible daily Condition recovery, (2) PF/VF daily recovery, (3) advance abnormality recovery progress, (4) make one seeded abnormality incident/progression draw per member and type, using the resulting PF/VF and pre-existing severity (if an abnormality resolved at step 3, treat it as resolved before the single draw). Persist the day's checkpoint/result for replay idempotence.
+
+**Condition: preserve the existing recovery formula, not a new generic daily +N:**
+```text
+SleepRecovery = 22 * (SleepHours/8)^0.8 * NFMultiplier
+              * (0.9+0.002*Morale)
+              * (0.90+0.40*((100-Condition_at_bed)/100)^2)
+PostTrainingRecoveryEligible = 3.0 * NFMultiplier
+PostLiveRecoveryEligible = 4.5 * NFMultiplier
+FreeBreakRecovery = 3 * sqrt(minutes/15) * NFMultiplier
+DailyConditionRecovery = SleepRecovery * SleepQualityMultiplier + Sum(eligible non-overlapping rest-credit)
+C_nextMorning = clamp(C_previousEvening + DailyConditionRecovery, 0,100)
+```
+The older 0.5h rest reservation rules determine eligibility, but **credits settle once at next morning**, never when reserving the slot. Do not count the same sleep or rest period under multiple categories. NF14 => 1. Night-time losses reduce *actual* SleepHours and/or quality, not an extra Condition subtraction.
+
+**PF/VF daily recovery** (preserve previously discussed candidate baseline, **TUNABLE**, distinct from Condition and no double-counted rest):
+```text
+PF_nextMorning = max(0, PF_beforeSleep - 2.0 * NFMultiplier * RestEffectiveness)
+VF_nextMorning = max(0, VF_beforeSleep - 2.5 * NFMultiplier * RestEffectiveness)
+RestEffectiveness = clamp((SleepHours/8)^0.8 * SleepQualityMultiplier, 0, 1)
+```
+RestEffectiveness is computed once from the actual overnight schedule; no recovery if no qualifying sleep. Coefficients 2.0/2.5 remain proposed until multi-day tests; duration / probability below are independent.
+
+**Abnormality natural recovery duration benchmark** at **NF=14, normal sleep 8h and SleepQualityMultiplier=1**, assuming no re-injury or new worsening:
+- mild = **4 qualified recovery days**
+- moderate = **12 qualified recovery days**
+- severe = **28 qualified recovery days**
+
+Use continuous per-abnormality recovery progress (persist separately for Vocal and Physical, and with the current severity's required target):
+```text
+targetDays = {mild:4, moderate:12, severe:28}[severity_at_cycle_start]
+AbnormalRecoveryProgress += NFMultiplier * RestEffectiveness / targetDays
+if Progress >= 1: abnormality -> none; reset cycle/progress
+```
+A severity escalation from a morning draw starts a new cycle at the higher severity with progress reset; recovery does not convert to fixed calendar expiration. The 4/12/28 are **full resolution** benchmarks for the current severity (not consecutive 4+12+28 downgrades). Existing severe eligibility/medical restrictions remain independent. A progression roll is only on a separate morning from the prior incident; do not roll multiple steps per day. If a no-symptom recovery rule or PF/VF inhibition is added later, make it explicit and do not secretly alter 4/12/28 baselines.
+
+**Special overnights:** offsite overnight, late-night work, and overnight bus must reflect the **real hours available to sleep** and, where quality is independently degraded, a `SleepQualityMultiplier ∈[0,1]`. Proposed, **unlocked for calibration** example quality multipliers: normal overnight 1.0; away hotel 0.90; late-night activity 0.85 (in addition to reduced actual sleep hours); night bus 0.50. Do not stack overlapping categories without a separately defined composition rule; for a single overnight take the most restrictive applicable multiplier, not a product. 6h sleep at quality 0.85 yields RestEffectiveness ≈0.675, so one qualified recovery day advances ~0.675 normal-day equivalents at NF14. A night bus with only 4h effective sleep and quality0.50 yields ≈0.287 equivalent days. These quality factors are modeling candidates; user has locked *direction* and 4/12/28 anchor, not these exact penalties.
+
+**Risk and recovery are different:** morning PF/VF governs the existing seeded incident/progression probability; anomaly state still amplifies matching future PF/VF load. Avoid an existing anomalous member repeatedly receiving a new mild event; a successful roll may worsen existing state at most one step. Persist duration/progress and risk RNG keys across save/load.
+
+**Regression gates:** NF14 normal 8h, no workload/progression, mild resolves after 4 daily checkpoints, moderate after 12, severe after 28; NF below/above14 affects pace via same NFMultiplier; 6h/away/late/night-bus slower; no double recovery in training or Live, even if an event completed at midnight; save/reload and mixed travel calendars deterministic. These are new design assertions; not evidence of executed Runtime tests.
+
+**Performance import (no reinvention):** Chronicle's existing `docs/implementation/Chronicle_Technical_Performance_Kernel_v1.0.md` is the authoritative *attribute-specific* path (Breath/Rhythm baseline, Pitch/Agility failure check, Tone/Power positive bonuses, StagePresence once, actual part burden/exposure). `Chronicle_Performance_Palette_Assignment_v1.0.md` supplies its existing palette/Impression/assignment connections. The precise continuous coefficient curves and PartExposure weights remain explicitly TUNABLE in those files: DO NOT fabricate a replacement Fit equation or silently claim numeric calibration. The new 8-part unison/relay/lead adapter supplies the participant aggregation and part IDs into these existing technical APIs.
