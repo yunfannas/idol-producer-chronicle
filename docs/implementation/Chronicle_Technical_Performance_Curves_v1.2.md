@@ -263,14 +263,21 @@ RawPartImpression[L,p] = BaseQuality[p] * PaletteExpressionMultiplier[L,p]
 FinalPartImpression[L,p] = RawPartImpression[L,p]
                            * ArrangementExecutionFactor[p]
 TeamImpression[L] = sum_p FinalPartImpression[L,p]
-MemberImpression[m,L] = sum_p FinalPartImpression[L,p] * DutyShare[m,p]
+MemberImpression[m,L] = sum_p OwnPartContribution[m,L,p]  // MUST NOT use shared damaged team Part total
 ```
 
-- `DutyShare` 基于该成员实际承担的 solo/relay/unison 演唱和舞蹈份额（实现细节仍需校准），没有站位加成。
+- `DutyShare` 基于该成员实际承担的 solo/relay/unison 演唱和舞蹈份额（实现细节仍需校准），没有站位加成。**个人 Impression 必须取该成员自己的局部技术结果，而不是从包含别人成败的 Team Part Impression 再乘 DutyShare。**
 - `PartExposure` 是段落**固有**显著性；**独唱不是另一个随意叠乘的 ExposureBonus**，而由 DutyShare 的实际归属体现。
-- 落ちサビ额外 Pitch 失败先进入该段的实际 VocalExecution → 该段 `FinalPartImpression` → 按真实 DutyShare 同时影响团队与成员，**不可再另外扣一笔 Team 或 Member**。
+- 任意 Part 的 Pitch/Agility 失败只改变出错成员该 Part 的对应声乐/舞蹈贡献；Team Part 由各实际参演者对应分量聚合。**其他成员的个人 Impression 不因该失误降低**，无论他们是否参与该 Part 的舞蹈、合唱或其他职责。错误仅进入来源成员个人贡献和团队对应 Part，一次结算，不在 Team/Member 出口额外扣分。
 - 与八色 Palette 一体化遵循 Palette v2.1；Env×PE 在旧集成文件中仍是待桥接项，不把 `M(PE)` 和 `M(EnvPE)` 重复相乘。
 - `TeamImpression` 与所有成员曝光之和**不必被强行设置为同一数**；若未来引入个人可观察性，应在 DutyShare 合同中明确定义，避免无解释的重复记账。
+
+### 7.4 个人失误隔离不变量 `DESIGN-AGREED`
+
+- For every failure event `(m,p,path)`, holding all other inputs and seeded draws constant: `MemberImpression[j ≠ m]` MUST remain unchanged. A failing member's `OwnPartContribution[m,L,p]` changes only for the affected path in Part `p`; their other Parts do not change.
+- `TeamImpression[L,p]` may decrease because the actual participant ensemble quality changes. Do not distribute this reduction back to innocent members through a shared `FinalPartImpression × DutyShare` formula.
+- `PaletteExpressionMultiplier[L,p]` may be shared across participants as an aesthetic multiplier; the failure event itself MUST NOT change the Palette multiplier or any other member’s independent execution. Compute individual vocal/dance component quality first, apply the single agreed common Palette/audience/part factors to each person's own credited contribution, then aggregate Team and Member outputs on their defined, non-zero-sum bases.
+- Unit test: with A singing solo and B dancing in `ochi_sabi`, one A Pitch failure lowers A and Team's part impression but leaves B's `MemberImpression` exactly unchanged. Repeat for relay and unison where B sings correctly, and for A Agility failure during a shared dance part.
 
 ## 8. 难度与 Condition / PF / VF 的长期联动
 
@@ -286,7 +293,7 @@ ConditionCost_m = Wbase_m * StaminaMultiplier_m * A(C_before)
 
 该部分**引用** Condition v0.4，不在 Technical v1.2 重写或改变已存在的 Stamina/NF/睡眠/次晨机制。因 Condition 下降，后续歌曲 Breath/Rhythm/Power 下降；C<70 时对应 PF/VF 开始积累，次日可能产生匹配异常；PF/VF 的增长不能再次重复扣除 Condition。
 
-**发现原文件有内部矛盾，进入仓库前必须核对**：Condition v0.4 第4节写 `deltaPF_live = 1.00*Wd*q`，第5节公式写 `deltaPF_train = 0.65*Wphysical*q`，但该节文字又写“Training PF/VF multiplier LOCKED = 0.50；Live PF/VF multiplier LOCKED = 0.75”。因此本草案**不冻结 PF/VF 乘数，也不自行选择其中一套**；以 Condition 规范后续统一勘误为准。此问题不影响已确认的演出技术计算结构。
+**PF/VF 已勘误**：Condition v0.4a/b 的最新权威系数明确为 **Live 1.00 / Training 0.65**（均乘对应负荷和低 Condition 曝露占比 `q`，异常时另乘匹配的 `AbnormalityAccumMultiplier`）。旧 0.75/0.50 文字已在 Condition v0.4 原文件中修正；不改变 v0.4c 的次晨恢复/异常持续时间。
 
 ## 9. 玩家可见评价与中日英术语
 
@@ -355,7 +362,7 @@ Match 不随当日 Condition 跳级；Live 前由 Staff 结合 Condition、Famil
 1. **落ちサび模式覆写**：歌曲和各 Part 使用统一 Vocal/Dance Difficulty、歌曲级 Pitch/Agility Requirement，主检定无需代表性难度；仅落ちサび改 relay/unison 时额外检定的资格和人数待定。
 2. **新技术执行上界**：旧 1.45 clamp 不再适配 A20 基础 1.587，需确定是否仅非负下限以及高阶表现上限。
 3. **曲目 Appeal 的最终系数** 35 / 65 / 1.4、技术指数和系数、失误严重度、Tone/Power/SP、Familiarity、Part salience，都需跨属性、跨时长回归。
-4. **PF/VF 倍率文字冲突**：必须先从最新权威源统一，再回写 Condition spec；本技术文档仅引用，不分叉 Condition 公式。
+4. **PF/VF 倍率已统一**：Live 1.00 / Training 0.65，按 v0.4a/b 与 v0.4c 执行；后续需校准概率与回归数据，但无倍率定义冲突。
 5. **DutyShare 的声乐/舞蹈归属**：现有简化 `MemberImpression=Σ PartImpression×DutyShare` 尚需确保落ちサビ局部事故不会无差别损害未唱成员的个人归属；若需 voice/dance 分量，仍应保持 Team/Member 同一事实源，不另造奖励乘数。
 6. **高风险 Part 的额外检定条件**：目前明确只有默认 lead 的落ちサビ加一次；其它 key Part 及覆写成 relay/unison 的行为待定。
 7. **Staff 自动分配阈值、提醒文案、Part 曝光参数、EnvPalette 整合**尚未通过大样本校准。
