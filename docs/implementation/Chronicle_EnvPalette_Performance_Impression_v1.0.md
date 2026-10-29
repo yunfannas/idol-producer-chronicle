@@ -1,5 +1,7 @@
 # Chronicle — Performance → Impression / World & Live Palette v1.0
 
+> **2026-10-29 World v0.3 authority:** [World Palette Trend v0.3](Chronicle_World_Palette_Trend_v0.3.md) supersedes any implication here that World raw intensities sum to 100 or that UI World Stripe is the Impression input. Each color has independent raw popularity and saturation; normalized Stripe is *display only*. WorldResponse reads raw R with neutral R=40; Public slope .005, Otaku .0025. Seeded clustered events, Memory/Boredom, high-Sat recovery and momentum damping k=.15 are TUNABLE; rare short-lived >50% Stripe allowed. Prior independent simulations do NOT establish Runtime or Fan balance acceptance.
+
 **2026-10-29 | DESIGN-AGREED architecture; TUNABLE conservative calibration; Runtime NOT verified.**
 
 ## 0. Authority and supersession
