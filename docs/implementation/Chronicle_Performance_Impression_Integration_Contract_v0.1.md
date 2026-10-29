@@ -1,5 +1,7 @@
 # Chronicle — Performance / Impression Integration Contract v0.1
 
+> **2026-10-29 vocal attribution override:** [Vocal Time-Slice Assignment v0.1](Chronicle_Vocal_Time_Slice_Assignment_v0.1.md) specifies named singers per slice, solo as one-member relay, duration-derived duty shares, and reduced unison Pitch-error impact. It supersedes older automatic relay membership and equal division where conflicting; quantitative slice size and unison attenuation remain TUNABLE.
+
 **2026-10-29 — IMPLEMENTATION HANDOFF / DESIGN AGREED constraints + PROPOSED implementation details; NOT runtime proof or calibration.**
 
 ## 0. Scope and precedence
