@@ -83,7 +83,7 @@ Sample with W=80 per relevant color:
 | 0 | 1.200 | 1.100 |
 | 10 | 1.150 | 1.023 |
 | 25 | 1.056 | 0.880 |
-| 40 | 0.953 | 0.777 |
+| 40 | 0.953 | 0.722 |
 
 These are direct Impression-layer factors, **not additional PE**, no extra attribute growth or Condition effect.
 
