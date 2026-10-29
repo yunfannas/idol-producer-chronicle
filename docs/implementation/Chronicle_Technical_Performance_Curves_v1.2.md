@@ -1,5 +1,7 @@
 # Chronicle Technical Performance / Song Appeal / Part Resolution v1.2 — design specification (calibration pending)
 
+> **2026-10-29 OVERRIDE:** [World / Live Palette & Impression v1.0](Chronicle_EnvPalette_Performance_Impression_v1.0.md) is authoritative for **Performance → Public/Otaku Impression**. Old EnvPE in PaletteExpression/Performance and shared Team Part Impression → Member Impression allocation formulas below are historical and overridden where conflicting. Intrinsic Palette `M(FinalPE)` applies within Performance once; World/Live environment only after Performance for Impression. Member Impression uses each member's own Performance and is unaffected by other members' failures. Conservative environment coefficients TUNABLE, runtime unverified.
+
 **日期：** 2026-10-29  
 **状态：** 已提交设计规范；数值 `TUNABLE`，**未实施 Runtime、未完成回归校准**。  
 **文件路径：** `docs/implementation/Chronicle_Technical_Performance_Curves_v1.2.md`  
