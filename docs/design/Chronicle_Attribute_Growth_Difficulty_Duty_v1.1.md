@@ -1,4 +1,4 @@
-# Chronicle｜Attribute Growth · Difficulty & Duty Gate v1.2
+# Chronicle｜Attribute Growth · Difficulty & Duty Gate v1.1 (2026-10-29 revision)
 
 **Status:** DESIGN UPDATE (2026-10-29). This document supersedes the difficulty-neutral **Attribute EXP allocation** portions of `docs/implementation/Chronicle_Member_Training_Condition_v1.0.md` §2 and `docs/design/Chronicle_Member_Training_Condition_Performance_Kernel_v0.1.md` §2. The other training, EXP threshold, aging, scheduling and Condition rules remain unchanged. The numeric constants introduced below are **TUNABLE** until regression-calibrated; do not claim they are already implemented in runtime.
 
