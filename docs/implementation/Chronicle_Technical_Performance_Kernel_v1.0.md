@@ -1,5 +1,8 @@
 # Chronicle｜Technical Performance Kernel v1.0 — Attribute-Specific Mechanics
 
+> **2026-10-28 numeric extension (TUNABLE):** [Technical Performance Curves v1.1](Chronicle_Technical_Performance_Curves_v1.1.md) defines a versioned *candidate* continuous function for every unresolved technical coefficient and the eight-part exposure. The present v1.0 document's semantics are retained; coefficients are not historical/LOCKED values.
+
+
 **Implementation authority · 2026-10-24**. 此文件补回已经设计的不同技术 Attribute 运算机制，覆盖旧提取文档的笼统 `Fit(WeightedAverage, Difficulty)` 占位符。**不得**将 Vocal/Dance 技术折叠为一个加权 Ability 再减 Difficulty；**不得**采用 `1 + 0.04(Ability−Difficulty)−0.02Burden` 之类新造的统一线性公式。
 
 ## 1. 角色、输入与执行时点
