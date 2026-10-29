@@ -1,5 +1,8 @@
 # Chronicle Runtime Implementation Pack v1.0
 
+> **2026-10-28 candidate numeric curves:** [Technical Performance Curves v1.1](Chronicle_Technical_Performance_Curves_v1.1.md) parameterizes Breath/Rhythm baselines, Pitch/Agility probability and penalty, Tone/Power bonuses, StagePresence, low-Condition Attr effects, singing/dance combination, Familiarity and eight-part salience. These are **TUNABLE proposed values**, not historically calibrated nor runtime implemented; v1.0 attribute-specific semantics remain authoritative.
+
+
 > **2026-10-28 Condition/Recovery & Part authority:** [Condition / Fatigue / Part Kernel v0.4c](../design/Chronicle_Condition_Fatigue_Part_Kernel_v0.4.md) overrides old `A(E)`, `Wraw`, FatigueDebt-only, immediate-rest settlement, and old key-part defaults in this Implementation Pack. Condition/PF/VF **recovery settles once each morning**; abnormality baseline mild/moderate/severe = 4/12/28 qualified days at NF14/8h; special overnight sleep degradation applies. **Technical Performance equations are already imported** via [Technical Performance Kernel v1.0](Chronicle_Technical_Performance_Kernel_v1.0.md) plus [Performance/Palette/Assignment](Chronicle_Performance_Palette_Assignment_v1.0.md); do not invent new numeric Fit curves where source remains TUNABLE. Runtime integration not yet verified.
 
 
