@@ -1,6 +1,6 @@
 # Condition / PF / VF / Abnormality v0.4 — unified calculation contract
 
-**Frozen design decisions: 2026-10-28.** Applies to Chronicle runtime; idol-data-lab should treat this as the new forward-looking override of older contradictory Condition/Fatigue sections. Documentation and reference-calibration only; NOT a claim that runtime or historical saves were migrated or tests executed.
+**Frozen design decisions: 2026-10-28.** Editorial erratum 2026-10-29: earlier 0.50/0.75 coefficient prose corrected to the already-authoritative v0.4a/b 0.65/1.00; no formula change. Applies to Chronicle runtime; idol-data-lab should treat this as the new forward-looking override of older contradictory Condition/Fatigue sections. Documentation and reference-calibration only; NOT a claim that runtime or historical saves were migrated or tests executed.
 
 ## 1. State and precedence
 
@@ -79,7 +79,7 @@ deltaPF_train = 0.65 * Wphysical * q
 deltaVF_train = 0.65 * Wvocal * q
 Wphysical + Wvocal = Wtrain
 ```
-Activity load shares: combined training/song rehearsal PF:VF = 50:50; dance-specific 100:0; vocal-specific 0:100. q is same below-70 linear interpolation over that 0.5h slot. **Training Condition multiplier LOCKED = 1.25. Training PF/VF multiplier LOCKED = 0.50**; Live PF/VF multiplier LOCKED = 0.75. Do not multiply PF/VF by training Condition factor 1.25.
+Activity load shares: combined training/song rehearsal PF:VF = 50:50; dance-specific 100:0; vocal-specific 0:100. q is same below-70 linear interpolation over that 0.5h slot. **Training Condition multiplier LOCKED = 1.25. Current PF/VF accumulation coefficients (v0.4a/b) are Training = 0.65 and Live = 1.00**, before matching-abnormality multipliers. Old 0.50/0.75 figures are superseded. Do not multiply PF/VF by training Condition factor 1.25.
 
 Existing staff training-policy guardrails remain: Conservative projected C≥65; Normal ≥55; Aggressive ≥45, plus avoid nonessential training at extremely low Condition.
 
@@ -124,7 +124,7 @@ Overrides prior:
 
 Does NOT override unrelated real observations, data provenance, palette v2.1 axes, normal rest policies, member growth or the core distinction between Team and Member Impression.
 
-**Implementation checklists**: code schema/fixtures migration (especially old key-part IDs and any saves), deterministic tests for C/PF/VF at 4/12/20, q crossing at70, per-member relay assignment, opening_sabi extra20, S14 normalization, training 1.25, training PF/VF .50, fatigue-triggered abnormalities, no repeated Condition subtraction. This document freezes intended design; pending tests must not be falsely marked passed.
+**Implementation checklists**: code schema/fixtures migration (especially old key-part IDs and any saves), deterministic tests for C/PF/VF at 4/12/20, q crossing at70, per-member relay assignment, opening_sabi extra20, S14 normalization, training 1.25, training PF/VF .65 and Live 1.00 (v0.4a/b), fatigue-triggered abnormalities, no repeated Condition subtraction. This document freezes intended design; pending tests must not be falsely marked passed.
 
 ## 2026-10-28 v0.4a override — Morning abnormality draw and higher accumulated fatigue
 
