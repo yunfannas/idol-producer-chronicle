@@ -1,5 +1,7 @@
 # Chronicle Runtime Implementation Pack v1.0
 
+> **2026-10-28 member profile UI authority:** [Member Profile UI & Trilingual Glossary v1.0](../design/Chronicle_Member_Profile_UI_Glossary_v1.0.md) locks Overall Ability, the five-axis and eight-color radar, collapsed-by-default 17 detailed attributes, song difficulty match labels, and Chinese/Japanese/English names (Breath ブレス, Power パワー, Agility 身体協調性, Teamwork チームワーク). This is presentation/spec only, not a runtime implementation claim.
+
 > **2026-10-28 candidate numeric curves:** [Technical Performance Curves v1.1](Chronicle_Technical_Performance_Curves_v1.1.md) parameterizes Breath/Rhythm baselines, Pitch/Agility probability and penalty, Tone/Power bonuses, StagePresence, low-Condition Attr effects, singing/dance combination, Familiarity and eight-part salience. These are **TUNABLE proposed values**, not historically calibrated nor runtime implemented; v1.0 attribute-specific semantics remain authoritative.
 
 
