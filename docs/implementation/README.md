@@ -1,5 +1,7 @@
 # Chronicle Runtime Implementation Pack v1.0
 
+> **2026-10-29 proposed Part aggregation:** [Member / Team Performance Aggregation v0.1](Chronicle_Member_Team_Performance_Aggregation_v0.1.md) provides time-weighted, member-owned vocal/dance credits, a TeamPerf conservation formula, 3/5/9/15-member unison invariance, solo/relay examples and isolation tests. **Candidate math, not frozen balance**; personal quality vs credited share, nonlinear Palette placement and error scope within repeated slices remain OPEN. No Runtime integration claimed.
+
 > **2026-10-29 World trend v0.3:** [World Palette Trend v0.3](Chronicle_World_Palette_Trend_v0.3.md) overrides older world-state assumptions. Raw eight-color Popularity drives Public/Otaku Impression; normalized Stripe is display-only. Seeded clustered events, Saturation memory, soft overheating and high-Saturation momentum damping k=0.15 are TUNABLE; short rare >50% shares allowed. World generator / fan conversion integration is still pending.
 
 > **2026-10-29 vocal assignment refinement:** [Vocal Time-Slice Assignment v0.1](Chronicle_Vocal_Time_Slice_Assignment_v0.1.md) overrides the old automatic half-lineup relay/equal-seconds shortcut: explicit named singers per temporal slice, solo as one-person relay, real vocal seconds for Condition and Part Performance. Unison Pitch failures have a substantially smaller local impact (initial 0.25 multiplier TUNABLE) before ensemble averaging; this does not change the per-member seeded failure chance. Slice length 5s is a candidate, not LOCKED. Runtime unverified.
