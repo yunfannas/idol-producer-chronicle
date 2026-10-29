@@ -1,5 +1,7 @@
 # Chronicle｜Performance、八色 Palette、关键段落与轮换 v1.0
 
+> **2026-10-29 OVERRIDE:** [World / Live Palette & Impression v1.0](Chronicle_EnvPalette_Performance_Impression_v1.0.md) is authoritative for **Performance → Public/Otaku Impression**. Old EnvPE in PaletteExpression/Performance and shared Team Part Impression → Member Impression allocation formulas below are historical and overridden where conflicting. Intrinsic Palette `M(FinalPE)` applies within Performance once; World/Live environment only after Performance for Impression. Member Impression uses each member's own Performance and is unaffected by other members' failures. Conservative environment coefficients TUNABLE, runtime unverified.
+
 **Chronicle 独立实施规范 · 2026-10-24**。以下所有公式及测试在本仓库内完整给出；无需查阅外部研究文档。旧十色、TargetPalette/lambda、普通 part TeamPalette 与 key part MemberPalette 硬切换、Center/Front/StandingExposure、旧 dramatic bonus **全部禁止**。
 
 > **Technical kernel authority (2026-10-24)**：唱跳的每个 Attribute 使用独立算法，详见 [Chronicle_Technical_Performance_Kernel_v1.0.md](Chronicle_Technical_Performance_Kernel_v1.0.md)。本文旧 `Fit(EffectiveAbility, Difficulty, Burden)` 仅是接口占位符，**禁止**按加权 Ability−Difficulty 实现；Breath/Rhythm 是连续基线，Pitch/Agility 是失败概率检定，Tone/Power 仅正向 bonus，Stage Presence 最终乘数，Stamina 只控制疲劳。新技术规范优先。
