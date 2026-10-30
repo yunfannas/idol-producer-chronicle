@@ -223,3 +223,31 @@ A severity escalation from a morning draw starts a new cycle at the higher sever
 **Regression gates:** NF14 normal 8h, no workload/progression, mild resolves after 4 daily checkpoints, moderate after 12, severe after 28; NF below/above14 affects pace via same NFMultiplier; 6h/away/late/night-bus slower; no double recovery in training or Live, even if an event completed at midnight; save/reload and mixed travel calendars deterministic. These are new design assertions; not evidence of executed Runtime tests.
 
 **Performance import (no reinvention):** Chronicle's existing `docs/implementation/Chronicle_Technical_Performance_Kernel_v1.0.md` is the authoritative *attribute-specific* path (Breath/Rhythm baseline, Pitch/Agility failure check, Tone/Power positive bonuses, StagePresence once, actual part burden/exposure). `Chronicle_Performance_Palette_Assignment_v1.0.md` supplies its existing palette/Impression/assignment connections. The precise continuous coefficient curves and PartExposure weights remain explicitly TUNABLE in those files: DO NOT fabricate a replacement Fit equation or silently claim numeric calibration. The new 8-part unison/relay/lead adapter supplies the participant aggregation and part IDs into these existing technical APIs.
+
+## 2026-10-29 v0.4d — 38-song ultra-long live, float stages and VTR recovery
+
+**Status:** design calibration / proposed implementation, not a historical iLiFE! part-allocation measurement or a seeded runtime validation. Retain the v0.4c single Condition, PF/VF only below Condition 70, song-start status and next-morning ordinary recovery. Never multiply the superseded historical fatigue amplifier on top of current A(C).
+
+### Existing Stamina / Natural Fitness anchors
+
+The earlier portable-system calibration (idol_producer_portable_system_spec.md §19–20) records load multipliers S14=1.00, S15≈0.93, S16≈0.87, S17≈0.81, **S18=.76, S19=.72, S20=.68**; the upper-range 18–20 anchors were previously calibrated. Do not extrapolate v0.4's provisional linear expression across 0–20. Natural Fitness recovery multipliers: **NF14=1.00, NF18=1.35**, with intermediate suggested NF12=.87, NF16=1.17, NF20=1.50. The historical *fatigue-state* formulas are not the current Condition model; migrate the anchors, not the old state machine.
+
+### VTR recovery: agreed anchors, diminishing marginal benefit
+
+For a genuinely resting performing member, an in-show VTR of t minutes restores Condition immediately after the segment:
+
+    VTRRecovery(t,NF) = 0 if t<=0
+    otherwise = 2 * (t/2)^(ln(2)/ln(2.5)) * NFMultiplier(NF)
+    Condition_after = min(100, Condition_before + VTRRecovery)
+
+This is a proposed smooth interpolation through agreed **NF14: 2min→+2, 5min→+4** (power ≈.7565). Six minutes yields ≈4.59 at NF14, ≈6.20 at NF18. No PF/VF recovery. This is an explicit *in-show* exception to next-morning settlement: never count the same VTR as a next-morning rest credit. Non-eligible or occupied members do not recover. Ordinary idle/MC nonparticipant time gives neither cost nor recovery by default.
+
+### Real singing seconds and float/truck (花车) dance exceptions
+
+The ordinary rule remains all *actual song performers* dance throughout the song, but a scheduled float/truck segment may explicitly reduce or eliminate dancing. Use **actual full-equivalent dance seconds** per member for Wd and matching physical fatigue. For no dancing, dance equivalent seconds are zero; partial float movement intensity requires its own TUNABLE equivalence, not an invented fixed discount. Always charge Wv from **actual singing time slices** (lead/relay/unison, per member), not the standard 8-member 118.75≈119 seconds: that number is an illustrative arrangement average, **not** an iLiFE! measured or mandatory allocation. A singing member on a float still incurs vocal load. No phantom dance load and no automatic inactive-member recovery.
+
+### Extreme fixture (not a new ordinary-show balancing target)
+
+Check **38 songs**, three **6-minute VTRs** (example: after songs 10/20/30), **S18 / NF18**, average Vocal/Dance Difficulty **14**, C0=100 and no initial abnormalities. Include a second fixture with reduced dance participation on explicitly selected float songs and shorter actual vocal allocations; calculate each member individually and advance Condition at song end. Compare Aisu at S19 separately, not by changing the whole team's Stamina. MC costs apply only to assigned MC participants.
+
+A prior illustrative **full-dance / ~119-second singing** D14 estimate ended near C≈15 with the three VTRs. Treat this as a conditional stress estimate, **not** a runtime-tested result or a floor; authentic float/non-singing allocation should reduce load, but no exact improvement is asserted without those inputs. Report final/min Condition, PF/VF, technical execution losses and participation eligibility. Nonzero Condition alone does not establish safety or real-life feasibility. Keep the ordinary 4/6/13/18-song D-tier checks separate.
